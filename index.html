@@ -4,37 +4,32 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Wycena usług chmurowych</title>
-  <link rel="stylesheet" href="style.css">
+  <!-- Bootstrap 5 CSS from CDN -->
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+  />
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
+  <div class="container my-4">
+    <h1 class="mb-4 text-center">Kalkulator usług chmurowych</h1>
 
-  <h1>Wycena usług chmurowych</h1>
-
-  <div class="calculator">
-    <!-- Wybór typu usługi -->
-    <label for="serviceSelect">Wybierz usługę:</label>
-    <select id="serviceSelect">
-      <!-- Opcje zostaną dynamicznie załadowane z data.json -->
-    </select>
-
-    <!-- Suwak CPU -->
-    <div class="slider-group">
-      <label for="cpuSlider">CPU (liczba jednostek): <span id="cpuValue">1</span></label><br>
-      <input type="range" id="cpuSlider" min="1" max="64" step="1" value="1">
+    <!-- Akordeon dla kategorii -->
+    <div class="accordion" id="categoriesAccordion">
+      <!-- Tutaj dynamicznie wstawiamy kategorie z pliku data.json -->
     </div>
 
-    <!-- Suwak RAM -->
-    <div class="slider-group">
-      <label for="ramSlider">RAM (GB): <span id="ramValue">1</span></label><br>
-      <input type="range" id="ramSlider" min="1" max="128" step="1" value="1">
-    </div>
-
-    <!-- Wyświetlana cena -->
-    <div class="price">
-      <h2>Cena miesięczna: <span id="priceValue">0</span> PLN</h2>
+    <!-- Sekcja podsumowania -->
+    <div class="my-4 p-4 bg-light rounded text-center">
+      <h4>Całkowita cena miesięczna:</h4>
+      <h2><span id="totalPrice">0</span> PLN</h2>
     </div>
   </div>
 
+  <!-- Bootstrap JS (do animacji akordeonu) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Nasz skrypt -->
   <script src="script.js"></script>
 </body>
 </html>
