@@ -28,9 +28,9 @@ function renderCategoriesMenu(categories) {
 
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      // wywołujemy funkcję selectCategory (poniżej)
+      // Wybieramy kategorię
       selectCategory(index);
-      // podświetlanie "active"
+      // Podświetlenie "active"
       document.querySelectorAll('#categoriesMenu a').forEach(a => a.classList.remove('active'));
       link.classList.add('active');
     });
@@ -41,7 +41,7 @@ function renderCategoriesMenu(categories) {
 }
 
 /**
- * Po kliknięciu w kategorię (index) - aktualizujemy tytuł, tabelę z planami
+ * Po kliknięciu w kategorię (index) - aktualizujemy tytuł i generujemy tabelę
  */
 function selectCategory(catIndex) {
   const category = categoriesData[catIndex];
@@ -55,31 +55,100 @@ function selectCategory(catIndex) {
   titleEl.textContent = category.name;
   descEl.textContent = `Opcje dostępne w kategorii: ${category.name}.`;
 
-  // Pokaż wrapper z tabelą
+  // Pokaż tabelę
   plansWrapper.style.display = 'block';
-
-  // Czyścimy wiersze tabeli
+  // Czyścimy poprzednie wiersze
   plansBody.innerHTML = '';
 
   // Sprawdzamy typ (IaaS czy inne)
   if (category.type === 'iaas') {
-    // Generujemy 1 wiersz z przyciskiem "Konfiguruj"
+    // Renderujemy wiersz z suwakami, dropdown, checkboxem itd.
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td>Skonfiguruj zasoby (CPU, RAM, SSD) + dodatki (Windows, Linux, Support)</td>
-      <td>Dynamiczna cena</td>
       <td>
-        <button class="btn btn-outline-primary btn-sm">
-          Konfiguruj
+        <!-- SUWAKI -->
+        <div class="mb-2">
+          <label class="form-label me-2">CPU: <span id="cpuValue">1</span></label>
+          <input type="range" min="${category.sliders[0].min}" max="${category.sliders[0].max}" step="${category.sliders[0].step}" value="${category.sliders[0].min}" id="cpuSlider" style="width:150px;">
+        </div>
+        <div class="mb-2">
+          <label class="form-label me-2">RAM (GB): <span id="ramValue">${category.sliders[1].min}</span></label>
+          <input type="range" min="${category.sliders[1].min}" max="${category.sliders[1].max}" step="${category.sliders[1].step}" value="${category.sliders[1].min}" id="ramSlider" style="width:150px;">
+        </div>
+        <div class="mb-2">
+          <label class="form-label me-2">SSD (GB): <span id="ssdValue">${category.sliders[2].min}</span></label>
+          <input type="range" min="${category.sliders[2].min}" max="${category.sliders[2].max}" step="${category.sliders[2].step}" value="${category.sliders[2].min}" id="ssdSlider" style="width:150px;">
+        </div>
+
+        <!-- DROPDOWN OS -->
+        <div class="mb-2">
+          <label class="form-label me-2">System:</label>
+          <select id="osSelect" class="form-select d-inline-block" style="width:auto;">
+          </select>
+        </div>
+
+        <!-- CHECKBOX SUPPORT -->
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" value="support" id="supportCheckbox">
+          <label class="form-check-label" for="supportCheckbox">
+            Managed Support (+15 PLN)
+          </label>
+        </div>
+      </td>
+      <td>
+        <span id="iaasPrice">0.00</span> PLN
+      </td>
+      <td>
+        <button class="btn btn-outline-primary" id="btnAddIaas">
+          Dodaj do koszyka
         </button>
       </td>
     `;
-    // Event "Konfiguruj"
-    const btn = tr.querySelector('button');
-    btn.addEventListener('click', () => {
-      configureIaaS(category);
-    });
+
     plansBody.appendChild(tr);
+
+    // Uzupełniamy dropdown OS
+    const osSelect = tr.querySelector('#osSelect');
+    category.addons.forEach(addon => {
+      const option = document.createElement('option');
+      option.value = addon.id;
+      option.textContent = `${addon.label} (+${addon.price} PLN)`;
+      osSelect.appendChild(option);
+    });
+
+    // Eventy suwaków + checkbox + select
+    const cpuSlider = tr.querySelector('#cpuSlider');
+    const ramSlider = tr.querySelector('#ramSlider');
+    const ssdSlider = tr.querySelector('#ssdSlider');
+    const supportCheckbox = tr.querySelector('#supportCheckbox');
+
+    cpuSlider.addEventListener('input', () => {
+      tr.querySelector('#cpuValue').textContent = cpuSlider.value;
+      updateIaaSPrice(category, tr);
+    });
+    ramSlider.addEventListener('input', () => {
+      tr.querySelector('#ramValue').textContent = ramSlider.value;
+      updateIaaSPrice(category, tr);
+    });
+    ssdSlider.addEventListener('input', () => {
+      tr.querySelector('#ssdValue').textContent = ssdSlider.value;
+      updateIaaSPrice(category, tr);
+    });
+    osSelect.addEventListener('change', () => {
+      updateIaaSPrice(category, tr);
+    });
+    supportCheckbox.addEventListener('change', () => {
+      updateIaaSPrice(category, tr);
+    });
+
+    // Pierwsze wywołanie
+    updateIaaSPrice(category, tr);
+
+    // Obsługa przycisku "Dodaj do koszyka"
+    const addBtn = tr.querySelector('#btnAddIaas');
+    addBtn.addEventListener('click', () => {
+      addIaaSConfigToCart(category, tr);
+    });
 
   } else {
     // Inne kategorie - "services"
@@ -111,54 +180,87 @@ function selectCategory(catIndex) {
 }
 
 /**
- * Konfiguracja IaaS - uproszczona (prompt)
+ * Funkcja przelicza cenę w IaaS przy każdej zmianie suwaka / dropdown / checkbox
  */
-function configureIaaS(category) {
-  const cpu = parseInt(prompt("CPU (vCore)?", "1"), 10) || 1;
-  const ram = parseInt(prompt("RAM (GB)?", "2"), 10) || 2;
-  const ssd = parseInt(prompt("SSD (GB)?", "50"), 10) || 50;
+function updateIaaSPrice(category, container) {
+  // Pobierz suwak i inne elementy
+  const cpuVal = parseInt(container.querySelector('#cpuSlider').value, 10);
+  const ramVal = parseInt(container.querySelector('#ramSlider').value, 10);
+  const ssdVal = parseInt(container.querySelector('#ssdSlider').value, 10);
+  const osId = container.querySelector('#osSelect').value;
+  const supportChecked = container.querySelector('#supportCheckbox').checked;
 
-  // Oblicz cenę z suwaków
   let total = 0;
-  let desc = `IaaS: CPU=${cpu}, RAM=${ram}, SSD=${ssd} | `;
 
-  // Znajdź definicje sliderów w JSON
+  // Znajdź definicje sliderów i dodaj do total
   category.sliders.forEach(sl => {
     if (sl.id === 'cpu') {
-      total += sl.pricePerUnit * cpu;
+      total += cpuVal * sl.pricePerUnit;
     } else if (sl.id === 'ram') {
-      total += sl.pricePerUnit * ram;
+      total += ramVal * sl.pricePerUnit;
     } else if (sl.id === 'storage') {
-      total += sl.pricePerUnit * ssd;
+      total += ssdVal * sl.pricePerUnit;
     }
   });
 
-  // Dodatki
-  let chosenAddons = [];
-  if (confirm("Dodać Windows OS License? (+10 PLN)")) {
-    const addon = category.addons.find(a => a.id === 'win-os');
-    if (addon) {
-      chosenAddons.push(addon.label);
-      total += addon.price;
-    }
-  }
-  if (confirm("Dodać Linux OS License? (+5 PLN)")) {
-    const addon = category.addons.find(a => a.id === 'lin-os');
-    if (addon) {
-      chosenAddons.push(addon.label);
-      total += addon.price;
-    }
-  }
-  if (confirm("Dodać Managed Support? (+15 PLN)")) {
-    const addon = category.addons.find(a => a.id === 'support');
-    if (addon) {
-      chosenAddons.push(addon.label);
-      total += addon.price;
+  // OS
+  if (category.addons) {
+    const chosenOs = category.addons.find(a => a.id === osId);
+    if (chosenOs) {
+      total += chosenOs.price;
     }
   }
 
-  if (chosenAddons.length > 0) {
-    desc += `Dodatki: ${chosenAddons.join(", ")}`;
+  // Support?
+  if (supportChecked) {
+    // Powiedzmy, że jest na sztywno 15 PLN
+    total += 15;
+  }
+
+  // Wyświetl wynik
+  const priceEl = container.querySelector('#iaasPrice');
+  priceEl.textContent = total.toFixed(2);
+}
+
+/**
+ * Dodaje wybraną konfigurację IaaS do koszyka
+ */
+function addIaaSConfigToCart(category, container) {
+  const cpuVal = parseInt(container.querySelector('#cpuSlider').value, 10);
+  const ramVal = parseInt(container.querySelector('#ramSlider').value, 10);
+  const ssdVal = parseInt(container.querySelector('#ssdSlider').value, 10);
+  const osId = container.querySelector('#osSelect').value;
+  const supportChecked = container.querySelector('#supportCheckbox').checked;
+
+  // Obliczamy cenę jeszcze raz
+  let total = 0;
+  category.sliders.forEach(sl => {
+    if (sl.id === 'cpu') {
+      total += cpuVal * sl.pricePerUnit;
+    } else if (sl.id === 'ram') {
+      total += ramVal * sl.pricePerUnit;
+    } else if (sl.id === 'storage') {
+      total += ssdVal * sl.pricePerUnit;
+    }
+  });
+  let chosenOsLabel = '';
+  if (category.addons) {
+    const chosenOs = category.addons.find(a => a.id === osId);
+    if (chosenOs) {
+      total += chosenOs.price;
+      chosenOsLabel = chosenOs.label;
+    }
+  }
+  if (supportChecked) {
+    total += 15; 
+  }
+
+  // Opis
+  let desc = `CPU=${cpuVal}, RAM=${ramVal}, SSD=${ssdVal} GB, OS=${chosenOsLabel || 'Brak'}, `;
+  if (supportChecked) {
+    desc += `Support=Yes`;
+  } else {
+    desc += `Support=No`;
   }
 
   // Tworzymy obiekt koszyka
@@ -172,7 +274,7 @@ function configureIaaS(category) {
 }
 
 /**
- * Dodawanie usług (PaaS, SaaS, itd.) do koszyka
+ * Dodaje usługę (PaaS, SaaS, itp.) do koszyka
  */
 function addServiceToCart(category, srv) {
   const cartItem = {
@@ -185,14 +287,13 @@ function addServiceToCart(category, srv) {
 }
 
 /**
- * Rysowanie koszyka
+ * Renderuje koszyk
  */
 function renderCart() {
   const cartSection = document.getElementById('cartSection');
   const tbody = document.querySelector('#cartTable tbody');
   const totalEl = document.getElementById('cartTotal');
 
-  // Jeśli koszyk pusty - chowamy sekcję
   if (cart.length === 0) {
     cartSection.style.display = 'none';
     return;
@@ -200,7 +301,6 @@ function renderCart() {
     cartSection.style.display = 'block';
   }
 
-  // Czyścimy tabelę koszyka
   tbody.innerHTML = '';
 
   let sum = 0;
@@ -225,3 +325,4 @@ function renderCart() {
 
   totalEl.textContent = sum.toFixed(2);
 }
+
