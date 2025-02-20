@@ -1,6 +1,8 @@
 let categoriesData = [];
 let cart = []; // koszyk
 
+console.log("Skrypt działa - test");
+
 document.addEventListener('DOMContentLoaded', () => {
   fetch('data.json')
     .then(res => res.json())
@@ -23,53 +25,56 @@ function renderCategoriesMenu(categories) {
     const link = document.createElement('a');
     link.href = '#';
     link.textContent = cat.name;
+
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      // Obsługa kliknięcia w kategorię
+      // wywołujemy funkcję selectCategory (poniżej)
       selectCategory(index);
-      // oznacz link jako active
+      // podświetlanie "active"
       document.querySelectorAll('#categoriesMenu a').forEach(a => a.classList.remove('active'));
       link.classList.add('active');
     });
+
     li.appendChild(link);
     menuUl.appendChild(li);
   });
 }
 
 /**
- * Wywoływane po kliknięciu w kategorię (index)
+ * Po kliknięciu w kategorię (index) - aktualizujemy tytuł, tabelę z planami
  */
 function selectCategory(catIndex) {
   const category = categoriesData[catIndex];
+
   const titleEl = document.getElementById('categoryTitle');
   const descEl = document.getElementById('categoryDesc');
   const plansWrapper = document.getElementById('plansTableWrapper');
   const plansBody = document.getElementById('plansTableBody');
 
-  // Ustawiamy tytuł
+  // Ustawiamy tytuł i opis
   titleEl.textContent = category.name;
-  descEl.textContent = `Opcje dostępne w kategorii ${category.name}.`;
+  descEl.textContent = `Opcje dostępne w kategorii: ${category.name}.`;
 
-  // Pokażemy wrapper z tabelą
+  // Pokaż wrapper z tabelą
   plansWrapper.style.display = 'block';
 
-  // Czyścimy dotychczasowe wiersze
+  // Czyścimy wiersze tabeli
   plansBody.innerHTML = '';
 
-  // Sprawdzamy typ (iaas czy inne)
+  // Sprawdzamy typ (IaaS czy inne)
   if (category.type === 'iaas') {
-    // Generujemy 1 wiersz z przyciskiem "Konfiguruj IaaS"
+    // Generujemy 1 wiersz z przyciskiem "Konfiguruj"
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>Skonfiguruj zasoby (CPU, RAM, SSD) + dodatki (Windows, Linux, Support)</td>
-      <td>Dynamiczne</td>
+      <td>Dynamiczna cena</td>
       <td>
         <button class="btn btn-outline-primary btn-sm">
           Konfiguruj
         </button>
       </td>
     `;
-    // Po kliknięciu w "Konfiguruj" -> otwieramy prompt (dla uproszczenia)
+    // Event "Konfiguruj"
     const btn = tr.querySelector('button');
     btn.addEventListener('click', () => {
       configureIaaS(category);
@@ -77,7 +82,7 @@ function selectCategory(catIndex) {
     plansBody.appendChild(tr);
 
   } else {
-    // Mamy "services" - rysujemy je wierszami
+    // Inne kategorie - "services"
     if (category.services && category.services.length) {
       category.services.forEach(srv => {
         const tr = document.createElement('tr');
@@ -106,15 +111,14 @@ function selectCategory(catIndex) {
 }
 
 /**
- * Obsługa IaaS - proste prompty do CPU/RAM/SSD + checkboks do dodatków
- * (Wersja minimalna, w realu lepiej byłoby zrobić modal z suwakami).
+ * Konfiguracja IaaS - uproszczona (prompt)
  */
 function configureIaaS(category) {
   const cpu = parseInt(prompt("CPU (vCore)?", "1"), 10) || 1;
   const ram = parseInt(prompt("RAM (GB)?", "2"), 10) || 2;
   const ssd = parseInt(prompt("SSD (GB)?", "50"), 10) || 50;
 
-  // Oblicz cenę bazową z suwaków
+  // Oblicz cenę z suwaków
   let total = 0;
   let desc = `IaaS: CPU=${cpu}, RAM=${ram}, SSD=${ssd} | `;
 
@@ -168,7 +172,7 @@ function configureIaaS(category) {
 }
 
 /**
- * Dodawanie usługi z PaaS/SaaS/Acronis do koszyka
+ * Dodawanie usług (PaaS, SaaS, itd.) do koszyka
  */
 function addServiceToCart(category, srv) {
   const cartItem = {
@@ -181,14 +185,14 @@ function addServiceToCart(category, srv) {
 }
 
 /**
- * Rysowanie zawartości koszyka
+ * Rysowanie koszyka
  */
 function renderCart() {
   const cartSection = document.getElementById('cartSection');
   const tbody = document.querySelector('#cartTable tbody');
   const totalEl = document.getElementById('cartTotal');
 
-  // Jeśli koszyk jest pusty, chowamy sekcję
+  // Jeśli koszyk pusty - chowamy sekcję
   if (cart.length === 0) {
     cartSection.style.display = 'none';
     return;
@@ -196,12 +200,13 @@ function renderCart() {
     cartSection.style.display = 'block';
   }
 
-  // Czyścimy tabelę
+  // Czyścimy tabelę koszyka
   tbody.innerHTML = '';
 
   let sum = 0;
   cart.forEach((item, index) => {
     sum += item.price;
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td>${item.name}</td>
@@ -214,6 +219,7 @@ function renderCart() {
       cart.splice(index, 1);
       renderCart();
     });
+
     tbody.appendChild(tr);
   });
 
