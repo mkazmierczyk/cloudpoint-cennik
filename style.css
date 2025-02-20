@@ -1,7 +1,7 @@
-/* Przykładowe kolory - dostosuj do brandingu CloudPoint */
+/* Przykładowa paleta zbliżona do CloudPoint */
 :root {
-  --cp-primary: #002855;  /* ciemny odcień granatu */
-  --cp-secondary: #134ca7; /* jaśniejszy odcień niebiesko-fioletowy */
+  --cp-primary: #002855;  /* ciemny granat */
+  --cp-secondary: #134ca7; /* jaśniejszy */
   --cp-light: #f8f9fa;
   --cp-white: #ffffff;
   --cp-footer-bg: #001f3f; 
@@ -25,7 +25,7 @@ body {
   font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
 }
 
-h1, h4 {
+h1 {
   color: var(--cp-primary);
 }
 
@@ -34,25 +34,24 @@ h1, h4 {
   font-size: 1.3rem;
 }
 
-/* Drobne poprawki do kart i list-group w panelu kategorii */
+.cp-footer {
+  color: var(--cp-white);
+}
+.cp-footer a {
+  color: var(--cp-white);
+}
+
+/* Lista kategorii (lewa kolumna) */
 #categoriesMenu .list-group-item {
   border: 1px solid #ddd;
   border-radius: 0;
   cursor: pointer;
 }
 #categoriesMenu .list-group-item:hover {
-  background-color: #e2e6ea; /* Lekko podświetla przy najechaniu */
+  background-color: #e2e6ea; /* Lekko podświetlenie przy najechaniu */
 }
 
-/* Nadanie minimalnej wysokości, by content nie "skakał" */
+/* Zapobiega "skakaniu" kontentu, rezerwuje wysokość */
 #categoryForm {
   min-height: 400px;
-}
-
-/* Stopka */
-.cp-footer {
-  color: var(--cp-white);
-}
-.cp-footer a {
-  color: var(--cp-white);
 }

@@ -2,6 +2,9 @@ let categoriesData = [];
 let currentCategory = null; // aktualnie wybrana kategoria
 let cart = [];             // koszyk (tablica obiektów)
 
+// Prosty log do konsoli - żeby sprawdzić, czy skrypt się wczytuje
+console.log("Skrypt działa - test");
+
 /**
  * Inicjacja - pobieramy data.json
  */
@@ -10,6 +13,7 @@ function init() {
     .then(response => response.json())
     .then(data => {
       categoriesData = data.categories;
+      // Rysujemy menu
       renderCategoriesMenu();
     })
     .catch(err => console.error("Błąd wczytywania data.json:", err));
@@ -42,7 +46,7 @@ function renderCategoriesMenu() {
  */
 function renderCategoryForm(category) {
   const formContainer = document.getElementById('categoryForm');
-  formContainer.innerHTML = ''; // wyczyść
+  formContainer.innerHTML = ''; // wyczyszczenie
 
   // Sprawdzamy typ kategorii
   if (category.type === 'iaas') {
@@ -57,7 +61,7 @@ function renderCategoryForm(category) {
 /**
  * Tworzy element DOM z formularzem IaaS:
  * - Suwaki CPU, RAM, Storage
- * - Checkboksy (lub select) z dodatkami (addons)
+ * - Checkboksy z dodatkami (addons)
  * - Przycisk "Dodaj do wyceny"
  */
 function renderIaaSForm(category) {
@@ -66,7 +70,7 @@ function renderIaaSForm(category) {
 
   let html = `<h5>${category.name} - konfiguracja</h5>`;
 
-  // Rysujemy suwaki
+  // Rysujemy suwaki (CPU, RAM, SSD)
   if (category.sliders && category.sliders.length) {
     category.sliders.forEach(slider => {
       html += `
@@ -105,7 +109,7 @@ function renderIaaSForm(category) {
     });
   }
 
-  // Przyciski
+  // Przycisk
   html += `
     <button class="btn btn-primary mt-3" id="btnAddIaas">
       Dodaj do wyceny
@@ -139,7 +143,6 @@ function renderIaaSForm(category) {
 
 /**
  * Funkcja wywoływana po kliknięciu "Dodaj do wyceny" w sekcji IaaS
- * Pobiera wartości suwaków, dodatków, liczy cenę i dodaje do koszyka
  */
 function addIaaSConfigToCart(category, container) {
   let total = 0;
@@ -151,7 +154,7 @@ function addIaaSConfigToCart(category, container) {
       const inputEl = container.querySelector(`#${slider.id}`);
       if (!inputEl) return;
       const count = parseFloat(inputEl.value);
-      const pricePerUnit = parseFloat(inputEl.dataset.price);
+      const pricePerUnit = parseFloat(inputEl.dataset.price) || 0;
       const cost = count * pricePerUnit;
       total += cost;
       description += `${slider.label} = ${count}, `;
@@ -174,7 +177,7 @@ function addIaaSConfigToCart(category, container) {
     description += `[Dodatki: ${addonsDescription.join(', ')}]`;
   }
 
-  // Tworzymy obiekt pozycji do koszyka
+  // Tworzymy obiekt pozycji w koszyku
   const cartItem = {
     name: category.name,
     details: description,
@@ -187,7 +190,6 @@ function addIaaSConfigToCart(category, container) {
 
 /**
  * Renderuje formularz dla pozostałych kategorii (PaaS, SaaS, Acronis, itp.)
- * Tu np. tworzymy <select> z usługami i input do podania ilości
  */
 function renderServicesForm(category) {
   const wrap = document.createElement('div');
@@ -240,7 +242,7 @@ function renderServicesForm(category) {
 }
 
 /**
- * Wywoływane po kliknięciu "Dodaj do wyceny" w PaaS/SaaS/Acronis itp.
+ * Dodaje wybraną usługę z danej kategorii do koszyka
  */
 function addServiceToCart(category, container) {
   const selectEl = container.querySelector('#serviceSelect');
