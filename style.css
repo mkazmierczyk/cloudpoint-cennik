@@ -1,57 +1,70 @@
-/* Przykładowa paleta zbliżona do CloudPoint */
-:root {
-  --cp-primary: #002855;  /* ciemny granat */
-  --cp-secondary: #134ca7; /* jaśniejszy */
-  --cp-light: #f8f9fa;
-  --cp-white: #ffffff;
-  --cp-footer-bg: #001f3f; 
-}
-
-/* HEADER */
-.cp-header-bg {
-  background-color: var(--cp-primary) !important;
-}
-
-/* FOOTER */
-.cp-footer-bg {
-  background-color: var(--cp-footer-bg) !important;
-}
-
-/* Ogólny layout */
 body {
-  background-color: var(--cp-light);
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+  background-color: #f8f9fa; /* Jasne tło */
 }
 
-h1 {
-  color: var(--cp-primary);
+/* Górny pasek (navbar) */
+.navbar {
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+.navbar-brand span {
+  font-size: 1.2rem;
 }
 
-.cp-header a.navbar-brand span {
-  font-weight: bold;
-  font-size: 1.3rem;
+/* Lewe menu */
+#leftMenu {
+  border-right: 1px solid #dee2e6;
+}
+#leftMenu h6 {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+#leftMenu .menu-link {
+  display: block;
+  padding: 0.5rem 0;
+  text-decoration: none;
+  color: #343a40;
+  font-size: 0.95rem;
+  border-bottom: 1px solid #f1f1f1;
+}
+#leftMenu .menu-link:hover {
+  text-decoration: none;
+  background-color: #e9ecef;
+}
+#leftMenu .menu-link.active {
+  color: #0d6efd;
+  font-weight: 600;
+  background-color: #edf5ff;
 }
 
-.cp-footer {
-  color: var(--cp-white);
+/* Tabela pakietów */
+.packages-table tbody tr:hover {
+  background-color: #f3f4f6;
 }
-.cp-footer a {
-  color: var(--cp-white);
+.packages-table th, .packages-table td {
+  vertical-align: middle;
+  border-top: none; /* styl jak w DO */
+}
+.packages-table th {
+  border-bottom: 1px solid #dee2e6;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.packages-table td {
+  font-size: 0.95rem;
+}
+.packages-table td:last-child {
+  text-align: right;
+}
+.packages-table .btn-outline-primary {
+  font-size: 0.8rem;
+  padding: 4px 6px;
 }
 
-/* Lista kategorii (lewa kolumna) */
-#categoriesMenu .list-group-item {
-  border: 1px solid #ddd;
-  border-radius: 0;
-  cursor: pointer;
-}
-#categoriesMenu .list-group-item:hover {
-  background-color: #e2e6ea; /* Lekko podświetlenie przy najechaniu */
-}
-
-/* Zapobiega "skakaniu" kontentu, rezerwuje wysokość */
-#categoryForm {
-  min-height: 400px;
+/* Przełączniki CPU Options */
+.btn-check:checked + .btn-outline-secondary {
+  background-color: #e7f1ff;
+  color: #0d6efd;
+  border-color: #0d6efd;
 }
