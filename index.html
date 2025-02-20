@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Wycena usług chmurowych</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>Wycena usług chmurowych</h1>
+
+  <div class="calculator">
+    <!-- Wybór typu usługi -->
+    <label for="serviceSelect">Wybierz usługę:</label>
+    <select id="serviceSelect">
+      <!-- Opcje zostaną dynamicznie załadowane z data.json -->
+    </select>
+
+    <!-- Suwak CPU -->
+    <div class="slider-group">
+      <label for="cpuSlider">CPU (liczba jednostek): <span id="cpuValue">1</span></label><br>
+      <input type="range" id="cpuSlider" min="1" max="64" step="1" value="1">
+    </div>
+
+    <!-- Suwak RAM -->
+    <div class="slider-group">
+      <label for="ramSlider">RAM (GB): <span id="ramValue">1</span></label><br>
+      <input type="range" id="ramSlider" min="1" max="128" step="1" value="1">
+    </div>
+
+    <!-- Wyświetlana cena -->
+    <div class="price">
+      <h2>Cena miesięczna: <span id="priceValue">0</span> PLN</h2>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

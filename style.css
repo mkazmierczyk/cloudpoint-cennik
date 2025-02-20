@@ -1,0 +1,30 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+  background: #f5f5f5;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.calculator {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.slider-group {
+  margin: 20px 0;
+}
+
+.price {
+  margin-top: 30px;
+  text-align: center;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #007BFF;
+}

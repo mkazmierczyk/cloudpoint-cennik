@@ -1,0 +1,22 @@
+{
+  "services": [
+    {
+      "type": "Usługa A",
+      "basePrice": 100,
+      "cpuPricePerUnit": 5,
+      "ramPricePerGB": 2
+    },
+    {
+      "type": "Usługa B",
+      "basePrice": 200,
+      "cpuPricePerUnit": 3,
+      "ramPricePerGB": 4
+    },
+    {
+      "type": "Usługa C",
+      "basePrice": 150,
+      "cpuPricePerUnit": 4,
+      "ramPricePerGB": 3
+    }
+  ]
+}
