@@ -2,11 +2,11 @@
   "categories": [
     {
       "name": "IaaS",
-      "items": [
+      "type": "iaas",
+      "sliders": [
         {
           "id": "cpu",
           "label": "CPU (vCore)",
-          "type": "slider",
           "min": 1,
           "max": 64,
           "step": 1,
@@ -15,7 +15,6 @@
         {
           "id": "ram",
           "label": "RAM (GB)",
-          "type": "slider",
           "min": 1,
           "max": 128,
           "step": 1,
@@ -23,97 +22,62 @@
         },
         {
           "id": "storage",
-          "label": "CS-SSD (GB)",
-          "type": "slider",
+          "label": "SSD (GB)",
           "min": 10,
           "max": 1000,
           "step": 10,
           "pricePerUnit": 0.2
         }
+      ],
+      "addons": [
+        { "id": "win-os",  "label": "Windows OS License",  "price": 10 },
+        { "id": "lin-os",  "label": "Linux OS License",    "price": 5 },
+        { "id": "support", "label": "Managed Support",     "price": 15 }
       ]
     },
     {
       "name": "PaaS",
-      "items": [
-        {
-          "id": "paas-package",
-          "label": "Wybierz pakiet PaaS",
-          "type": "list",
-          "options": [
-            { "label": "Pakiet Basic",   "price": 50 },
-            { "label": "Pakiet Standard","price": 100 },
-            { "label": "Pakiet Premium", "price": 200 }
-          ]
-        },
-        {
-          "id": "paas-db",
-          "label": "Baza danych (na szt.)",
-          "type": "list",
-          "options": [
-            { "label": "MySQL",  "price": 10 },
-            { "label": "PostgreSQL", "price": 15 },
-            { "label": "SQL Server",  "price": 25 }
-          ]
-        }
+      "type": "paas",
+      "services": [
+        { "label": "Pakiet PaaS Basic",    "price": 50 },
+        { "label": "Pakiet PaaS Standard", "price": 100 },
+        { "label": "Pakiet PaaS Premium",  "price": 200 }
       ]
     },
     {
       "name": "SaaS",
-      "items": [
-        {
-          "id": "saas-per-user",
-          "label": "Licencje per użytkownik (Office, CRM, itp.)",
-          "type": "list",
-          "options": [
-            { "label": "Licencja A (miesięcznie / user)", "price": 30 },
-            { "label": "Licencja B (miesięcznie / user)", "price": 50 },
-            { "label": "Licencja C (miesięcznie / user)", "price": 70 }
-          ]
-        }
+      "type": "saas",
+      "services": [
+        { "label": "Licencja SaaS A", "price": 30 },
+        { "label": "Licencja SaaS B", "price": 50 },
+        { "label": "Licencja SaaS C", "price": 70 }
       ]
     },
     {
       "name": "Acronis",
-      "items": [
-        {
-          "id": "acronis-backup",
-          "label": "Backup (liczba agentów)",
-          "type": "list",
-          "options": [
-            { "label": "Agent Windows", "price": 10 },
-            { "label": "Agent Linux",   "price": 12 }
-          ]
-        }
+      "type": "acronis",
+      "services": [
+        { "label": "Backup Windows Agent", "price": 10 },
+        { "label": "Backup Linux Agent",   "price": 12 },
+        { "label": "Backup MacOS Agent",   "price": 15 }
       ]
     },
     {
       "name": "Microsoft CSP",
-      "items": [
-        {
-          "id": "azure-credits",
-          "label": "Azure Credits (miesięcznie)",
-          "type": "list",
-          "options": [
-            { "label": "100 USD", "price": 100 },
-            { "label": "250 USD", "price": 250 },
-            { "label": "500 USD", "price": 500 }
-          ]
-        }
+      "type": "csp",
+      "services": [
+        { "label": "Azure Credits 100 USD", "price": 100 },
+        { "label": "Azure Credits 250 USD", "price": 250 },
+        { "label": "Azure Credits 500 USD", "price": 500 }
       ]
     },
     {
       "name": "Security (SecaaS)",
-      "items": [
-        {
-          "id": "security-package",
-          "label": "Pakiet antywirus / firewall / EDR",
-          "type": "list",
-          "options": [
-            { "label": "Podstawowy (AV)", "price": 5 },
-            { "label": "Rozszerzony (AV+FW)", "price": 10 },
-            { "label": "Pełny (EDR)", "price": 20 }
-          ]
-        }
+      "type": "security",
+      "services": [
+        { "label": "Antywirus Podstawowy", "price": 5 },
+        { "label": "Antywirus + Firewall", "price": 10 },
+        { "label": "Pełny EDR",           "price": 20 }
       ]
     }
   ]

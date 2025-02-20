@@ -1,13 +1,58 @@
+/* Przykładowe kolory - dostosuj do brandingu CloudPoint */
+:root {
+  --cp-primary: #002855;  /* ciemny odcień granatu */
+  --cp-secondary: #134ca7; /* jaśniejszy odcień niebiesko-fioletowy */
+  --cp-light: #f8f9fa;
+  --cp-white: #ffffff;
+  --cp-footer-bg: #001f3f; 
+}
+
+/* HEADER */
+.cp-header-bg {
+  background-color: var(--cp-primary) !important;
+}
+
+/* FOOTER */
+.cp-footer-bg {
+  background-color: var(--cp-footer-bg) !important;
+}
+
+/* Ogólny layout */
 body {
-  background-color: #f8f9fa; /* Jasnoszary, standardowy w bootstrap */
+  background-color: var(--cp-light);
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
 }
-h1 {
-  color: #0d6efd; /* Kolor brandowy Bootstrapa */
+
+h1, h4 {
+  color: var(--cp-primary);
 }
-.card {
-  border: 1px solid #e9ecef;
-  border-radius: 5px;
+
+.cp-header a.navbar-brand span {
+  font-weight: bold;
+  font-size: 1.3rem;
 }
-.card-body {
-  background-color: #ffffff;
+
+/* Drobne poprawki do kart i list-group w panelu kategorii */
+#categoriesMenu .list-group-item {
+  border: 1px solid #ddd;
+  border-radius: 0;
+  cursor: pointer;
+}
+#categoriesMenu .list-group-item:hover {
+  background-color: #e2e6ea; /* Lekko podświetla przy najechaniu */
+}
+
+/* Nadanie minimalnej wysokości, by content nie "skakał" */
+#categoryForm {
+  min-height: 400px;
+}
+
+/* Stopka */
+.cp-footer {
+  color: var(--cp-white);
+}
+.cp-footer a {
+  color: var(--cp-white);
 }
