@@ -47,8 +47,18 @@
         { "label": "MS SQL Standard",    "price": 70 }
       ],
       "drServices": [
-        { "id": "C-DR-STORAGE", "label": "C-DR-STORAGE", "price": 0.2, "tooltip": "Storage w GB (min 0)." },
-        { "id": "C-DR-IP",      "label": "C-DR-IP",      "price": 10,  "tooltip": "Adresy IP (min 1)." }
+        {
+          "id": "C-DR-STORAGE",
+          "label": "C-DR-STORAGE",
+          "price": 0.2,
+          "tooltip": "Storage w GB (min 0)."
+        },
+        {
+          "id": "C-DR-IP",
+          "label": "C-DR-IP",
+          "price": 10,
+          "tooltip": "Adresy IP (min 1)."
+        }
       ]
     },
     {

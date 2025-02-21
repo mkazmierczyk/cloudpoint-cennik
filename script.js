@@ -11,9 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     .catch(err => console.error("Błąd wczytywania data.json:", err));
 });
 
-/**
- * Menu kategorii
- */
+/** MENU KATEGORII */
 function renderCategoriesMenu(categories) {
   const menuUl = document.getElementById('categoriesMenu');
   menuUl.innerHTML = '';
@@ -22,22 +20,18 @@ function renderCategoriesMenu(categories) {
     const link = document.createElement('a');
     link.href = '#';
     link.textContent = cat.name;
-
     link.addEventListener('click', (e) => {
       e.preventDefault();
       selectCategory(index);
       document.querySelectorAll('#categoriesMenu a').forEach(a => a.classList.remove('active'));
       link.classList.add('active');
     });
-
     li.appendChild(link);
     menuUl.appendChild(li);
   });
 }
 
-/**
- * Po kliknięciu w kategorię
- */
+/** WYBÓR KATEGORII */
 function selectCategory(catIndex) {
   const category = categoriesData[catIndex];
   const titleEl = document.getElementById('categoryTitle');
@@ -47,6 +41,7 @@ function selectCategory(catIndex) {
 
   titleEl.textContent = category.name;
   descEl.textContent = `Opcje dostępne w kategorii: ${category.name}.`;
+
   plansWrapper.style.display = 'block';
   plansBody.innerHTML = '';
 
@@ -60,43 +55,418 @@ function selectCategory(catIndex) {
     renderPaaSDisasterRecoverySection(category, plansBody);
   }
   else if (category.type === 'saas') {
-    renderSaaS(category, plansBody);
+    renderSaaSApplications(category, plansBody);
+    renderMsLicSection(category, plansBody);
   }
   else {
-    // SaaS, Acronis, CSP
+    // Acronis, CSP
     renderServicesList(category, plansBody);
   }
 
   initTooltips();
 }
 
-/**
- * ----- IaaS, PaaS, MsLic i DR to to samo co poprzednio -----
- * (funkcje: renderIaaS, renderMsLicSection, renderPaaSMachinesSection, etc.)
- * TU SKUPIAMY SIĘ NA NOWEJ FUNKCJI renderSaaS
- */
+/** ***** IaaS ***** */
+function renderIaaS(category, plansBody) {
+  const headerTr = document.createElement('tr');
+  headerTr.innerHTML = `
+    <td colspan="3">
+      <h5 class="mb-3">Maszyny wirtualne (IaaS)</h5>
+    </td>
+  `;
+  plansBody.appendChild(headerTr);
 
-/**
- * Render sekcji SaaS:
- * 1) Aplikacje (SQL, Enova, Terminal, etc.)
- * 2) Licencje Microsoft
- */
-function renderSaaS(category, plansBody) {
-  // Sekcja Aplikacje
-  renderSaaSApplications(category, plansBody);
-  // Sekcja Licencje Microsoft (jeśli jest w data)
-  renderMsLicSection(category, plansBody);
+  const contentTr = document.createElement('tr');
+  contentTr.innerHTML = `
+    <td>
+      <div class="mb-2">
+        <label class="form-label me-2">CPU (vCore): <span id="cpuValue">1</span></label>
+        <input type="range" id="cpuSlider" min="${category.sliders[0].min}" max="${category.sliders[0].max}" step="${category.sliders[0].step}" value="${category.sliders[0].min}" style="width:150px;">
+      </div>
+      <div class="mb-2">
+        <label class="form-label me-2">RAM (GB): <span id="ramValue">${category.sliders[1].min}</span></label>
+        <input type="range" id="ramSlider" min="${category.sliders[1].min}" max="${category.sliders[1].max}" step="${category.sliders[1].step}" value="${category.sliders[1].min}" style="width:150px;">
+      </div>
+      <div class="mb-2">
+        <label class="form-label me-2">SSD (GB): <span id="ssdValue">${category.sliders[2].min}</span></label>
+        <input type="range" id="ssdSlider" min="${category.sliders[2].min}" max="${category.sliders[2].max}" step="${category.sliders[2].step}" value="${category.sliders[2].min}" style="width:150px;">
+      </div>
+
+      <!-- Kopie zapasowe -->
+      <div class="mb-2">
+        <label class="form-label me-2">
+          Kopie zapasowe (GB)
+          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+             title="Rozmiar kopii zależny od wielkości VM."></i>
+        </label>
+        <input type="number" id="backupGB" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
+      </div>
+      <!-- Public IP -->
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="publicIP">
+        <label class="form-check-label" for="publicIP">
+          Dodatkowe publiczne IP
+          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+             title="Jeśli VM wymaga osobnego IP."></i>
+        </label>
+      </div>
+    </td>
+    <td>
+      <span id="iaasPrice">0.00</span> PLN
+    </td>
+    <td>
+      <button class="btn btn-outline-primary" id="btnAddIaas">
+        Dodaj do koszyka
+      </button>
+    </td>
+  `;
+  plansBody.appendChild(contentTr);
+
+  const cpuSlider = contentTr.querySelector('#cpuSlider');
+  const ramSlider = contentTr.querySelector('#ramSlider');
+  const ssdSlider = contentTr.querySelector('#ssdSlider');
+  const backupInput = contentTr.querySelector('#backupGB');
+  const publicIPCheck = contentTr.querySelector('#publicIP');
+  const priceEl = contentTr.querySelector('#iaasPrice');
+
+  function updateIaaSPrice() {
+    let total = 0;
+    const cpuVal = parseInt(cpuSlider.value, 10);
+    const ramVal = parseInt(ramSlider.value, 10);
+    const ssdVal = parseInt(ssdSlider.value, 10);
+    const backupVal = parseFloat(backupInput.value) || 0;
+
+    total += cpuVal * category.sliders[0].pricePerUnit;
+    total += ramVal * category.sliders[1].pricePerUnit;
+    total += ssdVal * category.sliders[2].pricePerUnit;
+
+    if (backupVal > 0 && category.backupPricePerGB) {
+      total += backupVal * category.backupPricePerGB;
+    }
+    if (publicIPCheck.checked && category.publicIPPrice) {
+      total += category.publicIPPrice;
+    }
+
+    contentTr.querySelector('#cpuValue').textContent = cpuVal;
+    contentTr.querySelector('#ramValue').textContent = ramVal;
+    contentTr.querySelector('#ssdValue').textContent = ssdVal;
+    priceEl.textContent = total.toFixed(2);
+  }
+
+  cpuSlider.addEventListener('input', updateIaaSPrice);
+  ramSlider.addEventListener('input', updateIaaSPrice);
+  ssdSlider.addEventListener('input', updateIaaSPrice);
+  backupInput.addEventListener('input', updateIaaSPrice);
+  publicIPCheck.addEventListener('change', updateIaaSPrice);
+  updateIaaSPrice();
+
+  const addBtn = contentTr.querySelector('#btnAddIaas');
+  addBtn.addEventListener('click', () => {
+    const total = parseFloat(priceEl.textContent) || 0;
+    const cpuVal = parseInt(cpuSlider.value, 10);
+    const ramVal = parseInt(ramSlider.value, 10);
+    const ssdVal = parseInt(ssdSlider.value, 10);
+    const backupVal = parseFloat(backupInput.value) || 0;
+    const pubIP = publicIPCheck.checked;
+
+    let desc = `CPU=${cpuVal}, RAM=${ramVal}GB, SSD=${ssdVal}GB`;
+    if (backupVal > 0) desc += `, Backup=${backupVal}GB`;
+    if (pubIP) desc += `, +PublicIP`;
+
+    cart.push({
+      name: category.name,
+      details: desc,
+      price: total
+    });
+    renderCart();
+  });
 }
 
-/**
- * Sekcja Aplikacje w SaaS:
- * a) Baza danych MS SQL (select + opis)
- * b) Enova365Web (select + opis) + Harmonogram checkbox
- * c) Enova365Web API (select + opis)
- * d) Terminal w chmurze (# użytk., mandatory security)
- * e) Dodatkowe miejsce na dane (#)
- * + Przycisk "Dodaj do koszyka"
- */
+/** PaaS */
+function renderPaaSMachinesSection(category, plansBody) {
+  // Tytuł
+  const headerTr = document.createElement('tr');
+  headerTr.innerHTML = `
+    <td colspan="3">
+      <h5 class="mb-3">Maszyny wirtualne (PaaS)</h5>
+    </td>
+  `;
+  plansBody.appendChild(headerTr);
+
+  // Wiersz
+  const contentTr = document.createElement('tr');
+  contentTr.innerHTML = `
+    <td>
+      <!-- instancja -->
+      <div class="mb-2">
+        <label class="form-label me-2">Wybierz instancję:</label>
+        <select id="paasInstanceSelect" class="form-select d-inline-block" style="width:auto; min-width:150px;">
+          <option value="" disabled selected>-- wybierz --</option>
+        </select>
+        <div id="paasInstanceDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
+      </div>
+
+      <!-- wsparcie -->
+      <div class="mb-2">
+        <label class="form-label me-2">Wsparcie techniczne:</label>
+        <select id="paasSupportSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
+          <option value="" disabled selected>-- wybierz --</option>
+          <option value="gold">C-SUPPORT-GOLD</option>
+          <option value="platinum">C-SUPPORT-PLATINUM-AddON</option>
+        </select>
+        <div id="paasSupportDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
+      </div>
+
+      <!-- Dysk SSD -->
+      <div class="mb-2">
+        <label class="form-label me-2">Dysk SSD (GB):</label>
+        <input type="number" id="paasSsdGB" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
+      </div>
+
+      <!-- Kopie zapasowe -->
+      <div class="mb-2">
+        <label class="form-label me-2">
+          Kopie zapasowe (GB)
+          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+             title="Rozmiar kopii zależny od wielkości instancji."></i>
+        </label>
+        <input type="number" id="paasBackupGB" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
+      </div>
+
+      <!-- IP -->
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="paasPublicIP">
+        <label class="form-check-label" for="paasPublicIP">
+          Dodatkowe publiczne IP
+          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+             title="Wymagane jeśli chcesz osobny adres IP."></i>
+        </label>
+      </div>
+    </td>
+    <td>
+      <span id="paasPrice">0.00</span> PLN
+    </td>
+    <td>
+      <button class="btn btn-outline-primary" id="btnAddPaaS">
+        Dodaj do koszyka
+      </button>
+    </td>
+  `;
+  plansBody.appendChild(contentTr);
+
+  const instSelect = contentTr.querySelector('#paasInstanceSelect');
+  const instDescEl = contentTr.querySelector('#paasInstanceDesc');
+  const supportSelect = contentTr.querySelector('#paasSupportSelect');
+  const supportDescEl = contentTr.querySelector('#paasSupportDesc');
+  const ssdInput = contentTr.querySelector('#paasSsdGB');
+  const backupInput = contentTr.querySelector('#paasBackupGB');
+  const ipCheck = contentTr.querySelector('#paasPublicIP');
+  const priceEl = contentTr.querySelector('#paasPrice');
+  const addBtn = contentTr.querySelector('#btnAddPaaS');
+
+  // instancje
+  if (category.paasInstances) {
+    category.paasInstances.forEach(inst => {
+      const opt = document.createElement('option');
+      opt.value = inst.price;
+      opt.setAttribute('data-label', inst.label);
+      opt.setAttribute('data-desc', inst.desc || "");
+      opt.textContent = `${inst.label} (${inst.price} PLN)`;
+      instSelect.appendChild(opt);
+    });
+  }
+
+  function updateInstDesc() {
+    if (!instSelect.value) {
+      instDescEl.textContent = "";
+      return;
+    }
+    const sel = instSelect.options[instSelect.selectedIndex];
+    instDescEl.textContent = sel.getAttribute('data-desc') || "";
+  }
+
+  function updateSupportDesc() {
+    let txt = "";
+    if (supportSelect.value === 'gold') {
+      txt = category.supportGoldDesc || "";
+    } else if (supportSelect.value === 'platinum') {
+      txt = (category.supportGoldDesc||"") + " " + (category.supportPlatinumDesc||"");
+    }
+    supportDescEl.textContent = txt.trim();
+  }
+
+  function updatePaaSPrice() {
+    let total = 0;
+    const instPrice = parseFloat(instSelect.value) || 0;
+    total += instPrice;
+
+    if (supportSelect.value === 'gold') {
+      total += (category.supportGoldPrice || 0);
+    } else if (supportSelect.value === 'platinum') {
+      total += (category.supportGoldPrice || 0);
+      total += (category.supportPlatinumAddOnPrice || 0);
+    }
+
+    // Dysk SSD
+    const ssdVal = parseFloat(ssdInput.value) || 0;
+    // Załóżmy 1 PLN/GB dla SSD w PaaS
+    total += ssdVal * 1.0;
+
+    // Backup
+    const backupVal = parseFloat(backupInput.value) || 0;
+    if (backupVal>0 && category.backupPricePerGB) {
+      total += backupVal * category.backupPricePerGB;
+    }
+
+    if (ipCheck.checked && category.publicIPPrice) {
+      total += category.publicIPPrice;
+    }
+    priceEl.textContent = total.toFixed(2);
+  }
+
+  instSelect.addEventListener('change', () => {
+    updateInstDesc();
+    updatePaaSPrice();
+  });
+  supportSelect.addEventListener('change', () => {
+    updateSupportDesc();
+    updatePaaSPrice();
+  });
+  ssdInput.addEventListener('input', updatePaaSPrice);
+  backupInput.addEventListener('input', updatePaaSPrice);
+  ipCheck.addEventListener('change', updatePaaSPrice);
+
+  updateInstDesc();
+  updateSupportDesc();
+  updatePaaSPrice();
+
+  addBtn.addEventListener('click', () => {
+    if (!instSelect.value) {
+      alert("Musisz wybrać instancję PaaS!");
+      return;
+    }
+    if (!supportSelect.value) {
+      alert("Musisz wybrać co najmniej C-SUPPORT-GOLD!");
+      return;
+    }
+
+    const total = parseFloat(priceEl.textContent) || 0;
+    const selInst = instSelect.options[instSelect.selectedIndex];
+    const instLabel = selInst.getAttribute('data-label')||"";
+    let supDesc = "";
+    if (supportSelect.value === 'gold') {
+      supDesc = "C-SUPPORT-GOLD";
+    } else if (supportSelect.value === 'platinum') {
+      supDesc = "C-SUPPORT-GOLD + C-SUPPORT-PLATINUM-AddON";
+    }
+    const ssdVal = parseFloat(ssdInput.value)||0;
+    const backupVal = parseFloat(backupInput.value)||0;
+    const ipChecked = ipCheck.checked;
+
+    let desc = `Instancja=${instLabel}, Wsparcie=${supDesc}`;
+    if (ssdVal>0) desc += `, SSD=${ssdVal}GB`;
+    if (backupVal>0) desc += `, Backup=${backupVal}GB`;
+    if (ipChecked) desc += `, +PublicIP`;
+
+    cart.push({
+      name: category.name,
+      details: desc,
+      price: total
+    });
+    renderCart();
+  });
+}
+
+/** PaaS DR */
+function renderPaaSDisasterRecoverySection(category, plansBody) {
+  if (!category.drServices) return;
+
+  const headerTr = document.createElement('tr');
+  headerTr.innerHTML = `
+    <td colspan="3">
+      <h5 class="mt-4 mb-3">Disaster Recovery (PaaS)</h5>
+    </td>
+  `;
+  plansBody.appendChild(headerTr);
+
+  const contentTr = document.createElement('tr');
+  contentTr.innerHTML = `
+    <td>
+      <div class="mb-2" id="drStorageWrap"></div>
+      <div class="mb-2" id="drIpWrap"></div>
+    </td>
+    <td>
+      <span id="drPrice">0.00</span> PLN
+    </td>
+    <td>
+      <button class="btn btn-outline-primary" id="btnAddDR">
+        Dodaj do koszyka
+      </button>
+    </td>
+  `;
+  plansBody.appendChild(contentTr);
+
+  const drStorageWrap = contentTr.querySelector('#drStorageWrap');
+  const drIpWrap = contentTr.querySelector('#drIpWrap');
+  const drPriceEl = contentTr.querySelector('#drPrice');
+  const btnAddDR = contentTr.querySelector('#btnAddDR');
+
+  const storObj = category.drServices.find(s => s.id==='C-DR-STORAGE');
+  const ipObj = category.drServices.find(s => s.id==='C-DR-IP');
+
+  drStorageWrap.innerHTML = `
+    <label class="form-label me-2">${storObj?.label||'C-DR-STORAGE'}
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="${storObj?.tooltip||''}"></i>
+    </label>
+    <input type="number" id="drStorageInput" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
+  `;
+  drIpWrap.innerHTML = `
+    <label class="form-label me-2">${ipObj?.label||'C-DR-IP'}
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="${ipObj?.tooltip||''}"></i>
+    </label>
+    <input type="number" id="drIpInput" min="1" value="1" style="width:80px;" class="form-control d-inline-block">
+  `;
+
+  const drStorageInput = contentTr.querySelector('#drStorageInput');
+  const drIpInput = contentTr.querySelector('#drIpInput');
+
+  function updateDrPrice() {
+    let total = 0;
+    const sVal = parseFloat(drStorageInput.value) || 0;
+    const iVal = parseFloat(drIpInput.value) || 1;
+    if (storObj) total += sVal * storObj.price;
+    if (ipObj) total += iVal * ipObj.price;
+    drPriceEl.textContent = total.toFixed(2);
+  }
+
+  drStorageInput.addEventListener('input', updateDrPrice);
+  drIpInput.addEventListener('input', updateDrPrice);
+  updateDrPrice();
+
+  btnAddDR.addEventListener('click', () => {
+    const sVal = parseFloat(drStorageInput.value)||0;
+    const iVal = parseFloat(drIpInput.value)||1;
+    if (iVal<1) {
+      alert("C-DR-IP musi być co najmniej 1!");
+      return;
+    }
+    let total = 0;
+    if (storObj) total += sVal * storObj.price;
+    if (ipObj) total += iVal * ipObj.price;
+
+    let desc = `${storObj?.label||'C-DR-STORAGE'}=${sVal}GB, ${ipObj?.label||'C-DR-IP'}=${iVal}`;
+    cart.push({
+      name: category.name+" (DR)",
+      details: desc,
+      price: total
+    });
+    renderCart();
+  });
+}
+
+/** ***** SaaS (Aplikacje) ***** */
 function renderSaaSApplications(category, plansBody) {
   // Nagłówek
   const headerTr = document.createElement('tr');
@@ -107,11 +477,11 @@ function renderSaaSApplications(category, plansBody) {
   `;
   plansBody.appendChild(headerTr);
 
-  // Główny wiersz
+  // Wiersz
   const contentTr = document.createElement('tr');
   contentTr.innerHTML = `
     <td>
-      <!-- A) Baza danych Microsoft SQL -->
+      <!-- Baza danych MS SQL -->
       <div class="mb-3">
         <label class="form-label fw-bold">Baza danych Microsoft SQL</label><br/>
         <select id="saasMsSqlSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
@@ -120,7 +490,7 @@ function renderSaaSApplications(category, plansBody) {
         <div id="saasMsSqlDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
       </div>
 
-      <!-- B) Enova365Web + Harmonogram -->
+      <!-- Enova365Web -->
       <div class="mb-3">
         <label class="form-label fw-bold">Enova365Web</label><br/>
         <select id="enovaWebSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
@@ -130,13 +500,11 @@ function renderSaaSApplications(category, plansBody) {
 
         <div class="form-check mt-2">
           <input class="form-check-input" type="checkbox" id="enovaHarmony">
-          <label class="form-check-label" for="enovaHarmony">
-            Harmonogram zadań
-          </label>
+          <label class="form-check-label" for="enovaHarmony">Harmonogram zadań</label>
         </div>
       </div>
 
-      <!-- C) Enova365Web API -->
+      <!-- Enova365Web API -->
       <div class="mb-3">
         <label class="form-label fw-bold">Enova365Web API</label><br/>
         <select id="enovaApiSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
@@ -145,17 +513,14 @@ function renderSaaSApplications(category, plansBody) {
         <div id="enovaApiDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
       </div>
 
-      <!-- D) Terminal w chmurze -->
+      <!-- Terminal w chmurze -->
       <div class="mb-3">
         <label class="form-label fw-bold">
           Terminal w chmurze
-          <i class="bi bi-info-circle text-muted ms-1"
-             data-bs-toggle="tooltip"
-             title="Podaj liczbę użytkowników terminala.">
-          </i>
+          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+             title="Podaj liczbę użytkowników terminala."></i>
         </label><br/>
         <input type="number" id="terminalUsers" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
-
         <div class="form-check mt-2">
           <input class="form-check-input" type="checkbox" id="terminalSecurity">
           <label class="form-check-label" for="terminalSecurity">
@@ -164,7 +529,7 @@ function renderSaaSApplications(category, plansBody) {
         </div>
       </div>
 
-      <!-- E) Dodatkowe miejsce na dane -->
+      <!-- Dodatkowe miejsce na dane -->
       <div class="mb-3">
         <label class="form-label fw-bold">
           Dodatkowe miejsce na dane
@@ -175,7 +540,6 @@ function renderSaaSApplications(category, plansBody) {
         </label><br/>
         <input type="number" id="extraData" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
       </div>
-
     </td>
     <td>
       <span id="saasAppsPrice">0.00</span> PLN
@@ -188,7 +552,7 @@ function renderSaaSApplications(category, plansBody) {
   `;
   plansBody.appendChild(contentTr);
 
-  // Referencje do elementów
+  // Pobieramy referencje
   const msSqlSelect = contentTr.querySelector('#saasMsSqlSelect');
   const msSqlDescEl = contentTr.querySelector('#saasMsSqlDesc');
 
@@ -199,16 +563,15 @@ function renderSaaSApplications(category, plansBody) {
   const enovaApiSelect = contentTr.querySelector('#enovaApiSelect');
   const enovaApiDescEl = contentTr.querySelector('#enovaApiDesc');
 
-  const terminalUsers = contentTr.querySelector('#terminalUsers');
-  const terminalSecurity = contentTr.querySelector('#terminalSecurity');
+  const termUsers = contentTr.querySelector('#terminalUsers');
+  const termSecurity = contentTr.querySelector('#terminalSecurity');
 
   const extraDataInput = contentTr.querySelector('#extraData');
 
   const priceEl = contentTr.querySelector('#saasAppsPrice');
   const addBtn = contentTr.querySelector('#btnAddSaasApps');
 
-  // Wypełniamy selecty
-  // 1) msSqlDbOptions
+  // Wypełniamy selecty (msSqlDbOptions, enovaWebOptions, enovaWebApiOptions)
   if (category.msSqlDbOptions) {
     category.msSqlDbOptions.forEach(opt => {
       const o = document.createElement('option');
@@ -219,7 +582,6 @@ function renderSaaSApplications(category, plansBody) {
       msSqlSelect.appendChild(o);
     });
   }
-  // 2) enovaWebOptions
   if (category.enovaWebOptions) {
     category.enovaWebOptions.forEach(opt => {
       const o = document.createElement('option');
@@ -230,7 +592,6 @@ function renderSaaSApplications(category, plansBody) {
       enovaWebSelect.appendChild(o);
     });
   }
-  // 3) enovaWebApiOptions
   if (category.enovaWebApiOptions) {
     category.enovaWebApiOptions.forEach(opt => {
       const o = document.createElement('option');
@@ -242,67 +603,66 @@ function renderSaaSApplications(category, plansBody) {
     });
   }
 
-  // Funkcje do uzupełniania opisów
+  // Opisy
   function updateMsSqlDesc() {
     if (!msSqlSelect.value) {
       msSqlDescEl.textContent = "";
       return;
     }
-    const selOpt = msSqlSelect.options[msSqlSelect.selectedIndex];
-    msSqlDescEl.textContent = selOpt.getAttribute('data-desc') || "";
+    const sOpt = msSqlSelect.options[msSqlSelect.selectedIndex];
+    msSqlDescEl.textContent = sOpt.getAttribute('data-desc') || "";
   }
   function updateEnovaWebDesc() {
     if (!enovaWebSelect.value) {
       enovaWebDescEl.textContent = "";
       return;
     }
-    const selOpt = enovaWebSelect.options[enovaWebSelect.selectedIndex];
-    enovaWebDescEl.textContent = selOpt.getAttribute('data-desc') || "";
+    const sOpt = enovaWebSelect.options[enovaWebSelect.selectedIndex];
+    enovaWebDescEl.textContent = sOpt.getAttribute('data-desc')||"";
   }
   function updateEnovaApiDesc() {
     if (!enovaApiSelect.value) {
       enovaApiDescEl.textContent = "";
       return;
     }
-    const selOpt = enovaApiSelect.options[enovaApiSelect.selectedIndex];
-    enovaApiDescEl.textContent = selOpt.getAttribute('data-desc') || "";
+    const sOpt = enovaApiSelect.options[enovaApiSelect.selectedIndex];
+    enovaApiDescEl.textContent = sOpt.getAttribute('data-desc')||"";
   }
 
   // Obliczanie ceny
   function updateSaasAppsPrice() {
     let total = 0;
 
-    // msSQL
-    const msSqlPrice = parseFloat(msSqlSelect.value) || 0;
-    total += msSqlPrice;
+    // msSql
+    const msSqlVal = parseFloat(msSqlSelect.value)||0;
+    total += msSqlVal;
 
     // enovaWeb
-    const enovaWebPrice = parseFloat(enovaWebSelect.value) || 0;
-    total += enovaWebPrice;
-    // "Harmonogram zadań" – nie wskazałeś ceny, załóżmy 0 PLN
+    const enovaWebVal = parseFloat(enovaWebSelect.value)||0;
+    total += enovaWebVal;
+    // Harmonogram = 0 PLN (nie ma info, więc załóżmy 0)
 
     // enovaWeb API
-    const enovaApiPrice = parseFloat(enovaApiSelect.value) || 0;
-    total += enovaApiPrice;
+    const enovaApiVal = parseFloat(enovaApiSelect.value)||0;
+    total += enovaApiVal;
 
     // Terminal
-    const termUsers = parseInt(terminalUsers.value, 10) || 0;
-    if (termUsers > 0) {
-      // załóżmy, że price: category.terminalPricePerUser
-      total += termUsers * (category.terminalPricePerUser || 0);
+    const tUsers = parseInt(termUsers.value,10)||0;
+    if (tUsers>0) {
+      total += tUsers*(category.terminalPricePerUser||0);
     }
-    // "Zabezpieczenie terminala" – nie ma ceny w Twoim opisie, załóżmy 0
+    // Security = 0 PLN ?
 
-    // Dodatkowe miejsce na dane
-    const extraDataVal = parseInt(extraDataInput.value, 10) || 0;
-    if (extraDataVal > 0) {
-      total += extraDataVal * (category.extraDataStoragePrice || 0);
+    // Dodatkowe miejsce
+    const extraVal = parseInt(extraDataInput.value,10)||0;
+    if (extraVal>0) {
+      total += extraVal*(category.extraDataStoragePrice||0);
     }
 
     priceEl.textContent = total.toFixed(2);
   }
 
-  // Obsługa eventów
+  // Eventy
   msSqlSelect.addEventListener('change', () => {
     updateMsSqlDesc();
     updateSaasAppsPrice();
@@ -315,75 +675,72 @@ function renderSaaSApplications(category, plansBody) {
     updateEnovaApiDesc();
     updateSaasAppsPrice();
   });
-  terminalUsers.addEventListener('input', updateSaasAppsPrice);
-  terminalSecurity.addEventListener('change', updateSaasAppsPrice);
+
+  termUsers.addEventListener('input', updateSaasAppsPrice);
+  termSecurity.addEventListener('change', updateSaasAppsPrice);
   extraDataInput.addEventListener('input', updateSaasAppsPrice);
 
-  // Inicjalizacja
+  // Inicjalizacje
   updateMsSqlDesc();
   updateEnovaWebDesc();
   updateEnovaApiDesc();
   updateSaasAppsPrice();
 
-  // Dodaj do koszyka
+  // Dodawanie do koszyka
   addBtn.addEventListener('click', () => {
-    const total = parseFloat(priceEl.textContent) || 0;
+    const total = parseFloat(priceEl.textContent)||0;
 
-    // Walidacje
-    // 1) Terminal - jeżeli #user > 0, to security MUSI być zaznaczone
-    const termUsers = parseInt(terminalUsers.value, 10) || 0;
-    if (termUsers > 0 && !terminalSecurity.checked) {
-      alert("Włącz 'Zabezpieczenie terminala' przy dodatnich użytkownikach terminala!");
+    // Walidacja terminala
+    const tUsers = parseInt(termUsers.value,10)||0;
+    if (tUsers>0 && !termSecurity.checked) {
+      alert("Włącz zabezpieczenie terminala, skoro liczba użytkowników > 0!");
       return;
     }
 
-    // Budujemy opis
+    // Zbieramy opis
     let descArr = [];
 
-    // msSQL
+    // msSql
     if (msSqlSelect.value) {
-      const selOpt = msSqlSelect.options[msSqlSelect.selectedIndex];
-      const label = selOpt.getAttribute('data-label');
+      const sOpt = msSqlSelect.options[msSqlSelect.selectedIndex];
+      const label = sOpt.getAttribute('data-label')||"";
       descArr.push(`SQL=${label}`);
     }
     // enovaWeb
     if (enovaWebSelect.value) {
-      const selOpt = enovaWebSelect.options[enovaWebSelect.selectedIndex];
-      const label = selOpt.getAttribute('data-label');
+      const sOpt = enovaWebSelect.options[enovaWebSelect.selectedIndex];
+      const label = sOpt.getAttribute('data-label')||"";
       descArr.push(`Enova=${label}`);
       if (enovaHarmonyCheck.checked) {
         descArr.push(`+Harmonogram`);
       }
     }
-    // enovaWebAPI
+    // enovaApi
     if (enovaApiSelect.value) {
-      const selOpt = enovaApiSelect.options[enovaApiSelect.selectedIndex];
-      const label = selOpt.getAttribute('data-label');
+      const sOpt = enovaApiSelect.options[enovaApiSelect.selectedIndex];
+      const label = sOpt.getAttribute('data-label')||"";
       descArr.push(`EnovaAPI=${label}`);
     }
-
-    // Terminal
-    if (termUsers > 0) {
-      descArr.push(`TerminalUsers=${termUsers}`);
-      if (terminalSecurity.checked) {
-        descArr.push(`Zabezp.Terminal=Yes`);
+    // terminal
+    if (tUsers>0) {
+      descArr.push(`TerminalUsers=${tUsers}`);
+      if (termSecurity.checked) {
+        descArr.push(`Zab.Terminal=Yes`);
       }
     }
-
-    // Extra Data
-    const extraVal = parseInt(extraDataInput.value, 10) || 0;
-    if (extraVal > 0) {
-      descArr.push(`ExtraData=${extraVal} szt.`);
+    // extraData
+    const extraVal = parseInt(extraDataInput.value,10)||0;
+    if (extraVal>0) {
+      descArr.push(`ExtraData=${extraVal}szt.`);
     }
 
-    if (descArr.length === 0) {
-      alert("Nie wybrano żadnych aplikacji w SaaS!");
+    if (descArr.length===0) {
+      alert("Nie wybrano żadnej aplikacji w SaaS!");
       return;
     }
 
-    // Dodaj do koszyka
     cart.push({
-      name: category.name + " (Aplikacje)",
+      name: category.name+" (Aplikacje)",
       details: descArr.join(", "),
       price: total
     });
@@ -391,9 +748,7 @@ function renderSaaSApplications(category, plansBody) {
   });
 }
 
-/**
- * Sekcja MsLic (IaaS/PaaS/SaaS)
- */
+/** MsLicSection (uniwersalne dla IaaS/PaaS/SaaS) */
 function renderMsLicSection(category, plansBody) {
   if (!category.msSplaServices) return;
   const headerTr = document.createElement('tr');
@@ -444,7 +799,7 @@ function renderMsLicSection(category, plansBody) {
       return;
     }
     const price = parseFloat(msSelect.value);
-    const qty = parseInt(msQty.value, 10) || 1;
+    const qty = parseInt(msQty.value, 10)||1;
     msPriceEl.textContent = (price * qty).toFixed(2);
   }
 
@@ -459,7 +814,7 @@ function renderMsLicSection(category, plansBody) {
     }
     const label = msSelect.options[msSelect.selectedIndex].getAttribute('data-label');
     const price = parseFloat(msSelect.value);
-    const qty = parseInt(msQty.value, 10) || 1;
+    const qty = parseInt(msQty.value, 10)||1;
     const total = price * qty;
 
     cart.push({
@@ -471,9 +826,7 @@ function renderMsLicSection(category, plansBody) {
   });
 }
 
-/**
- * Inne kategorie (Acronis, CSP) - standard
- */
+/** Proste kategorie (Acronis, CSP) */
 function renderServicesList(category, plansBody) {
   if (category.services && category.services.length) {
     category.services.forEach(srv => {
@@ -481,11 +834,7 @@ function renderServicesList(category, plansBody) {
       tr.innerHTML = `
         <td>${srv.label}</td>
         <td>${srv.price} PLN</td>
-        <td>
-          <button class="btn btn-outline-primary btn-sm">
-            Dodaj do koszyka
-          </button>
-        </td>
+        <td><button class="btn btn-outline-primary btn-sm">Dodaj do koszyka</button></td>
       `;
       const btn = tr.querySelector('button');
       btn.addEventListener('click', () => {
@@ -505,9 +854,7 @@ function renderServicesList(category, plansBody) {
   }
 }
 
-/**
- * Koszyk
- */
+/** Koszyk */
 function renderCart() {
   const cartSection = document.getElementById('cartSection');
   const tbody = document.querySelector('#cartTable tbody');
@@ -537,13 +884,10 @@ function renderCart() {
     });
     tbody.appendChild(tr);
   });
-
   totalEl.textContent = sum.toFixed(2);
 }
 
-/**
- * Tooltipy (Bootstrap 5)
- */
+/** Tooltipy (Bootstrap) */
 function initTooltips() {
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
   tooltipTriggerList.map(el => new bootstrap.Tooltip(el));

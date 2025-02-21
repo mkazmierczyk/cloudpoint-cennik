@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CloudPoint - SaaS (Aplikacje, Licencje)</title>
+  <title>CloudPoint - IaaS, PaaS, SaaS, Acronis, CSP</title>
   <!-- Bootstrap 5 CSS (CDN) -->
   <link
     rel="stylesheet"
@@ -17,7 +17,7 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Górny pasek a'la DigitalOcean -->
+  <!-- Górny pasek -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
@@ -40,14 +40,12 @@
 
   <div class="container-fluid mt-4">
     <div class="row">
-      <!-- LEWA KOLUMNA: Menu -->
+      <!-- LEWE MENU -->
       <div class="col-12 col-md-3 col-lg-2 px-4" id="leftMenu">
         <h6 class="text-uppercase text-muted">KATEGORIE</h6>
-        <ul class="list-unstyled" id="categoriesMenu">
-          <!-- generowane w script.js -->
-        </ul>
+        <ul class="list-unstyled" id="categoriesMenu"></ul>
       </div>
-      <!-- PRAWA KOLUMNA: Tabela + Koszyk -->
+      <!-- PRAWA KOLUMNA -->
       <div class="col-12 col-md-9 col-lg-10 px-4" id="rightContent">
         <h2 class="mt-3" id="categoryTitle">Wybierz kategorię...</h2>
         <p class="text-muted" id="categoryDesc">
@@ -69,6 +67,7 @@
           </table>
         </div>
 
+        <!-- Koszyk -->
         <div id="cartSection" class="bg-light p-3 rounded" style="display: none;">
           <h4>Koszyk</h4>
           <div class="table-responsive">
@@ -96,7 +95,7 @@
     <small>&copy; 2025 CloudPoint, All rights reserved.</small>
   </footer>
 
-  <!-- Bootstrap 5 JS -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>
