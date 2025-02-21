@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CloudPoint - IaaS, PaaS, SaaS, Acronis, Microsoft CSP, Bezpieczeństwo</title>
+  <title>CloudPoint - IaaS, PaaS, SaaS, Acronis, CSP, Bezpieczeństwo</title>
   <!-- Bootstrap 5 CSS (CDN) -->
   <link
     rel="stylesheet"
@@ -17,7 +17,6 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- NAV -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
@@ -39,20 +38,20 @@
     </div>
   </nav>
 
-  <!-- MAIN -->
   <div class="container-fluid mt-4">
     <div class="row">
-      <!-- Menu po lewej -->
+      <!-- LEWE MENU -->
       <div class="col-12 col-md-3 col-lg-2 px-4" id="leftMenu">
         <h6 class="text-uppercase text-muted">KATEGORIE</h6>
-        <ul class="list-unstyled" id="categoriesMenu"></ul>
+        <ul class="list-unstyled" id="categoriesMenu">
+          <!-- generowane w script.js -->
+        </ul>
       </div>
-      <!-- Prawa kolumna -->
+
+      <!-- PRAWA KOLUMNA: Tabela planów + koszyk -->
       <div class="col-12 col-md-9 col-lg-10 px-4" id="rightContent">
         <h2 class="mt-3" id="categoryTitle">Wybierz kategorię...</h2>
-        <p class="text-muted" id="categoryDesc">
-          Proszę wybrać jedną z kategorii po lewej, aby zobaczyć dostępne plany/usługi.
-        </p>
+        <p class="text-muted" id="categoryDesc">Proszę wybrać jedną z kategorii po lewej, aby zobaczyć dostępne plany/usługi.</p>
 
         <div class="table-responsive mb-4" id="plansTableWrapper" style="display:none;">
           <table class="table align-middle table-hover packages-table">
@@ -63,12 +62,14 @@
                 <th style="width:20%"></th>
               </tr>
             </thead>
-            <tbody id="plansTableBody"></tbody>
+            <tbody id="plansTableBody">
+              <!-- generowane w script.js -->
+            </tbody>
           </table>
         </div>
 
         <!-- Koszyk -->
-        <div id="cartSection" class="bg-light p-3 rounded" style="display:none;">
+        <div id="cartSection" class="bg-light p-3 rounded" style="display: none;">
           <h4>Koszyk</h4>
           <div class="table-responsive">
             <table class="table table-sm table-striped align-middle" id="cartTable">
@@ -80,16 +81,16 @@
                   <th>Usuń</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody><!-- generowane w script.js --></tbody>
             </table>
           </div>
           <div class="text-end mt-2">
             <strong>Razem: <span id="cartTotal">0.00</span> PLN</strong>
           </div>
         </div>
-      </div>
-    </div>
-  </div>
+      </div><!-- col -->
+    </div><!-- row -->
+  </div><!-- container -->
 
   <footer class="text-center text-muted py-4 mt-5">
     <small>&copy; 2025 CloudPoint, All rights reserved.</small>

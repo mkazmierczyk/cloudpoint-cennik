@@ -128,17 +128,17 @@
         {
           "label": "M365 Business Basic",
           "price": 5,
-          "desc": "Microsoft 365 Business Basic: Podstawowe narzędzia online."
+          "desc": "Podstawowe narzędzia online."
         },
         {
           "label": "M365 Business Standard",
           "price": 10,
-          "desc": "Microsoft 365 Business Standard: Pełny Office, poczta, OneDrive."
+          "desc": "Pełny Office, Poczta, OneDrive."
         },
         {
           "label": "M365 Business Premium",
           "price": 15,
-          "desc": "Microsoft 365 Business Premium: dodatkowe zabezpieczenia i Intune."
+          "desc": "Więcej zabezpieczeń, Intune."
         }
       ]
     },
@@ -167,12 +167,12 @@
         {
           "label": "Firewall L2",
           "price": 80,
-          "desc": "Zaawansowany firewall z IPS/IDS."
+          "desc": "Zaawansowany firewall z IPS."
         }
       ],
       "analysis": {
-        "centralLoggingTooltip": "Podaj liczbę licencji lub instancji logowania (min 1).",
-        "memoryTooltip": "Jeśli centralne logowanie > 0, min 5GB pamięci."
+        "centralLoggingTooltip": "Podaj liczbę licencji (min 1) jeśli chcesz centralne logowanie.",
+        "memoryTooltip": "Jeśli logowanie > 0, pamięć >=5GB."
       }
     }
   ]
