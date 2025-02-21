@@ -1,14 +1,14 @@
-/* Podstawowy reset + font */
+/* Ustawiamy font-family na "Wix Medefor Text" (lub cokolwiek z linka GFonts).
+   Tutaj np. Open Sans jako placeholder.
+*/
 body {
   margin: 0;
   padding: 0;
-  /* Zmieniamy czcionkę na 'Wix Medefor Text' (jeśli naprawdę istnieje),
-     w tym przykładzie 'Open Sans' z fallback: */
   font-family: 'Open Sans', sans-serif;
   background-color: #f8f9fa;
 }
 
-/* Navbar z delikatnym backgroundem? */
+/* NAV bar styl delikatny */
 .custom-nav {
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
@@ -45,22 +45,22 @@ body {
   background-color: #edf5ff;
 }
 
-/* SEKCJE */
+/* .section-wrapper => niebieskie tło, zaokrąglone rogi, odstęp */
 .section-wrapper {
-  background-color: #e3f1ff;  /* delikatny niebieski */
-  border-radius: 8px;         /* zaokrąglone rogi */
+  background-color: #e3f1ff;
+  border-radius: 8px;
   padding: 1rem;
-  margin-bottom: 1rem;        /* odstęp miedzy sekcjami */
+  margin-bottom: 1rem;
 }
 
-/* Sekcja - nagłówek parametry/cena z tooltipem */
+/* Pasek "Parametry" / "Cena (MIESIĘCZNIE)" */
 .section-header-row {
   font-size: 0.85rem;
-  text-transform: uppercase;
   color: #666;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  text-transform: uppercase;
   margin-bottom: 0.5rem;
 }
 .section-header-row div {
@@ -82,20 +82,8 @@ body {
   border-top: none;
 }
 
-/* TABELKI FORM - suwak itp. (drobna stylizacja) */
-.form-label {
-  font-size: 0.9rem;
-}
+/* Minim. styl do suwaków / input range */
 input[type="range"] {
   vertical-align: middle;
+  margin-left: 8px;
 }
-
-/* Minimalne dopasowanie buttonów w headerze */
-.navbar .btn {
-  font-size: 0.9rem;
-  padding: 6px 12px;
-}
-
-/* Poniższe style do tooltipów bootstrapu - domyślne wystarczą 
-   ale można dopisać delikatne dopasowania
-*/

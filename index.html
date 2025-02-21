@@ -3,66 +3,73 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>CloudPoint - IaaS, PaaS, SaaS, Acronis, CSP, Bezpieczeństwo</title>
 
-  <!-- Google Fonts: Wix Medefor Text (przykładowy link) -->
+  <!-- Google Fonts: (tu wstaw link do "Wix Medefor Text" jeśli istnieje;
+       poniżej przykład użycia innej czcionki jako placeholder) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Jeżeli ta czcionka nie istnieje oficjalnie, to zastąp ją własnym linkiem do wczytania. 
-       Przykład:
-  -->
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
-  <!-- KONIEC dopasuj do "Wix Medefor Text" jeżeli jest faktycznie w GFonts, 
-       w tym przykładzie używamy Open Sans jako placeholder.
-  -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap"
+    rel="stylesheet"
+  />
 
   <!-- Bootstrap 5 CSS (CDN) -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
   />
-
   <!-- Bootstrap Icons (CDN) -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
   />
-
+  
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <!-- NAV -->
   <nav class="navbar navbar-expand-lg navbar-light border-bottom custom-nav">
     <div class="container-fluid">
-      
-      <!-- Logo w lewym górnym rogu zamiast napisu CloudPoint -->
+      <!-- LOGO w lewym rogu -->
       <a class="navbar-brand d-flex align-items-center" href="#">
-        <!-- Podmień src na rzeczywisty link do logo -->
-        <img src="https://upload.wikimedia.org/entexample/logo.png" alt="CloudPoint logo" style="height:40px;">
+        <!-- Link do pliku svg -->
+        <img
+          src="https://enteo.pl/wp-content/uploads/2023/11/Warstwa_1-5.svg"
+          alt="CloudPoint logo"
+          style="height:40px;"
+        />
       </a>
 
-      <!-- Przycisk toggle (dla widoku mobilnego) -->
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar"
-              aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#topNavbar"
+        aria-controls="topNavbar"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Prawa część navbara - 2 przyciski -->
+      <!-- Prawa część navbara: 2 przyciski -->
       <div class="collapse navbar-collapse" id="topNavbar">
         <div class="ms-auto d-flex gap-3">
-
-          <!-- Skontaktuj się z nami -->
-          <a href="https://enteo.pl/skontaktuj-sie-z-nami/" target="_blank" class="btn btn-outline-primary">
+          <a
+            href="https://enteo.pl/skontaktuj-sie-z-nami/"
+            target="_blank"
+            class="btn btn-outline-primary"
+          >
             Skontaktuj się z nami
           </a>
-
-          <!-- Przeczytaj opis usług -->
-          <a href="https://enteo.pl/wp-content/uploads/2025/02/Cloudpoint_opis_uslug.pdf" target="_blank" class="btn btn-outline-primary">
+          <a
+            href="https://enteo.pl/wp-content/uploads/2025/02/Cloudpoint_opis_uslug.pdf"
+            target="_blank"
+            class="btn btn-outline-primary"
+          >
             Przeczytaj opis usług
           </a>
-
         </div>
       </div>
     </div>
@@ -71,31 +78,36 @@
   <!-- MAIN -->
   <div class="container-fluid mt-4">
     <div class="row">
-      <!-- LEWE MENU (zmiana KATEGORIE -> USŁUGI) -->
+      <!-- LEWE MENU -->
       <div class="col-12 col-md-3 col-lg-2 px-4" id="leftMenu">
         <h6 class="text-uppercase text-muted">USŁUGI</h6>
         <ul class="list-unstyled" id="categoriesMenu"></ul>
       </div>
 
-      <!-- Prawa kolumna -->
+      <!-- PRAWA KOLUMNA -->
       <div class="col-12 col-md-9 col-lg-10 px-4" id="rightContent">
         <h2 class="mt-3" id="categoryTitle">Wybierz kategorię...</h2>
         <p class="text-muted" id="categoryDesc">
           Proszę wybrać jedną z kategorii po lewej, aby zobaczyć dostępne plany/usługi.
         </p>
 
+        <!-- Table wrapper ze structured <table> i <tbody id="plansTableBody">
+             Żeby script.js mógł używać: 
+               const plansBody = document.getElementById('plansTableBody'); 
+               plansBody.innerHTML = '';
+        -->
         <div class="table-responsive mb-4" id="plansTableWrapper" style="display:none;">
-          <tbody id="plansTableBody">
-            <!-- generowane w script.js 
-                 UWAGA: 
-                 Każda sekcja sama tworzy "thead" (Parametry/Cena) 
-                 i "tbody" wewnętrznie, z tłem i border-radius.
-            -->
-          </tbody>
+          <table class="table align-middle table-hover" style="border-top:none;">
+            <tbody id="plansTableBody">
+              <!-- Sekcje .section-wrapper (IaaS, PaaS, SaaS...) będą tu wstawiane w postaci
+                   <tr><td colspan="3"> ... .section-wrapper ...</td></tr>
+              -->
+            </tbody>
+          </table>
         </div>
 
-        <!-- Koszyk -->
-        <div id="cartSection" class="bg-light p-3 rounded" style="display: none;">
+        <!-- KOSZYK -->
+        <div id="cartSection" class="bg-light p-3 rounded" style="display:none;">
           <h4>Koszyk</h4>
           <div class="table-responsive">
             <table class="table table-sm table-striped align-middle" id="cartTable">
@@ -107,16 +119,18 @@
                   <th>Usuń</th>
                 </tr>
               </thead>
-              <tbody></tbody>
+              <tbody>
+                <!-- generowane w script.js -->
+              </tbody>
             </table>
           </div>
           <div class="text-end mt-2">
             <strong>Razem: <span id="cartTotal">0.00</span> PLN</strong>
           </div>
         </div>
-      </div><!-- col -->
-    </div><!-- row -->
-  </div><!-- container -->
+      </div>
+    </div>
+  </div>
 
   <footer class="text-center text-muted py-4 mt-5">
     <small>&copy; 2025 CloudPoint, All rights reserved.</small>
@@ -124,6 +138,8 @@
 
   <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- SCRIPT -->
   <script src="script.js"></script>
 </body>
 </html>

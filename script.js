@@ -1,23 +1,22 @@
 /***************************************************************************************************
- * script.js - wersja z wodotryskami
- * 
- * 1) Wczytuje data.json i rysuje menu kategorii po lewej.
- * 2) Dla każdej kategorii rysuje sekcje z .section-wrapper (niebieskie tło, zaokrąglone rogi),
- *    wewnątrz:
- *     - Tytuł sekcji (np. "Maszyny wirtualne (IaaS)")
- *     - Pasek "Parametry" -- "Cena (MIESIĘCZNIE)" z tooltipem
- *     - Główna zawartość (formularze, suwaki, listy)
- *     - Guzik "Dodaj do wyceny"
- * 3) Zmiana wszystkich przycisków z "Dodaj do koszyka" -> "Dodaj do wyceny"
- * 4) Po kliknięciu "Dodaj do wyceny" dana konfiguracja trafia do koszyka (tablica cart),
- *    a w #cartSection jest rysowana tabela z 4 kolumnami (kategoria, szczegóły, cena, usuń).
+ * script.js - Pełna wersja z "wodotryskami":
+ *   - Każda kategoria (IaaS, PaaS, SaaS, Acronis, CSP, Bezpieczeństwo)
+ *   - Sekcje .section-wrapper (niebieskie tło, zaokrąglenie)
+ *   - Pasek "Parametry" / "Cena (MIESIĘCZNIE)" z tooltipem
+ *   - Guzik "Dodaj do wyceny"
+ *   - Koszyk (#cartTable) z możliwością usuwania pozycji
+ *
+ * Wymaga:
+ *   - index.html z <table><tbody id="plansTableBody"></tbody></table> i #cartSection, #cartTable
+ *   - style.css z definicjami .section-wrapper, .section-header-row
+ *   - data.json z polami (IaaS, PaaS, SaaS, Acronis, CSP, Bezpieczeństwo)
  ***************************************************************************************************/
 
 let categoriesData = [];
 let cart = [];
 
 /***************************************************************************************************
- * Po załadowaniu DOM
+ * 1) Ładujemy data.json
  ***************************************************************************************************/
 document.addEventListener('DOMContentLoaded', () => {
   fetch('data.json')
@@ -31,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 /***************************************************************************************************
- * renderCategoriesMenu - rysuje w #categoriesMenu listę linków do kategorii
+ * 2) renderCategoriesMenu - tworzy listę linków w #categoriesMenu
  ***************************************************************************************************/
 function renderCategoriesMenu(categories) {
   const menuUl = document.getElementById('categoriesMenu');
@@ -47,7 +46,6 @@ function renderCategoriesMenu(categories) {
       e.preventDefault();
       selectCategory(index);
 
-      // Podświetlenie "active"
       document.querySelectorAll('#categoriesMenu a').forEach(a => a.classList.remove('active'));
       link.classList.add('active');
     });
@@ -59,54 +57,54 @@ function renderCategoriesMenu(categories) {
 
 
 /***************************************************************************************************
- * selectCategory - główny dispatcher po kliknięciu w menu
+ * 3) selectCategory - dispatcher
  ***************************************************************************************************/
 function selectCategory(catIndex) {
   const category = categoriesData[catIndex];
+
   const titleEl      = document.getElementById('categoryTitle');
   const descEl       = document.getElementById('categoryDesc');
   const plansWrapper = document.getElementById('plansTableWrapper');
-  const plansBody    = document.getElementById('plansTableBody');
+  const plansBody    = document.getElementById('plansTableBody'); // <tbody id="plansTableBody">
 
   titleEl.textContent = category.name;
   descEl.textContent  = `Opcje dostępne w kategorii: ${category.name}.`;
   plansWrapper.style.display = 'block';
-  plansBody.innerHTML = ''; // czyścimy
+  plansBody.innerHTML = ''; // czyścimy poprzednie sekcje
 
-  // wg typu
-  if (category.type === 'iaas') {
-    // IaaS
-    renderIaaS(category, plansBody);
-    renderMsLicSection(category, plansBody);
+  switch (category.type) {
+    case 'iaas':
+      renderIaaS(category, plansBody);
+      renderMsLicSection(category, plansBody);
+      break;
 
-  } else if (category.type === 'paas') {
-    // PaaS
-    renderPaaSMachinesSection(category, plansBody);
-    renderMsLicSection(category, plansBody);
-    renderPaaSDisasterRecoverySection(category, plansBody);
+    case 'paas':
+      renderPaaSMachinesSection(category, plansBody);
+      renderMsLicSection(category, plansBody);
+      renderPaaSDisasterRecoverySection(category, plansBody);
+      break;
 
-  } else if (category.type === 'saas') {
-    // SaaS
-    renderSaaSApplications(category, plansBody);
-    renderMsLicSection(category, plansBody);
+    case 'saas':
+      renderSaaSApplications(category, plansBody);
+      renderMsLicSection(category, plansBody);
+      break;
 
-  } else if (category.type === 'acronis') {
-    // Acronis
-    renderServicesList(category, plansBody);
+    case 'acronis':
+      renderServicesList(category, plansBody);
+      break;
 
-  } else if (category.type === 'csp') {
-    // Microsoft CSP
-    renderMicrosoft365Section(category, plansBody);
+    case 'csp':
+      renderMicrosoft365Section(category, plansBody);
+      break;
 
-  } else if (category.type === 'security') {
-    // Bezpieczeństwo
-    renderSecurityWebAppsSection(category, plansBody);
-    renderSecurityFirewallSection(category, plansBody);
-    renderSecurityAnalysisSection(category, plansBody);
+    case 'security':
+      renderSecurityWebAppsSection(category, plansBody);
+      renderSecurityFirewallSection(category, plansBody);
+      renderSecurityAnalysisSection(category, plansBody);
+      break;
 
-  } else {
-    // fallback
-    renderServicesList(category, plansBody);
+    default:
+      renderServicesList(category, plansBody);
   }
 
   initTooltips();
@@ -114,24 +112,24 @@ function selectCategory(catIndex) {
 
 
 /***************************************************************************************************
- *  IaaS
+ * 4) IaaS
  ***************************************************************************************************/
 function renderIaaS(category, plansBody) {
-  // sekcja
-  const mainTr = document.createElement('tr');
-  const mainTd = document.createElement('td');
-  mainTd.colSpan=3;
+  // Tworzymy sekcję .section-wrapper w <tr><td colSpan="3">
+  const row = document.createElement('tr');
+  const col = document.createElement('td');
+  col.colSpan=3;
 
-  const secDiv = document.createElement('div');
-  secDiv.classList.add('section-wrapper'); // tło, zaokrąglenie
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
 
   // Tytuł
-  const h5 = document.createElement('h5');
-  h5.textContent = "Maszyny wirtualne (IaaS)";
+  const h5= document.createElement('h5');
+  h5.textContent= "Maszyny wirtualne (IaaS)";
   secDiv.appendChild(h5);
 
-  // Pasek "Parametry / Cena (MIESIĘCZNIE)"
-  const headerRow = document.createElement('div');
+  // Pasek parametry/cena
+  const headerRow= document.createElement('div');
   headerRow.classList.add('section-header-row');
   headerRow.innerHTML=`
     <div>Parametry</div>
@@ -142,27 +140,30 @@ function renderIaaS(category, plansBody) {
   `;
   secDiv.appendChild(headerRow);
 
-  // Główny content
-  const contentDiv = document.createElement('div');
-  contentDiv.innerHTML = `
+  // Content
+  const contentDiv= document.createElement('div');
+  contentDiv.innerHTML=`
     <div class="mb-2">
       <label>CPU (vCore): <span id="cpuVal">1</span></label>
-      <input type="range" id="cpuSlider" min="${category.sliders[0].min}" max="${category.sliders[0].max}"
+      <input type="range" id="cpuSlider"
+             min="${category.sliders[0].min}" max="${category.sliders[0].max}"
              step="${category.sliders[0].step}" value="${category.sliders[0].min}" style="width:150px;">
     </div>
     <div class="mb-2">
       <label>RAM (GB): <span id="ramVal">${category.sliders[1].min}</span></label>
-      <input type="range" id="ramSlider" min="${category.sliders[1].min}" max="${category.sliders[1].max}"
+      <input type="range" id="ramSlider"
+             min="${category.sliders[1].min}" max="${category.sliders[1].max}"
              step="${category.sliders[1].step}" value="${category.sliders[1].min}" style="width:150px;">
     </div>
     <div class="mb-2">
       <label>SSD (GB): <span id="ssdVal">${category.sliders[2].min}</span></label>
-      <input type="range" id="ssdSlider" min="${category.sliders[2].min}" max="${category.sliders[2].max}"
+      <input type="range" id="ssdSlider"
+             min="${category.sliders[2].min}" max="${category.sliders[2].max}"
              step="${category.sliders[2].step}" value="${category.sliders[2].min}" style="width:150px;">
     </div>
 
     <div class="mb-2">
-      <label>Kopie zapasowe (GB)
+      <label>Kopie zapasowe (GB):
         <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
            title="Rozmiar kopii zależny od wielkości VM."></i>
       </label>
@@ -173,29 +174,27 @@ function renderIaaS(category, plansBody) {
       <input class="form-check-input" type="checkbox" id="publicIP">
       <label class="form-check-label" for="publicIP">
         Dodatkowe publiczne IP
-        <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-           title="Jeśli VM wymaga osobnego IP."></i>
       </label>
     </div>
 
     <div class="d-flex align-items-center">
-      <strong class="me-3" style="font-size:1rem;"><span id="iaasPrice">0.00</span> PLN</strong>
+      <strong class="me-3"><span id="iaasPrice">0.00</span> PLN</strong>
       <button class="btn btn-primary" id="btnAddIaas">Dodaj do wyceny</button>
     </div>
   `;
   secDiv.appendChild(contentDiv);
 
-  mainTd.appendChild(secDiv);
-  mainTr.appendChild(mainTd);
-  plansBody.appendChild(mainTr);
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
 
-  // eventy i logika
-  const cpuSlider  = contentDiv.querySelector('#cpuSlider');
-  const ramSlider  = contentDiv.querySelector('#ramSlider');
-  const ssdSlider  = contentDiv.querySelector('#ssdSlider');
-  const backupInput= contentDiv.querySelector('#backupGB');
-  const publicIP   = contentDiv.querySelector('#publicIP');
-  const priceEl    = contentDiv.querySelector('#iaasPrice');
+  // Logika
+  const cpuSlider   = contentDiv.querySelector('#cpuSlider');
+  const ramSlider   = contentDiv.querySelector('#ramSlider');
+  const ssdSlider   = contentDiv.querySelector('#ssdSlider');
+  const backupInput = contentDiv.querySelector('#backupGB');
+  const publicIP    = contentDiv.querySelector('#publicIP');
+  const priceEl     = contentDiv.querySelector('#iaasPrice');
 
   function updateIaaSPrice(){
     let total=0;
@@ -204,11 +203,11 @@ function renderIaaS(category, plansBody) {
     const ssdVal= parseInt(ssdSlider.value,10);
     const backupVal= parseFloat(backupInput.value)||0;
 
-    total += cpuVal*(category.sliders[0].pricePerUnit||0);
-    total += ramVal*(category.sliders[1].pricePerUnit||0);
-    total += ssdVal*(category.sliders[2].pricePerUnit||0);
-    if(backupVal>0) total += backupVal*(category.backupPricePerGB||0);
-    if(publicIP.checked) total += (category.publicIPPrice||0);
+    total+= cpuVal*(category.sliders[0].pricePerUnit||0);
+    total+= ramVal*(category.sliders[1].pricePerUnit||0);
+    total+= ssdVal*(category.sliders[2].pricePerUnit||0);
+    if(backupVal>0) total+= backupVal*(category.backupPricePerGB||0);
+    if(publicIP.checked) total+= (category.publicIPPrice||0);
 
     contentDiv.querySelector('#cpuVal').textContent= cpuVal;
     contentDiv.querySelector('#ramVal').textContent= ramVal;
@@ -226,12 +225,12 @@ function renderIaaS(category, plansBody) {
     const cpuVal= parseInt(cpuSlider.value,10);
     const ramVal= parseInt(ramSlider.value,10);
     const ssdVal= parseInt(ssdSlider.value,10);
-    const bVal= parseFloat(backupInput.value)||0;
-    const ipChecked= publicIP.checked;
+    const backupVal= parseFloat(backupInput.value)||0;
+    const ipCheck= publicIP.checked;
 
     let desc= `CPU=${cpuVal}, RAM=${ramVal}GB, SSD=${ssdVal}GB`;
-    if(bVal>0) desc+=`, Backup=${bVal}GB`;
-    if(ipChecked) desc+=`, +PublicIP`;
+    if(backupVal>0) desc+= `, Backup=${backupVal}GB`;
+    if(ipCheck) desc+= `, +PublicIP`;
 
     cart.push({
       name: "IaaS",
@@ -244,11 +243,12 @@ function renderIaaS(category, plansBody) {
 
 
 /***************************************************************************************************
- * MsLicSection (IaaS/PaaS/SaaS)
+ * MsLicSection (IaaS/PaaS/SaaS) - sekcja "Licencje Microsoft"
  ***************************************************************************************************/
 function renderMsLicSection(category, plansBody) {
   if(!category.msSplaServices) return;
-
+  
+  // .section-wrapper ...
   const row = document.createElement('tr');
   const col = document.createElement('td');
   col.colSpan=3;
@@ -256,13 +256,11 @@ function renderMsLicSection(category, plansBody) {
   const secDiv= document.createElement('div');
   secDiv.classList.add('section-wrapper');
 
-  // Tytuł
-  const h5 = document.createElement('h5');
+  const h5= document.createElement('h5');
   h5.textContent= "Licencje Microsoft";
   secDiv.appendChild(h5);
 
-  // Pasek parametry/cena
-  const headerRow = document.createElement('div');
+  const headerRow= document.createElement('div');
   headerRow.classList.add('section-header-row');
   headerRow.innerHTML=`
     <div>Parametry</div>
@@ -273,20 +271,19 @@ function renderMsLicSection(category, plansBody) {
   `;
   secDiv.appendChild(headerRow);
 
-  // Główny content
   const contentDiv= document.createElement('div');
   contentDiv.innerHTML=`
     <div class="mb-2">
-      <label class="form-label me-2">Wybierz licencję:</label>
+      <label class="me-2">Wybierz licencję:</label>
       <select id="msSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
         <option value="" disabled selected>-- wybierz --</option>
       </select>
-      <label class="form-label ms-3 me-2">Ilość:</label>
-      <input type="number" value="1" min="1" id="msQty" style="width:60px;"
-             class="form-control d-inline-block">
+      <label class="ms-3 me-2">Ilość:</label>
+      <input type="number" value="1" min="1" id="msQty"
+             style="width:60px;" class="form-control d-inline-block">
     </div>
     <div class="d-flex align-items-center">
-      <strong class="me-3" style="font-size:1rem;"><span id="msPrice">0.00</span> PLN</strong>
+      <strong class="me-3"><span id="msPrice">0.00</span> PLN</strong>
       <button class="btn btn-primary" id="btnAddMS">Dodaj do wyceny</button>
     </div>
   `;
@@ -296,42 +293,42 @@ function renderMsLicSection(category, plansBody) {
   row.appendChild(col);
   plansBody.appendChild(row);
 
-  // wypełniamy select
-  const msSelect= contentDiv.querySelector('#msSelect');
-  const msQty   = contentDiv.querySelector('#msQty');
+  // wypełniamy
+  const msSelect = contentDiv.querySelector('#msSelect');
+  const msQty    = contentDiv.querySelector('#msQty');
   const msPriceEl= contentDiv.querySelector('#msPrice');
-  const btnAddMS= contentDiv.querySelector('#btnAddMS');
+  const btnAddMS = contentDiv.querySelector('#btnAddMS');
 
   category.msSplaServices.forEach(srv=>{
     const opt= document.createElement('option');
-    opt.value = srv.price;
+    opt.value= srv.price;
     opt.setAttribute('data-label', srv.label);
     opt.textContent= `${srv.label} (${srv.price} PLN)`;
     msSelect.appendChild(opt);
   });
 
-  function updateMsLicPrice(){
+  function updateMsPrice(){
     if(!msSelect.value){
       msPriceEl.textContent='0.00';
       return;
     }
-    const price = parseFloat(msSelect.value)||0;
-    const qty   = parseInt(msQty.value,10)||1;
-    msPriceEl.textContent= (price*qty).toFixed(2);
+    const p= parseFloat(msSelect.value)||0;
+    const q= parseInt(msQty.value,10)||1;
+    msPriceEl.textContent= (p*q).toFixed(2);
   }
-  msSelect.addEventListener('change', updateMsLicPrice);
-  msQty.addEventListener('input', updateMsLicPrice);
-  updateMsLicPrice();
+  msSelect.addEventListener('change', updateMsPrice);
+  msQty.addEventListener('input', updateMsPrice);
+  updateMsPrice();
 
   btnAddMS.addEventListener('click',()=>{
     if(!msSelect.value){
       alert("Wybierz licencję Microsoft!");
       return;
     }
-    const label = msSelect.options[msSelect.selectedIndex].getAttribute('data-label')||"";
-    const price = parseFloat(msSelect.value)||0;
-    const qty   = parseInt(msQty.value,10)||1;
-    const total = price*qty;
+    const label= msSelect.options[msSelect.selectedIndex].getAttribute('data-label')||"";
+    const price= parseFloat(msSelect.value)||0;
+    const qty= parseInt(msQty.value,10)||1;
+    const total= price*qty;
 
     cart.push({
       name: category.name + " (Licencje MS)",
@@ -344,45 +341,43 @@ function renderMsLicSection(category, plansBody) {
 
 
 /***************************************************************************************************
- * PaaS - Maszyny
+ * 5) PaaS - Machines + DR
  ***************************************************************************************************/
-function renderPaaSMachinesSection(category, plansBody) {
-  const row = document.createElement('tr');
-  const col = document.createElement('td');
+function renderPaaSMachinesSection(category, plansBody){
+  const row= document.createElement('tr');
+  const col= document.createElement('td');
   col.colSpan=3;
 
   const secDiv= document.createElement('div');
   secDiv.classList.add('section-wrapper');
 
-  // Tytuł
   const h5= document.createElement('h5');
   h5.textContent= "Maszyny wirtualne (PaaS)";
   secDiv.appendChild(h5);
 
-  // Pasek
-  const headerRow = document.createElement('div');
+  const headerRow= document.createElement('div');
   headerRow.classList.add('section-header-row');
   headerRow.innerHTML=`
     <div>Parametry</div>
     <div>Cena (MIESIĘCZNIE)
-      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-         title="Koszt miesięczny instancji PaaS."></i>
+      <i class="bi bi-info-circle text-muted ms-1"
+         title="Koszt miesięczny instancji PaaS."
+         data-bs-toggle="tooltip"></i>
     </div>
   `;
   secDiv.appendChild(headerRow);
 
-  // content
   const contentDiv= document.createElement('div');
   contentDiv.innerHTML=`
     <div class="mb-2">
-      <label class="form-label me-2">Wybierz instancję:</label>
-      <select id="paasInstanceSelect" class="form-select d-inline-block" style="width:auto; min-width:150px;">
+      <label class="me-2">Wybierz instancję:</label>
+      <select id="paasInstSelect" class="form-select d-inline-block" style="width:auto; min-width:150px;">
         <option value="" disabled selected>-- wybierz --</option>
       </select>
       <div id="paasInstDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
     </div>
     <div class="mb-2">
-      <label class="form-label me-2">Wsparcie techniczne:</label>
+      <label class="me-2">Wsparcie techniczne:</label>
       <select id="paasSupportSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
         <option value="" disabled selected>-- wybierz --</option>
         <option value="gold">C-SUPPORT-GOLD</option>
@@ -391,19 +386,16 @@ function renderPaaSMachinesSection(category, plansBody) {
       <div id="paasSupportDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
     </div>
     <div class="mb-2">
-      <label class="form-label me-2">Dysk SSD (GB):</label>
-      <input type="number" id="paasSsdGB" min="0" value="0"
-             style="width:80px;" class="form-control d-inline-block">
+      <label class="me-2">Dysk SSD (GB):</label>
+      <input type="number" id="paasSsdGB" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
     </div>
     <div class="mb-2">
-      <label class="form-label me-2">
+      <label class="me-2">
         Kopie zapasowe (GB)
-        <i class="bi bi-info-circle text-muted ms-1"
-           data-bs-toggle="tooltip"
+        <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
            title="Rozmiar kopii zależny od wielkości instancji."></i>
       </label>
-      <input type="number" id="paasBackupGB" min="0" value="0"
-             style="width:80px;" class="form-control d-inline-block">
+      <input type="number" id="paasBackupGB" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
     </div>
     <div class="form-check mb-2">
       <input class="form-check-input" type="checkbox" id="paasPublicIP">
@@ -411,8 +403,9 @@ function renderPaaSMachinesSection(category, plansBody) {
         Dodatkowe publiczne IP
       </label>
     </div>
+
     <div class="d-flex align-items-center">
-      <strong class="me-3" style="font-size:1rem;"><span id="paasPrice">0.00</span> PLN</strong>
+      <strong class="me-3"><span id="paasPrice">0.00</span> PLN</strong>
       <button class="btn btn-primary" id="btnAddPaaS">Dodaj do wyceny</button>
     </div>
   `;
@@ -423,7 +416,7 @@ function renderPaaSMachinesSection(category, plansBody) {
   plansBody.appendChild(row);
 
   // logika
-  const instSelect   = contentDiv.querySelector('#paasInstanceSelect');
+  const instSelect   = contentDiv.querySelector('#paasInstSelect');
   const instDescEl   = contentDiv.querySelector('#paasInstDesc');
   const supportSelect= contentDiv.querySelector('#paasSupportSelect');
   const supportDescEl= contentDiv.querySelector('#paasSupportDesc');
@@ -433,7 +426,7 @@ function renderPaaSMachinesSection(category, plansBody) {
   const priceEl      = contentDiv.querySelector('#paasPrice');
   const btnAdd       = contentDiv.querySelector('#btnAddPaaS');
 
-  if (category.paasInstances) {
+  if(category.paasInstances){
     category.paasInstances.forEach(inst=>{
       const o= document.createElement('option');
       o.value= inst.price;
@@ -465,6 +458,7 @@ function renderPaaSMachinesSection(category, plansBody) {
     let total=0;
     const instPrice= parseFloat(instSelect.value)||0;
     total+= instPrice;
+
     if(supportSelect.value==='gold'){
       total+= (category.supportGoldPrice||0);
     } else if(supportSelect.value==='platinum'){
@@ -492,9 +486,9 @@ function renderPaaSMachinesSection(category, plansBody) {
     updateSupportDesc();
     updatePaaSPrice();
   });
-  ssdInput.addEventListener('input',updatePaaSPrice);
-  backupInput.addEventListener('input',updatePaaSPrice);
-  ipCheck.addEventListener('change',updatePaaSPrice);
+  ssdInput.addEventListener('input', updatePaaSPrice);
+  backupInput.addEventListener('input', updatePaaSPrice);
+  ipCheck.addEventListener('change', updatePaaSPrice);
 
   updateInstDesc();
   updateSupportDesc();
@@ -502,7 +496,7 @@ function renderPaaSMachinesSection(category, plansBody) {
 
   btnAdd.addEventListener('click',()=>{
     if(!instSelect.value){
-      alert("Wybierz instancję PaaS!");
+      alert("Musisz wybrać instancję PaaS!");
       return;
     }
     if(!supportSelect.value){
@@ -537,12 +531,10 @@ function renderPaaSMachinesSection(category, plansBody) {
 }
 
 function renderPaaSDisasterRecoverySection(category, plansBody){
-  // analogicznie .section-wrapper, tytuł "Disaster Recovery (PaaS)", parametry/cena row, guzik
-  // ...
   if(!category.drServices) return;
-
-  const row = document.createElement('tr');
-  const col = document.createElement('td');
+  
+  const row= document.createElement('tr');
+  const col= document.createElement('td');
   col.colSpan=3;
 
   const secDiv= document.createElement('div');
@@ -564,23 +556,27 @@ function renderPaaSDisasterRecoverySection(category, plansBody){
   secDiv.appendChild(headerRow);
 
   const contentDiv= document.createElement('div');
+  const storObj= category.drServices.find(x=>x.id==='C-DR-STORAGE');
+  const ipObj  = category.drServices.find(x=>x.id==='C-DR-IP');
   contentDiv.innerHTML=`
     <div class="mb-2">
-      <label>C-DR-STORAGE (GB)
+      <label>${storObj?.label||'C-DR-STORAGE'} (GB)
         <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-           title="${(category.drServices.find(s=>s.id==='C-DR-STORAGE')?.tooltip)||''}"></i>
+           title="${storObj?.tooltip||''}"></i>
       </label>
-      <input type="number" id="drStorage" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
+      <input type="number" id="drStorage" min="0" value="0" style="width:80px;"
+             class="form-control d-inline-block">
     </div>
     <div class="mb-2">
-      <label>C-DR-IP (szt.)
+      <label>${ipObj?.label||'C-DR-IP'} (szt.)
         <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-           title="${(category.drServices.find(s=>s.id==='C-DR-IP')?.tooltip)||''}"></i>
+           title="${ipObj?.tooltip||''}"></i>
       </label>
-      <input type="number" id="drIp" min="1" value="1" style="width:80px;" class="form-control d-inline-block">
+      <input type="number" id="drIp" min="1" value="1" style="width:80px;"
+             class="form-control d-inline-block">
     </div>
     <div class="d-flex align-items-center">
-      <strong class="me-3" style="font-size:1rem;"><span id="drPrice">0.00</span> PLN</strong>
+      <strong class="me-3"><span id="drPrice">0.00</span> PLN</strong>
       <button class="btn btn-primary" id="btnAddDR">Dodaj do wyceny</button>
     </div>
   `;
@@ -590,9 +586,6 @@ function renderPaaSDisasterRecoverySection(category, plansBody){
   row.appendChild(col);
   plansBody.appendChild(row);
 
-  // logika
-  const storObj= category.drServices.find(x=>x.id==='C-DR-STORAGE');
-  const ipObj  = category.drServices.find(x=>x.id==='C-DR-IP');
   const drStorage= contentDiv.querySelector('#drStorage');
   const drIp     = contentDiv.querySelector('#drIp');
   const drPriceEl= contentDiv.querySelector('#drPrice');
@@ -602,8 +595,8 @@ function renderPaaSDisasterRecoverySection(category, plansBody){
     let total=0;
     const sVal= parseFloat(drStorage.value)||0;
     const iVal= parseFloat(drIp.value)||1;
-    if(storObj) total += sVal*(storObj.price||0);
-    if(ipObj)   total += iVal*(ipObj.price||0);
+    if(storObj) total+= sVal*(storObj.price||0);
+    if(ipObj)   total+= iVal*(ipObj.price||0);
     drPriceEl.textContent= total.toFixed(2);
   }
   drStorage.addEventListener('input', updateDrPrice);
@@ -618,10 +611,10 @@ function renderPaaSDisasterRecoverySection(category, plansBody){
       return;
     }
     let total=0;
-    if(storObj) total += sVal*(storObj.price||0);
-    if(ipObj)   total += iVal*(ipObj.price||0);
+    if(storObj) total+= sVal*(storObj.price||0);
+    if(ipObj)   total+= iVal*(ipObj.price||0);
 
-    let desc= `C-DR-STORAGE=${sVal}GB, C-DR-IP=${iVal}`;
+    let desc= `${storObj?.label||'C-DR-STORAGE'}=${sVal}GB, ${ipObj?.label||'C-DR-IP'}=${iVal}`;
     cart.push({
       name: "PaaS (DR)",
       details: desc,
@@ -633,23 +626,20 @@ function renderPaaSDisasterRecoverySection(category, plansBody){
 
 
 /***************************************************************************************************
- * SaaS - Aplikacje (MsSQL, Enova, Enova API, Terminal, Extra) 
+ * 6) SaaS - Aplikacje (MsSQL, Enova, API, Terminal, Extra) 
  ***************************************************************************************************/
 function renderSaaSApplications(category, plansBody){
-  // Tworzymy jedną .section-wrapper dla "Aplikacje (SaaS)" ...
-  const row = document.createElement('tr');
-  const col = document.createElement('td');
+  const row= document.createElement('tr');
+  const col= document.createElement('td');
   col.colSpan=3;
 
   const secDiv= document.createElement('div');
   secDiv.classList.add('section-wrapper');
 
-  // Tytuł
   const h5= document.createElement('h5');
   h5.textContent= "Aplikacje (SaaS)";
   secDiv.appendChild(h5);
 
-  // Pasek parametry/cena
   const headerRow= document.createElement('div');
   headerRow.classList.add('section-header-row');
   headerRow.innerHTML=`
@@ -661,29 +651,30 @@ function renderSaaSApplications(category, plansBody){
   `;
   secDiv.appendChild(headerRow);
 
-  // Dalszy content: MsSQL, Enova, Enova API, Terminal, Extra ...
-  // Żeby zachować czytelność, wrzucimy tu po kolei.
+  // wstawiamy kolejno MsSQL, Enova, Enova API, Terminal, Extra
   const contentDiv= document.createElement('div');
-  contentDiv.setAttribute('id','saasContent');
+  // MsSQL
+  contentDiv.appendChild(renderSaaS_MsSQLRow(category));
+  // Enova
+  contentDiv.appendChild(renderSaaS_EnovaRow(category));
+  // Enova API
+  contentDiv.appendChild(renderSaaS_EnovaApiRow(category));
+  // Terminal
+  contentDiv.appendChild(renderSaaS_TerminalRow(category));
+  // Extra
+  contentDiv.appendChild(renderSaaS_ExtraDataRow(category));
+
   secDiv.appendChild(contentDiv);
 
   col.appendChild(secDiv);
   row.appendChild(col);
   plansBody.appendChild(row);
-
-  // Teraz wstawiamy poszczególne "pod-bloki" (MsSQL, Enova, API, Terminal, Extra)
-  renderSaaS_MsSQLRow(category, contentDiv);
-  renderSaaS_EnovaRow(category, contentDiv);
-  renderSaaS_EnovaApiRow(category, contentDiv);
-  renderSaaS_TerminalRow(category, contentDiv);
-  renderSaaS_ExtraDataRow(category, contentDiv);
 }
 
-function renderSaaS_MsSQLRow(category, container){
-  // Tworzymy div z polami + guzik
-  const div = document.createElement('div');
-  div.classList.add('mb-3'); // odstęp między "wierszami"
-
+/** MsSQL (SaaS) */
+function renderSaaS_MsSQLRow(category){
+  const div= document.createElement('div');
+  div.classList.add('mb-3');
   div.innerHTML=`
     <label class="d-block mb-1">Baza danych Microsoft SQL:</label>
     <select id="msSqlSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
@@ -692,16 +683,14 @@ function renderSaaS_MsSQLRow(category, container){
     <div id="msSqlDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
 
     <div class="d-flex align-items-center mt-2">
-      <strong class="me-3" style="font-size:1rem;"><span id="msSqlPrice">0.00</span> PLN</strong>
+      <strong class="me-3"><span id="msSqlPrice">0.00</span> PLN</strong>
       <button class="btn btn-primary" id="btnAddMsSql">Dodaj do wyceny</button>
     </div>
   `;
-  container.appendChild(div);
-
-  const msSqlSelect = div.querySelector('#msSqlSelect');
-  const msSqlDescEl = div.querySelector('#msSqlDesc');
+  const msSqlSelect= div.querySelector('#msSqlSelect');
+  const msSqlDescEl= div.querySelector('#msSqlDesc');
   const msSqlPriceEl= div.querySelector('#msSqlPrice');
-  const btnAddMsSql = div.querySelector('#btnAddMsSql');
+  const btnAddMsSql= div.querySelector('#btnAddMsSql');
 
   if(category.msSqlDbOptions){
     category.msSqlDbOptions.forEach(opt=>{
@@ -749,14 +738,284 @@ function renderSaaS_MsSQLRow(category, container){
     });
     renderCart();
   });
+  return div;
 }
 
-/** analogicznie: renderSaaS_EnovaRow, renderSaaS_EnovaApiRow, renderSaaS_TerminalRow, renderSaaS_ExtraDataRow
- *   - zmiana guzików na "Dodaj do wyceny"
- */
+/** Enova (SaaS) */
+function renderSaaS_EnovaRow(category){
+  const div= document.createElement('div');
+  div.classList.add('mb-3');
+  div.innerHTML=`
+    <label class="d-block mb-1">Enova365Web:</label>
+    <select id="enovaSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
+      <option value="" disabled selected>-- wybierz --</option>
+    </select>
+    <div id="enovaDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
+
+    <div class="form-check mt-2">
+      <input class="form-check-input" type="checkbox" id="enovaHarmonogram">
+      <label class="form-check-label" for="enovaHarmonogram">Harmonogram zadań</label>
+    </div>
+
+    <div class="d-flex align-items-center mt-2">
+      <strong class="me-3"><span id="enovaPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddEnova">Dodaj do wyceny</button>
+    </div>
+  `;
+  const enovaSelect      = div.querySelector('#enovaSelect');
+  const enovaDescEl      = div.querySelector('#enovaDesc');
+  const enovaPriceEl     = div.querySelector('#enovaPrice');
+  const enovaHarmonogram = div.querySelector('#enovaHarmonogram');
+  const btnAddEnova      = div.querySelector('#btnAddEnova');
+
+  if(category.enovaWebOptions){
+    category.enovaWebOptions.forEach(opt=>{
+      const o= document.createElement('option');
+      o.value= opt.price;
+      o.setAttribute('data-label', opt.label);
+      o.setAttribute('data-desc', opt.desc||"");
+      o.textContent= `${opt.label} (${opt.price} PLN)`;
+      enovaSelect.appendChild(o);
+    });
+  }
+
+  function updateEnovaPrice(){
+    let total= parseFloat(enovaSelect.value)||0;
+    if(enovaHarmonogram.checked){
+      total+= (category.harmonogramCost||10);
+    }
+    enovaPriceEl.textContent= total.toFixed(2);
+  }
+  function updateEnovaDesc(){
+    if(!enovaSelect.value){
+      enovaDescEl.textContent="";
+      return;
+    }
+    const sel= enovaSelect.options[enovaSelect.selectedIndex];
+    enovaDescEl.textContent= sel.getAttribute('data-desc')||"";
+  }
+  enovaSelect.addEventListener('change',()=>{
+    updateEnovaPrice();
+    updateEnovaDesc();
+  });
+  enovaHarmonogram.addEventListener('change', updateEnovaPrice);
+  updateEnovaPrice();
+  updateEnovaDesc();
+
+  btnAddEnova.addEventListener('click',()=>{
+    if(!enovaSelect.value){
+      alert("Wybierz Enova!");
+      return;
+    }
+    const sel= enovaSelect.options[enovaSelect.selectedIndex];
+    const label= sel.getAttribute('data-label')||"Enova365Web";
+    const basePrice= parseFloat(enovaSelect.value)||0;
+
+    cart.push({
+      name: "SaaS - Enova365Web",
+      details: label,
+      price: basePrice
+    });
+    if(enovaHarmonogram.checked){
+      const harmCost= category.harmonogramCost||10;
+      cart.push({
+        name: "SaaS - Harmonogram zadań",
+        details: "Dodatkowy moduł",
+        price: harmCost
+      });
+    }
+    renderCart();
+  });
+
+  return div;
+}
+
+/** Enova API (SaaS) */
+function renderSaaS_EnovaApiRow(category){
+  const div= document.createElement('div');
+  div.classList.add('mb-3');
+  div.innerHTML=`
+    <label class="d-block mb-1">Enova365Web API:</label>
+    <select id="enovaApiSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
+      <option value="" disabled selected>-- wybierz --</option>
+    </select>
+    <div id="enovaApiDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
+
+    <div class="d-flex align-items-center mt-2">
+      <strong class="me-3"><span id="enovaApiPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddEnovaApi">Dodaj do wyceny</button>
+    </div>
+  `;
+  const enovaApiSelect= div.querySelector('#enovaApiSelect');
+  const enovaApiDescEl= div.querySelector('#enovaApiDesc');
+  const enovaApiPriceEl= div.querySelector('#enovaApiPrice');
+  const btnAddEnovaApi= div.querySelector('#btnAddEnovaApi');
+
+  if(category.enovaWebApiOptions){
+    category.enovaWebApiOptions.forEach(opt=>{
+      const o= document.createElement('option');
+      o.value= opt.price;
+      o.setAttribute('data-label', opt.label);
+      o.setAttribute('data-desc', opt.desc||"");
+      o.textContent= `${opt.label} (${opt.price} PLN)`;
+      enovaApiSelect.appendChild(o);
+    });
+  }
+  function updateApiPrice(){
+    const val= parseFloat(enovaApiSelect.value)||0;
+    enovaApiPriceEl.textContent= val.toFixed(2);
+  }
+  function updateApiDesc(){
+    if(!enovaApiSelect.value){
+      enovaApiDescEl.textContent="";
+      return;
+    }
+    const sel= enovaApiSelect.options[enovaApiSelect.selectedIndex];
+    enovaApiDescEl.textContent= sel.getAttribute('data-desc')||"";
+  }
+  enovaApiSelect.addEventListener('change',()=>{
+    updateApiPrice();
+    updateApiDesc();
+  });
+  updateApiPrice();
+  updateApiDesc();
+
+  btnAddEnovaApi.addEventListener('click',()=>{
+    if(!enovaApiSelect.value){
+      alert("Wybierz Enova365Web API!");
+      return;
+    }
+    const sel= enovaApiSelect.options[enovaApiSelect.selectedIndex];
+    const label= sel.getAttribute('data-label')||"EnovaAPI";
+    const price= parseFloat(sel.value)||0;
+
+    cart.push({
+      name: "SaaS - EnovaAPI",
+      details: label,
+      price
+    });
+    renderCart();
+  });
+
+  return div;
+}
+
+/** Terminal w chmurze (SaaS) */
+function renderSaaS_TerminalRow(category){
+  const div= document.createElement('div');
+  div.classList.add('mb-3');
+  div.innerHTML=`
+    <label class="d-block mb-1">Terminal w chmurze:</label>
+    <div class="mb-2">
+      <input type="number" id="terminalUsers" min="0" value="0"
+             style="width:80px;" class="form-control d-inline-block me-2">
+      <label class="form-check-label">użytkownicy</label>
+    </div>
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="terminalSecurity">
+      <label class="form-check-label" for="terminalSecurity">
+        Zabezpieczenie terminala
+      </label>
+    </div>
+    <div class="d-flex align-items-center">
+      <strong class="me-3"><span id="terminalPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddTerminal">Dodaj do wyceny</button>
+    </div>
+  `;
+  const terminalUsers= div.querySelector('#terminalUsers');
+  const terminalSecurity= div.querySelector('#terminalSecurity');
+  const terminalPriceEl= div.querySelector('#terminalPrice');
+  const btnAddTerminal= div.querySelector('#btnAddTerminal');
+
+  function updateTerminalPrice(){
+    let total=0;
+    const users= parseInt(terminalUsers.value,10)||0;
+    if(users>0){
+      total+= users*(category.terminalPricePerUser||30);
+      if(terminalSecurity.checked){
+        total+= (category.terminalSecurityCost||20);
+      }
+    }
+    terminalPriceEl.textContent= total.toFixed(2);
+  }
+  [terminalUsers, terminalSecurity].forEach(el =>
+    el.addEventListener('input', updateTerminalPrice));
+  updateTerminalPrice();
+
+  btnAddTerminal.addEventListener('click',()=>{
+    const users= parseInt(terminalUsers.value,10)||0;
+    if(users<=0){
+      alert("Podaj liczbę użytkowników terminala > 0!");
+      return;
+    }
+    const termCost= users*(category.terminalPricePerUser||30);
+    cart.push({
+      name: "SaaS - Terminal w chmurze",
+      details: `Users=${users}`,
+      price: termCost
+    });
+    if(terminalSecurity.checked){
+      const secCost= category.terminalSecurityCost||20;
+      cart.push({
+        name: "SaaS - Zabezpieczenie terminala",
+        details: "Dodatkowa ochrona",
+        price: secCost
+      });
+    } else {
+      alert("UWAGA: Terminal bez zabezpieczenia!");
+    }
+    renderCart();
+  });
+
+  return div;
+}
+
+/** Dodatkowe miejsce (SaaS) */
+function renderSaaS_ExtraDataRow(category){
+  const div= document.createElement('div');
+  div.classList.add('mb-3');
+  div.innerHTML=`
+    <label class="d-block mb-1">Dodatkowe miejsce na dane (GB):</label>
+    <input type="number" id="extraDataInput" min="0" value="0"
+           style="width:80px;" class="form-control d-inline-block me-2">
+    <div class="d-flex align-items-center mt-2">
+      <strong class="me-3"><span id="extraDataPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddExtraData">Dodaj do wyceny</button>
+    </div>
+  `;
+  const extraDataInput   = div.querySelector('#extraDataInput');
+  const extraDataPriceEl = div.querySelector('#extraDataPrice');
+  const btnAddExtraData  = div.querySelector('#btnAddExtraData');
+
+  function updateExtraDataPrice(){
+    const val= parseInt(extraDataInput.value,10)||0;
+    let cost= val*(category.extraDataStoragePrice||2);
+    extraDataPriceEl.textContent= cost.toFixed(2);
+  }
+  extraDataInput.addEventListener('input', updateExtraDataPrice);
+  updateExtraDataPrice();
+
+  btnAddExtraData.addEventListener('click',()=>{
+    const val= parseInt(extraDataInput.value,10)||0;
+    if(val<=0){
+      alert("Podaj liczbę > 0!");
+      return;
+    }
+    let cost= val*(category.extraDataStoragePrice||2);
+    cart.push({
+      name: "SaaS - Dodatkowe miejsce",
+      details: `Ilość=${val}GB`,
+      price: cost
+    });
+    renderCart();
+  });
+
+  return div;
+}
+
 
 /***************************************************************************************************
- * Acronis / fallback => renderServicesList
+ * 7) Acronis / fallback => renderServicesList
  ***************************************************************************************************/
 function renderServicesList(category, plansBody){
   const row= document.createElement('tr');
@@ -770,14 +1029,13 @@ function renderServicesList(category, plansBody){
   h5.textContent= category.name;
   secDiv.appendChild(h5);
 
-  // Pasek parametry/cena
   const headerRow= document.createElement('div');
   headerRow.classList.add('section-header-row');
   headerRow.innerHTML=`
     <div>Parametry</div>
     <div>Cena (MIESIĘCZNIE)
       <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-         title="Koszt miesięczny za wybraną usługę."></i>
+         title="Koszt miesięczny."></i>
     </div>
   `;
   secDiv.appendChild(headerRow);
@@ -785,8 +1043,7 @@ function renderServicesList(category, plansBody){
   const contentDiv= document.createElement('div');
   if(category.services && category.services.length){
     category.services.forEach(srv=>{
-      // Tworzymy "wiersz"
-      const itemDiv = document.createElement('div');
+      const itemDiv= document.createElement('div');
       itemDiv.classList.add('d-flex','justify-content-between','align-items-center','mb-2');
       itemDiv.innerHTML=`
         <div>${srv.label}</div>
@@ -818,10 +1075,9 @@ function renderServicesList(category, plansBody){
 
 
 /***************************************************************************************************
- * Microsoft CSP => renderMicrosoft365Section
+ * 8) Microsoft CSP => "Microsoft 365"
  ***************************************************************************************************/
-function renderMicrosoft365Section(category, plansBody) {
-  // .section-wrapper
+function renderMicrosoft365Section(category, plansBody){
   const row= document.createElement('tr');
   const col= document.createElement('td');
   col.colSpan=3;
@@ -829,12 +1085,10 @@ function renderMicrosoft365Section(category, plansBody) {
   const secDiv= document.createElement('div');
   secDiv.classList.add('section-wrapper');
 
-  // Tytuł
   const h5= document.createElement('h5');
   h5.textContent= "Microsoft 365";
   secDiv.appendChild(h5);
 
-  // Pasek parametry/cena
   const headerRow= document.createElement('div');
   headerRow.classList.add('section-header-row');
   headerRow.innerHTML=`
@@ -846,7 +1100,6 @@ function renderMicrosoft365Section(category, plansBody) {
   `;
   secDiv.appendChild(headerRow);
 
-  // content
   const contentDiv= document.createElement('div');
   contentDiv.innerHTML=`
     <div class="mb-2">
@@ -861,7 +1114,7 @@ function renderMicrosoft365Section(category, plansBody) {
              style="width:60px;" class="form-control d-inline-block">
     </div>
     <div class="d-flex align-items-center">
-      <strong class="me-3" style="font-size:1rem;"><span id="m365Price">0.00</span> PLN</strong>
+      <strong class="me-3"><span id="m365Price">0.00</span> PLN</strong>
       <button class="btn btn-primary" id="btnAddM365">Dodaj do wyceny</button>
     </div>
   `;
@@ -872,11 +1125,11 @@ function renderMicrosoft365Section(category, plansBody) {
   plansBody.appendChild(row);
 
   // logika
-  const selEl   = contentDiv.querySelector('#m365Select');
-  const descEl  = contentDiv.querySelector('#m365Desc');
-  const qtyEl   = contentDiv.querySelector('#m365Qty');
-  const priceEl = contentDiv.querySelector('#m365Price');
-  const btnAdd  = contentDiv.querySelector('#btnAddM365');
+  const m365Select= contentDiv.querySelector('#m365Select');
+  const m365Desc  = contentDiv.querySelector('#m365Desc');
+  const m365Qty   = contentDiv.querySelector('#m365Qty');
+  const m365PriceEl= contentDiv.querySelector('#m365Price');
+  const btnAddM365= contentDiv.querySelector('#btnAddM365');
 
   if(category.msCspServices && category.msCspServices.length){
     category.msCspServices.forEach(srv=>{
@@ -885,42 +1138,42 @@ function renderMicrosoft365Section(category, plansBody) {
       opt.setAttribute('data-label', srv.label);
       opt.setAttribute('data-desc', srv.desc||"");
       opt.textContent= `${srv.label} (${srv.price} PLN)`;
-      selEl.appendChild(opt);
+      m365Select.appendChild(opt);
     });
   }
 
   function updateM365Desc(){
-    if(!selEl.value){
-      descEl.textContent="";
+    if(!m365Select.value){
+      m365Desc.textContent="";
       return;
     }
-    const sel= selEl.options[selEl.selectedIndex];
-    descEl.textContent= sel.getAttribute('data-desc')||"";
+    const sel= m365Select.options[m365Select.selectedIndex];
+    m365Desc.textContent= sel.getAttribute('data-desc')||"";
   }
   function updateM365Price(){
-    const val= parseFloat(selEl.value)||0;
-    const qty= parseInt(qtyEl.value,10)||1;
-    const total= val*qty;
-    priceEl.textContent= total.toFixed(2);
+    const val= parseFloat(m365Select.value)||0;
+    const qty= parseInt(m365Qty.value,10)||1;
+    m365PriceEl.textContent= (val*qty).toFixed(2);
   }
-  selEl.addEventListener('change',()=>{
+
+  m365Select.addEventListener('change',()=>{
     updateM365Desc();
     updateM365Price();
   });
-  qtyEl.addEventListener('input', updateM365Price);
+  m365Qty.addEventListener('input', updateM365Price);
   updateM365Desc();
   updateM365Price();
 
-  btnAdd.addEventListener('click',()=>{
-    if(!selEl.value){
+  btnAddM365.addEventListener('click',()=>{
+    if(!m365Select.value){
       alert("Wybierz subskrypcję Microsoft 365!");
       return;
     }
-    const sel= selEl.options[selEl.selectedIndex];
-    const label= sel.getAttribute('data-label')||"M365 sub";
-    const val= parseFloat(selEl.value)||0;
-    const qty= parseInt(qtyEl.value,10)||1;
-    const total= val*qty;
+    const sel   = m365Select.options[m365Select.selectedIndex];
+    const label = sel.getAttribute('data-label')||"M365 sub";
+    const val   = parseFloat(m365Select.value)||0;
+    const qty   = parseInt(m365Qty.value,10)||1;
+    const total = val*qty;
 
     cart.push({
       name: category.name + " (Microsoft 365)",
@@ -933,10 +1186,9 @@ function renderMicrosoft365Section(category, plansBody) {
 
 
 /***************************************************************************************************
- * Bezpieczeństwo
+ * 9) Bezpieczeństwo => 3 sekcje: Aplikacje webowe, Firewall, Analiza
  ***************************************************************************************************/
 function renderSecurityWebAppsSection(category, plansBody){
-  // .section-wrapper
   const row= document.createElement('tr');
   const col= document.createElement('td');
   col.colSpan=3;
@@ -944,12 +1196,10 @@ function renderSecurityWebAppsSection(category, plansBody){
   const secDiv= document.createElement('div');
   secDiv.classList.add('section-wrapper');
 
-  // Tytuł
   const h5= document.createElement('h5');
   h5.textContent= "Aplikacje webowe";
   secDiv.appendChild(h5);
 
-  // Pasek parametry/cena
   const headerRow= document.createElement('div');
   headerRow.classList.add('section-header-row');
   headerRow.innerHTML=`
@@ -961,17 +1211,16 @@ function renderSecurityWebAppsSection(category, plansBody){
   `;
   secDiv.appendChild(headerRow);
 
-  // content
   const contentDiv= document.createElement('div');
   contentDiv.innerHTML=`
     <label class="d-block mb-1">Wybierz usługę skanowania:</label>
     <select id="webAppSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
       <option value="" disabled selected>-- wybierz --</option>
     </select>
-    <div id="webAppDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
+    <div id="webAppDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
 
     <div class="d-flex align-items-center mt-2">
-      <strong class="me-3" style="font-size:1rem;"><span id="webAppPrice">0.00</span> PLN</strong>
+      <strong class="me-3"><span id="webAppPrice">0.00</span> PLN</strong>
       <button class="btn btn-primary" id="btnAddWebApp">Dodaj do wyceny</button>
     </div>
   `;
@@ -981,7 +1230,6 @@ function renderSecurityWebAppsSection(category, plansBody){
   row.appendChild(col);
   plansBody.appendChild(row);
 
-  // logika
   const webAppSelect= contentDiv.querySelector('#webAppSelect');
   const webAppDesc  = contentDiv.querySelector('#webAppDesc');
   const webAppPriceEl= contentDiv.querySelector('#webAppPrice');
@@ -989,12 +1237,12 @@ function renderSecurityWebAppsSection(category, plansBody){
 
   if(category.securityWebApp && category.securityWebApp.length){
     category.securityWebApp.forEach(srv=>{
-      const opt= document.createElement('option');
-      opt.value= srv.price;
-      opt.setAttribute('data-label', srv.label);
-      opt.setAttribute('data-desc', srv.desc||"");
-      opt.textContent= `${srv.label} (${srv.price} PLN)`;
-      webAppSelect.appendChild(opt);
+      const o= document.createElement('option');
+      o.value= srv.price;
+      o.setAttribute('data-label', srv.label);
+      o.setAttribute('data-desc', srv.desc||"");
+      o.textContent= `${srv.label} (${srv.price} PLN)`;
+      webAppSelect.appendChild(o);
     });
   }
 
@@ -1023,9 +1271,8 @@ function renderSecurityWebAppsSection(category, plansBody){
       return;
     }
     const sel= webAppSelect.options[webAppSelect.selectedIndex];
-    const label= sel.getAttribute('data-label');
+    const label= sel.getAttribute('data-label')||"";
     const val= parseFloat(sel.value)||0;
-
     cart.push({
       name: category.name + " (Aplikacje webowe)",
       details: label,
@@ -1036,7 +1283,6 @@ function renderSecurityWebAppsSection(category, plansBody){
 }
 
 function renderSecurityFirewallSection(category, plansBody){
-  // ... analogicznie ...
   const row= document.createElement('tr');
   const col= document.createElement('td');
   col.colSpan=3;
@@ -1065,10 +1311,10 @@ function renderSecurityFirewallSection(category, plansBody){
     <select id="fwSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
       <option value="" disabled selected>-- wybierz --</option>
     </select>
-    <div id="fwDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
+    <div id="fwDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
 
     <div class="d-flex align-items-center mt-2">
-      <strong class="me-3" style="font-size:1rem;"><span id="fwPrice">0.00</span> PLN</strong>
+      <strong class="me-3"><span id="fwPrice">0.00</span> PLN</strong>
       <button class="btn btn-primary" id="btnAddFW">Dodaj do wyceny</button>
     </div>
   `;
@@ -1078,10 +1324,10 @@ function renderSecurityFirewallSection(category, plansBody){
   row.appendChild(col);
   plansBody.appendChild(row);
 
-  const fwSelect= contentDiv.querySelector('#fwSelect');
-  const fwDesc  = contentDiv.querySelector('#fwDesc');
-  const fwPriceEl= contentDiv.querySelector('#fwPrice');
-  const btnAddFW= contentDiv.querySelector('#btnAddFW');
+  const fwSelect   = contentDiv.querySelector('#fwSelect');
+  const fwDesc     = contentDiv.querySelector('#fwDesc');
+  const fwPriceEl  = contentDiv.querySelector('#fwPrice');
+  const btnAddFW   = contentDiv.querySelector('#btnAddFW');
 
   if(category.securityFW && category.securityFW.length){
     category.securityFW.forEach(srv=>{
@@ -1094,11 +1340,11 @@ function renderSecurityFirewallSection(category, plansBody){
     });
   }
 
-  function updateFWPrice(){
+  function updateFwPrice(){
     const val= parseFloat(fwSelect.value)||0;
     fwPriceEl.textContent= val.toFixed(2);
   }
-  function updateFWDesc(){
+  function updateFwDesc(){
     if(!fwSelect.value){
       fwDesc.textContent="";
       return;
@@ -1107,20 +1353,20 @@ function renderSecurityFirewallSection(category, plansBody){
     fwDesc.textContent= sel.getAttribute('data-desc')||"";
   }
   fwSelect.addEventListener('change',()=>{
-    updateFWPrice();
-    updateFWDesc();
+    updateFwPrice();
+    updateFwDesc();
   });
-  updateFWPrice();
-  updateFWDesc();
+  updateFwPrice();
+  updateFwDesc();
 
   btnAddFW.addEventListener('click',()=>{
     if(!fwSelect.value){
       alert("Wybierz usługę Firewalla w chmurze!");
       return;
     }
-    const sel= fwSelect.options[fwSelect.selectedIndex];
-    const label= sel.getAttribute('data-label')||"FW";
-    const val= parseFloat(sel.value)||0;
+    const sel   = fwSelect.options[fwSelect.selectedIndex];
+    const label = sel.getAttribute('data-label')||"FW";
+    const val   = parseFloat(sel.value)||0;
 
     cart.push({
       name: category.name + " (Firewall)",
@@ -1154,8 +1400,8 @@ function renderSecurityAnalysisSection(category, plansBody){
   `;
   secDiv.appendChild(headerRow);
 
+  const storObj= category.analysis; // do tooltipów
   const contentDiv= document.createElement('div');
-  const storObj= category.analysis; // tooltips
   contentDiv.innerHTML=`
     <div class="mb-2">
       <label class="me-2">
@@ -1166,7 +1412,6 @@ function renderSecurityAnalysisSection(category, plansBody){
       <input type="number" id="centralLogging" min="0" value="0"
              style="width:80px;" class="form-control d-inline-block">
     </div>
-
     <div class="mb-2">
       <label class="me-2">
         Pamięć do centralnego logowania (GB)
@@ -1176,9 +1421,8 @@ function renderSecurityAnalysisSection(category, plansBody){
       <input type="number" id="memoryGB" min="0" value="0"
              style="width:80px;" class="form-control d-inline-block">
     </div>
-
     <div class="d-flex align-items-center">
-      <strong class="me-3" style="font-size:1rem;"><span id="analysisPrice">0.00</span> PLN</strong>
+      <strong class="me-3"><span id="analysisPrice">0.00</span> PLN</strong>
       <button class="btn btn-primary" id="btnAddAnalysis">Dodaj do wyceny</button>
     </div>
   `;
@@ -1203,15 +1447,14 @@ function renderSecurityAnalysisSection(category, plansBody){
     }
     priceEl.textContent= total.toFixed(2);
   }
-  [loggingInput, memoryInput].forEach(el =>
-    el.addEventListener('input', updateAnalysisPrice));
+  [loggingInput, memoryInput].forEach(el => el.addEventListener('input', updateAnalysisPrice));
   updateAnalysisPrice();
 
   btnAdd.addEventListener('click',()=>{
     const logVal= parseInt(loggingInput.value,10)||0;
     const memVal= parseInt(memoryInput.value,10)||0;
     if(logVal>0 && memVal<5){
-      alert("Jeśli używasz centralnego logowania, pamięć >=5GB!");
+      alert("Jeśli używasz centralnego logowania, pamięć musi być min. 5GB!");
       return;
     }
     let total=0;
@@ -1233,7 +1476,7 @@ function renderSecurityAnalysisSection(category, plansBody){
 
 
 /***************************************************************************************************
- * Koszyk
+ * 10) Koszyk
  ***************************************************************************************************/
 function renderCart() {
   const cartSection = document.getElementById('cartSection');
@@ -1248,9 +1491,9 @@ function renderCart() {
   tbody.innerHTML='';
 
   let sum=0;
-  cart.forEach((item, index) => {
-    sum += item.price;
-    const tr = document.createElement('tr');
+  cart.forEach((item, index)=>{
+    sum+= item.price;
+    const tr= document.createElement('tr');
     tr.innerHTML=`
       <td>${item.name}</td>
       <td>${item.details}</td>
@@ -1269,7 +1512,7 @@ function renderCart() {
 
 
 /***************************************************************************************************
- * initTooltips
+ * 11) initTooltips
  ***************************************************************************************************/
 function initTooltips(){
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
