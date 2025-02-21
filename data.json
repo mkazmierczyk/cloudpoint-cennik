@@ -29,33 +29,43 @@
           "pricePerUnit": 0.2
         }
       ],
-      "backupPricePerGB": 0.1, 
+      "backupPricePerGB": 0.1,
       "publicIPPrice": 10,
       "msSplaServices": [
         { "label": "Windows Server Std (1 licencja)", "price": 20 },
-        { "label": "Windows Server DC (1 licencja)",  "price": 50 },
-        { "label": "SQL Server Std (1 licencja)",     "price": 45 }
+        { "label": "Windows Server DC (1 licencja)", "price": 50 },
+        { "label": "SQL Server Std (1 licencja)", "price": 45 }
       ]
     },
     {
       "name": "PaaS",
       "type": "paas",
       "paasInstances": [
-        { "label": "PaaS Basic VM",    "price": 40 },
+        { "label": "PaaS Basic VM", "price": 40 },
         { "label": "PaaS Standard VM", "price": 80 },
-        { "label": "PaaS Premium VM",  "price": 160 }
+        { "label": "PaaS Premium VM", "price": 160 }
       ],
       "supportGoldPrice": 50,
       "supportPlatinumAddOnPrice": 100,
       "backupPricePerGB": 0.3,
       "publicIPPrice": 15,
       "msSplaServices": [
-        { "label": "MS SQL Web Edition",   "price": 25 },
-        { "label": "MS SQL Standard",      "price": 70 }
+        { "label": "MS SQL Web Edition", "price": 25 },
+        { "label": "MS SQL Standard", "price": 70 }
       ],
       "drServices": [
-        { "id": "C-DR-STORAGE", "label": "C-DR-STORAGE", "price": 0.2,  "tooltip": "Storage w GB" },
-        { "id": "C-DR-IP",      "label": "C-DR-IP",      "price": 10,   "tooltip": "Adresy IP min. 1" }
+        {
+          "id": "C-DR-STORAGE",
+          "label": "C-DR-STORAGE",
+          "price": 0.2,
+          "tooltip": "Storage w GB (min 0)"
+        },
+        {
+          "id": "C-DR-IP",
+          "label": "C-DR-IP",
+          "price": 10,
+          "tooltip": "Adresy IP min. 1"
+        }
       ]
     },
     {
@@ -72,8 +82,8 @@
       "type": "acronis",
       "services": [
         { "label": "Backup Windows Agent", "price": 10 },
-        { "label": "Backup Linux Agent",   "price": 12 },
-        { "label": "Backup MacOS Agent",   "price": 15 }
+        { "label": "Backup Linux Agent", "price": 12 },
+        { "label": "Backup MacOS Agent", "price": 15 }
       ]
     },
     {
