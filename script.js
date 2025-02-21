@@ -73,7 +73,7 @@ function selectCategory(catIndex) {
 }
 
 /**
- * Render IaaS (Maszyny wirtualne + suwak) + Kopie zapasowe, IP
+ * Render IaaS (Maszyny wirtualne) - suwak CPU/RAM/SSD + Kopie + IP
  */
 function renderIaaS(category, plansBody) {
   // Nagłówek
@@ -207,7 +207,7 @@ function renderIaaS(category, plansBody) {
 }
 
 /**
- * Sekcja PaaS (Maszyny wirtualne, wsparcie, Dysk SSD(GB), Backup, IP)
+ * PaaS - Maszyny wirtualne z dynamicznym opisem instancji i wsparcia
  */
 function renderPaaSMachinesSection(category, plansBody) {
   const headerTr = document.createElement('tr');
@@ -227,6 +227,8 @@ function renderPaaSMachinesSection(category, plansBody) {
         <select id="paasInstanceSelect" class="form-select d-inline-block" style="width:auto; min-width:150px;">
           <option value="" disabled selected>-- wybierz --</option>
         </select>
+        <!-- Opis instancji -->
+        <div id="paasInstanceDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
       </div>
 
       <!-- Wsparcie -->
@@ -237,6 +239,8 @@ function renderPaaSMachinesSection(category, plansBody) {
           <option value="gold">C-SUPPORT-GOLD</option>
           <option value="platinum">C-SUPPORT-PLATINUM-AddON</option>
         </select>
+        <!-- Opis wsparcia -->
+        <div id="paasSupportDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
       </div>
 
       <!-- Dysk SSD (GB) -->
@@ -279,8 +283,11 @@ function renderPaaSMachinesSection(category, plansBody) {
   `;
   plansBody.appendChild(contentTr);
 
+  // Referencje
   const instSelect = contentTr.querySelector('#paasInstanceSelect');
+  const instDescEl = contentTr.querySelector('#paasInstanceDesc');
   const supportSelect = contentTr.querySelector('#paasSupportSelect');
+  const supportDescEl = contentTr.querySelector('#paasSupportDesc');
   const ssdInput = contentTr.querySelector('#paasSsdGB');
   const backupInput = contentTr.querySelector('#paasBackupGB');
   const ipCheck = contentTr.querySelector('#paasPublicIP');
@@ -293,12 +300,32 @@ function renderPaaSMachinesSection(category, plansBody) {
       const opt = document.createElement('option');
       opt.value = inst.price;
       opt.setAttribute('data-label', inst.label);
+      opt.setAttribute('data-desc', inst.desc || "");
       opt.textContent = `${inst.label} (${inst.price} PLN)`;
       instSelect.appendChild(opt);
     });
   }
 
-  // Obliczanie ceny
+  function updateInstanceDesc() {
+    if (!instSelect.value) {
+      instDescEl.textContent = "";
+      return;
+    }
+    const selectedOpt = instSelect.options[instSelect.selectedIndex];
+    const desc = selectedOpt.getAttribute('data-desc') || "";
+    instDescEl.textContent = desc;
+  }
+
+  function updateSupportDesc() {
+    let supDesc = "";
+    if (supportSelect.value === 'gold') {
+      supDesc = category.supportGoldDesc || "";
+    } else if (supportSelect.value === 'platinum') {
+      supDesc = (category.supportGoldDesc || "") + " " + (category.supportPlatinumDesc || "");
+    }
+    supportDescEl.textContent = supDesc.trim();
+  }
+
   function updatePaaSPrice() {
     let total = 0;
 
@@ -310,13 +337,14 @@ function renderPaaSMachinesSection(category, plansBody) {
     if (supportSelect.value === 'gold') {
       total += (category.supportGoldPrice || 0);
     } else if (supportSelect.value === 'platinum') {
+      // platinum => gold + platinum
       total += (category.supportGoldPrice || 0);
       total += (category.supportPlatinumAddOnPrice || 0);
     }
 
-    // Dysk SSD (GB) - załóżmy 1 PLN/GB
+    // Dysk SSD (GB) - np. 1 PLN/GB
     const ssdVal = parseFloat(ssdInput.value) || 0;
-    const ssdPricePerGB = 1.0; // stała - dostosuj
+    const ssdPricePerGB = 1.0;
     total += ssdVal * ssdPricePerGB;
 
     // Kopie zapasowe
@@ -333,11 +361,22 @@ function renderPaaSMachinesSection(category, plansBody) {
     priceEl.textContent = total.toFixed(2);
   }
 
-  instSelect.addEventListener('change', updatePaaSPrice);
-  supportSelect.addEventListener('change', updatePaaSPrice);
+  // Eventy
+  instSelect.addEventListener('change', () => {
+    updateInstanceDesc();
+    updatePaaSPrice();
+  });
+  supportSelect.addEventListener('change', () => {
+    updateSupportDesc();
+    updatePaaSPrice();
+  });
   ssdInput.addEventListener('input', updatePaaSPrice);
   backupInput.addEventListener('input', updatePaaSPrice);
   ipCheck.addEventListener('change', updatePaaSPrice);
+
+  // Pierwsze wywołanie
+  updateInstanceDesc();
+  updateSupportDesc();
   updatePaaSPrice();
 
   // Dodaj do koszyka
@@ -352,7 +391,8 @@ function renderPaaSMachinesSection(category, plansBody) {
     }
 
     const total = parseFloat(priceEl.textContent) || 0;
-    const instLabel = instSelect.options[instSelect.selectedIndex]?.dataset.label || "Brak";
+    const instLabel = instSelect.options[instSelect.selectedIndex]?.getAttribute('data-label') || "Brak";
+    
     let supportDesc = "";
     if (supportSelect.value === 'gold') {
       supportDesc = "C-SUPPORT-GOLD";
@@ -379,7 +419,7 @@ function renderPaaSMachinesSection(category, plansBody) {
 }
 
 /**
- * Sekcja "Disaster Recovery" w PaaS 
+ * Disaster Recovery w PaaS
  */
 function renderPaaSDisasterRecoverySection(category, plansBody) {
   if (!category.drServices || !category.drServices.length) return;
@@ -417,7 +457,6 @@ function renderPaaSDisasterRecoverySection(category, plansBody) {
   const storObj = category.drServices.find(s => s.id === 'C-DR-STORAGE');
   const ipObj = category.drServices.find(s => s.id === 'C-DR-IP');
 
-  // Rysujemy inputy
   drStorageWrap.innerHTML = `
     <label class="form-label me-2">
       ${storObj?.label || 'C-DR-STORAGE'}
@@ -428,6 +467,7 @@ function renderPaaSDisasterRecoverySection(category, plansBody) {
     </label>
     <input type="number" id="drStorageInput" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
   `;
+
   drIpWrap.innerHTML = `
     <label class="form-label me-2">
       ${ipObj?.label || 'C-DR-IP'}
@@ -479,7 +519,7 @@ function renderPaaSDisasterRecoverySection(category, plansBody) {
 }
 
 /**
- * Licencje Microsoft (dla IaaS/PaaS)
+ * Licencje MS w IaaS/PaaS
  */
 function renderMsLicSection(category, plansBody) {
   if (!category.msSplaServices) return;

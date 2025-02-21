@@ -41,12 +41,26 @@
       "name": "PaaS",
       "type": "paas",
       "paasInstances": [
-        { "label": "PaaS Basic VM", "price": 40 },
-        { "label": "PaaS Standard VM", "price": 80 },
-        { "label": "PaaS Premium VM", "price": 160 }
+        {
+          "label": "PaaS Basic VM",
+          "price": 40,
+          "desc": "Podstawowa instancja PaaS z ograniczonymi zasobami, odpowiednia do testów."
+        },
+        {
+          "label": "PaaS Standard VM",
+          "price": 80,
+          "desc": "Średnia instancja PaaS, zbalansowane zasoby i wsparcie dla większości aplikacji."
+        },
+        {
+          "label": "PaaS Premium VM",
+          "price": 160,
+          "desc": "Najwyższy poziom wydajności i zasobów, zalecany dla kluczowych obciążeń."
+        }
       ],
       "supportGoldPrice": 50,
+      "supportGoldDesc": "Wsparcie GOLD – 24/7, SLA do 2h reakcji, wsparcie mail i telefon.",
       "supportPlatinumAddOnPrice": 100,
+      "supportPlatinumDesc": "PLATINUM Add-On – rozszerzone wsparcie GOLD o priorytetową obsługę i dedykowanego opiekuna.",
       "backupPricePerGB": 0.3,
       "publicIPPrice": 15,
       "msSplaServices": [
@@ -58,13 +72,13 @@
           "id": "C-DR-STORAGE",
           "label": "C-DR-STORAGE",
           "price": 0.2,
-          "tooltip": "Storage w GB (min 0)"
+          "tooltip": "GB dla kopii DR (min. 0)."
         },
         {
           "id": "C-DR-IP",
           "label": "C-DR-IP",
           "price": 10,
-          "tooltip": "Adresy IP min. 1"
+          "tooltip": "Adresy IP (min 1)."
         }
       ]
     },
