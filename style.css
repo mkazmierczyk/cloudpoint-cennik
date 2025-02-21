@@ -1,11 +1,15 @@
+/* Podstawowy reset + font */
 body {
-  background-color: #f8f9fa;
   margin: 0;
   padding: 0;
-  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  /* Zmieniamy czcionkę na 'Wix Medefor Text' (jeśli naprawdę istnieje),
+     w tym przykładzie 'Open Sans' z fallback: */
+  font-family: 'Open Sans', sans-serif;
+  background-color: #f8f9fa;
 }
 
-.navbar {
+/* Navbar z delikatnym backgroundem? */
+.custom-nav {
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
 
@@ -33,7 +37,6 @@ body {
   font-size: 0.95rem;
 }
 #categoriesMenu li a:hover {
-  text-decoration: none;
   background-color: #e9ecef;
 }
 #categoriesMenu li a.active {
@@ -42,26 +45,29 @@ body {
   background-color: #edf5ff;
 }
 
-/* Tabela planów */
-.packages-table tbody tr:hover {
-  background-color: #f3f4f6;
-}
-.packages-table th, .packages-table td {
-  vertical-align: middle;
-  border-top: none;
-}
-.packages-table th {
-  border-bottom: 1px solid #dee2e6;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: #6c757d;
-}
-.packages-table td {
-  font-size: 0.95rem;
+/* SEKCJE */
+.section-wrapper {
+  background-color: #e3f1ff;  /* delikatny niebieski */
+  border-radius: 8px;         /* zaokrąglone rogi */
+  padding: 1rem;
+  margin-bottom: 1rem;        /* odstęp miedzy sekcjami */
 }
 
-/* Koszyk */
+/* Sekcja - nagłówek parametry/cena z tooltipem */
+.section-header-row {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+.section-header-row div {
+  font-weight: 600;
+}
+
+/* KOSZYK */
 #cartSection h4 {
   margin-bottom: 1rem;
 }
@@ -75,3 +81,21 @@ body {
   padding: 0.5rem;
   border-top: none;
 }
+
+/* TABELKI FORM - suwak itp. (drobna stylizacja) */
+.form-label {
+  font-size: 0.9rem;
+}
+input[type="range"] {
+  vertical-align: middle;
+}
+
+/* Minimalne dopasowanie buttonów w headerze */
+.navbar .btn {
+  font-size: 0.9rem;
+  padding: 6px 12px;
+}
+
+/* Poniższe style do tooltipów bootstrapu - domyślne wystarczą 
+   ale można dopisać delikatne dopasowania
+*/

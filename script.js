@@ -1,24 +1,24 @@
-/****************************************************************************************************
- * script.js - PEŁNA WERSJA
+/***************************************************************************************************
+ * script.js - wersja z wodotryskami
  * 
- * OBSŁUGA KATEGORII:
- *   - IaaS (CPU/RAM/SSD + backup + IP + MsLic)
- *   - PaaS (Instancje, wsparcie, SSD, backup, IP, DR + MsLic)
- *   - SaaS (MsSQL, Enova, Enova API, Terminal, Dodatkowe miejsce + MsLic)
- *   - Acronis (prosta lista services)
- *   - Microsoft CSP (typu "csp") => sekcja "Microsoft 365" z listą msCspServices
- *   - Bezpieczeństwo (typu "security") => 3 sekcje: 
- *        1) Aplikacje webowe (securityWebApp),
- *        2) Firewall (securityFW),
- *        3) Analiza (central log + memory)
- ****************************************************************************************************/
+ * 1) Wczytuje data.json i rysuje menu kategorii po lewej.
+ * 2) Dla każdej kategorii rysuje sekcje z .section-wrapper (niebieskie tło, zaokrąglone rogi),
+ *    wewnątrz:
+ *     - Tytuł sekcji (np. "Maszyny wirtualne (IaaS)")
+ *     - Pasek "Parametry" -- "Cena (MIESIĘCZNIE)" z tooltipem
+ *     - Główna zawartość (formularze, suwaki, listy)
+ *     - Guzik "Dodaj do wyceny"
+ * 3) Zmiana wszystkich przycisków z "Dodaj do koszyka" -> "Dodaj do wyceny"
+ * 4) Po kliknięciu "Dodaj do wyceny" dana konfiguracja trafia do koszyka (tablica cart),
+ *    a w #cartSection jest rysowana tabela z 4 kolumnami (kategoria, szczegóły, cena, usuń).
+ ***************************************************************************************************/
 
 let categoriesData = [];
 let cart = [];
 
-/****************************************************************************************************
- * INIT
- ****************************************************************************************************/
+/***************************************************************************************************
+ * Po załadowaniu DOM
+ ***************************************************************************************************/
 document.addEventListener('DOMContentLoaded', () => {
   fetch('data.json')
     .then(res => res.json())
@@ -30,9 +30,9 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-/****************************************************************************************************
- * renderCategoriesMenu
- ****************************************************************************************************/
+/***************************************************************************************************
+ * renderCategoriesMenu - rysuje w #categoriesMenu listę linków do kategorii
+ ***************************************************************************************************/
 function renderCategoriesMenu(categories) {
   const menuUl = document.getElementById('categoriesMenu');
   menuUl.innerHTML = '';
@@ -46,6 +46,8 @@ function renderCategoriesMenu(categories) {
     link.addEventListener('click', (e) => {
       e.preventDefault();
       selectCategory(index);
+
+      // Podświetlenie "active"
       document.querySelectorAll('#categoriesMenu a').forEach(a => a.classList.remove('active'));
       link.classList.add('active');
     });
@@ -56,11 +58,11 @@ function renderCategoriesMenu(categories) {
 }
 
 
-/****************************************************************************************************
- * selectCategory
- ****************************************************************************************************/
+/***************************************************************************************************
+ * selectCategory - główny dispatcher po kliknięciu w menu
+ ***************************************************************************************************/
 function selectCategory(catIndex) {
-  const category     = categoriesData[catIndex];
+  const category = categoriesData[catIndex];
   const titleEl      = document.getElementById('categoryTitle');
   const descEl       = document.getElementById('categoryDesc');
   const plansWrapper = document.getElementById('plansTableWrapper');
@@ -68,37 +70,42 @@ function selectCategory(catIndex) {
 
   titleEl.textContent = category.name;
   descEl.textContent  = `Opcje dostępne w kategorii: ${category.name}.`;
-  plansWrapper.style.display='block';
-  plansBody.innerHTML='';
+  plansWrapper.style.display = 'block';
+  plansBody.innerHTML = ''; // czyścimy
 
+  // wg typu
   if (category.type === 'iaas') {
+    // IaaS
     renderIaaS(category, plansBody);
     renderMsLicSection(category, plansBody);
-  }
-  else if (category.type === 'paas') {
+
+  } else if (category.type === 'paas') {
+    // PaaS
     renderPaaSMachinesSection(category, plansBody);
     renderMsLicSection(category, plansBody);
     renderPaaSDisasterRecoverySection(category, plansBody);
-  }
-  else if (category.type === 'saas') {
+
+  } else if (category.type === 'saas') {
+    // SaaS
     renderSaaSApplications(category, plansBody);
     renderMsLicSection(category, plansBody);
-  }
-  else if (category.type === 'acronis') {
+
+  } else if (category.type === 'acronis') {
+    // Acronis
     renderServicesList(category, plansBody);
-  }
-  else if (category.type === 'csp') {
-    // Microsoft CSP => "Microsoft 365"
+
+  } else if (category.type === 'csp') {
+    // Microsoft CSP
     renderMicrosoft365Section(category, plansBody);
-  }
-  else if (category.type === 'security') {
-    // Bezpieczeństwo => 3 sekcje
+
+  } else if (category.type === 'security') {
+    // Bezpieczeństwo
     renderSecurityWebAppsSection(category, plansBody);
     renderSecurityFirewallSection(category, plansBody);
     renderSecurityAnalysisSection(category, plansBody);
-  }
-  else {
-    // fallback => prosta lista
+
+  } else {
+    // fallback
     renderServicesList(category, plansBody);
   }
 
@@ -106,119 +113,125 @@ function selectCategory(catIndex) {
 }
 
 
-/****************************************************************************************************
- * IaaS
- ****************************************************************************************************/
+/***************************************************************************************************
+ *  IaaS
+ ***************************************************************************************************/
 function renderIaaS(category, plansBody) {
-  const headerTr = document.createElement('tr');
-  headerTr.innerHTML=`
-    <td colspan="3">
-      <h5 class="mb-3">Maszyny wirtualne (IaaS)</h5>
-    </td>
+  // sekcja
+  const mainTr = document.createElement('tr');
+  const mainTd = document.createElement('td');
+  mainTd.colSpan=3;
+
+  const secDiv = document.createElement('div');
+  secDiv.classList.add('section-wrapper'); // tło, zaokrąglenie
+
+  // Tytuł
+  const h5 = document.createElement('h5');
+  h5.textContent = "Maszyny wirtualne (IaaS)";
+  secDiv.appendChild(h5);
+
+  // Pasek "Parametry / Cena (MIESIĘCZNIE)"
+  const headerRow = document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="Koszt miesięczny za wybrane parametry."></i>
+    </div>
   `;
-  plansBody.appendChild(headerTr);
+  secDiv.appendChild(headerRow);
 
-  const contentTr = document.createElement('tr');
-  contentTr.innerHTML=`
-    <td>
-      <div class="mb-2">
-        <label class="form-label me-2">CPU (vCore): <span id="cpuValue">1</span></label>
-        <input type="range" id="cpuSlider" 
-               min="${category.sliders[0].min}" max="${category.sliders[0].max}" 
-               step="${category.sliders[0].step}" 
-               value="${category.sliders[0].min}" style="width:150px;">
-      </div>
-      <div class="mb-2">
-        <label class="form-label me-2">RAM (GB): <span id="ramValue">${category.sliders[1].min}</span></label>
-        <input type="range" id="ramSlider" 
-               min="${category.sliders[1].min}" max="${category.sliders[1].max}" 
-               step="${category.sliders[1].step}" 
-               value="${category.sliders[1].min}" style="width:150px;">
-      </div>
-      <div class="mb-2">
-        <label class="form-label me-2">SSD (GB): <span id="ssdValue">${category.sliders[2].min}</span></label>
-        <input type="range" id="ssdSlider"
-               min="${category.sliders[2].min}" max="${category.sliders[2].max}"
-               step="${category.sliders[2].step}"
-               value="${category.sliders[2].min}" style="width:150px;">
-      </div>
+  // Główny content
+  const contentDiv = document.createElement('div');
+  contentDiv.innerHTML = `
+    <div class="mb-2">
+      <label>CPU (vCore): <span id="cpuVal">1</span></label>
+      <input type="range" id="cpuSlider" min="${category.sliders[0].min}" max="${category.sliders[0].max}"
+             step="${category.sliders[0].step}" value="${category.sliders[0].min}" style="width:150px;">
+    </div>
+    <div class="mb-2">
+      <label>RAM (GB): <span id="ramVal">${category.sliders[1].min}</span></label>
+      <input type="range" id="ramSlider" min="${category.sliders[1].min}" max="${category.sliders[1].max}"
+             step="${category.sliders[1].step}" value="${category.sliders[1].min}" style="width:150px;">
+    </div>
+    <div class="mb-2">
+      <label>SSD (GB): <span id="ssdVal">${category.sliders[2].min}</span></label>
+      <input type="range" id="ssdSlider" min="${category.sliders[2].min}" max="${category.sliders[2].max}"
+             step="${category.sliders[2].step}" value="${category.sliders[2].min}" style="width:150px;">
+    </div>
 
-      <div class="mb-2">
-        <label class="form-label me-2">
-          Kopie zapasowe (GB)
-          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-             title="Rozmiar kopii zależny od wielkości VM."></i>
-        </label>
-        <input type="number" id="backupGB" min="0" value="0"
-               style="width:80px;" class="form-control d-inline-block">
-      </div>
+    <div class="mb-2">
+      <label>Kopie zapasowe (GB)
+        <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+           title="Rozmiar kopii zależny od wielkości VM."></i>
+      </label>
+      <input type="number" id="backupGB" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
+    </div>
 
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="publicIP">
-        <label class="form-check-label" for="publicIP">
-          Dodatkowe publiczne IP
-          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-             title="Jeśli VM wymaga osobnego IP."></i>
-        </label>
-      </div>
-    </td>
-    <td>
-      <span id="iaasPrice">0.00</span> PLN
-    </td>
-    <td>
-      <button class="btn btn-outline-primary" id="btnAddIaas">Dodaj do koszyka</button>
-    </td>
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="publicIP">
+      <label class="form-check-label" for="publicIP">
+        Dodatkowe publiczne IP
+        <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+           title="Jeśli VM wymaga osobnego IP."></i>
+      </label>
+    </div>
+
+    <div class="d-flex align-items-center">
+      <strong class="me-3" style="font-size:1rem;"><span id="iaasPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddIaas">Dodaj do wyceny</button>
+    </div>
   `;
-  plansBody.appendChild(contentTr);
+  secDiv.appendChild(contentDiv);
 
-  const cpuSlider   = contentTr.querySelector('#cpuSlider');
-  const ramSlider   = contentTr.querySelector('#ramSlider');
-  const ssdSlider   = contentTr.querySelector('#ssdSlider');
-  const backupInput = contentTr.querySelector('#backupGB');
-  const publicIP    = contentTr.querySelector('#publicIP');
-  const priceEl     = contentTr.querySelector('#iaasPrice');
+  mainTd.appendChild(secDiv);
+  mainTr.appendChild(mainTd);
+  plansBody.appendChild(mainTr);
 
-  function updateIaaSPrice() {
+  // eventy i logika
+  const cpuSlider  = contentDiv.querySelector('#cpuSlider');
+  const ramSlider  = contentDiv.querySelector('#ramSlider');
+  const ssdSlider  = contentDiv.querySelector('#ssdSlider');
+  const backupInput= contentDiv.querySelector('#backupGB');
+  const publicIP   = contentDiv.querySelector('#publicIP');
+  const priceEl    = contentDiv.querySelector('#iaasPrice');
+
+  function updateIaaSPrice(){
     let total=0;
-    const cpuVal   = parseInt(cpuSlider.value,10);
-    const ramVal   = parseInt(ramSlider.value,10);
-    const ssdVal   = parseInt(ssdSlider.value,10);
+    const cpuVal= parseInt(cpuSlider.value,10);
+    const ramVal= parseInt(ramSlider.value,10);
+    const ssdVal= parseInt(ssdSlider.value,10);
     const backupVal= parseFloat(backupInput.value)||0;
 
     total += cpuVal*(category.sliders[0].pricePerUnit||0);
     total += ramVal*(category.sliders[1].pricePerUnit||0);
     total += ssdVal*(category.sliders[2].pricePerUnit||0);
+    if(backupVal>0) total += backupVal*(category.backupPricePerGB||0);
+    if(publicIP.checked) total += (category.publicIPPrice||0);
 
-    if (backupVal>0) {
-      total += backupVal*(category.backupPricePerGB||0);
-    }
-    if (publicIP.checked) {
-      total += (category.publicIPPrice||0);
-    }
-
-    contentTr.querySelector('#cpuValue').textContent = cpuVal;
-    contentTr.querySelector('#ramValue').textContent = ramVal;
-    contentTr.querySelector('#ssdValue').textContent = ssdVal;
-    priceEl.textContent = total.toFixed(2);
+    contentDiv.querySelector('#cpuVal').textContent= cpuVal;
+    contentDiv.querySelector('#ramVal').textContent= ramVal;
+    contentDiv.querySelector('#ssdVal').textContent= ssdVal;
+    priceEl.textContent= total.toFixed(2);
   }
-
   [cpuSlider, ramSlider, ssdSlider, backupInput].forEach(el =>
     el.addEventListener('input', updateIaaSPrice));
   publicIP.addEventListener('change', updateIaaSPrice);
   updateIaaSPrice();
 
-  const btnAddIaas = contentTr.querySelector('#btnAddIaas');
-  btnAddIaas.addEventListener('click', ()=> {
-    const total    = parseFloat(priceEl.textContent)||0;
-    const cpuVal   = parseInt(cpuSlider.value,10);
-    const ramVal   = parseInt(ramSlider.value,10);
-    const ssdVal   = parseInt(ssdSlider.value,10);
-    const backupVal= parseFloat(backupInput.value)||0;
-    const ipCheck  = publicIP.checked;
+  const btnAddIaas= contentDiv.querySelector('#btnAddIaas');
+  btnAddIaas.addEventListener('click',()=>{
+    const total= parseFloat(priceEl.textContent)||0;
+    const cpuVal= parseInt(cpuSlider.value,10);
+    const ramVal= parseInt(ramSlider.value,10);
+    const ssdVal= parseInt(ssdSlider.value,10);
+    const bVal= parseFloat(backupInput.value)||0;
+    const ipChecked= publicIP.checked;
 
-    let desc = `CPU=${cpuVal}, RAM=${ramVal}GB, SSD=${ssdVal}GB`;
-    if (backupVal>0) desc += `, Backup=${backupVal}GB`;
-    if (ipCheck) desc += `, +PublicIP`;
+    let desc= `CPU=${cpuVal}, RAM=${ramVal}GB, SSD=${ssdVal}GB`;
+    if(bVal>0) desc+=`, Backup=${bVal}GB`;
+    if(ipChecked) desc+=`, +PublicIP`;
 
     cart.push({
       name: "IaaS",
@@ -230,69 +243,88 @@ function renderIaaS(category, plansBody) {
 }
 
 
-/****************************************************************************************************
+/***************************************************************************************************
  * MsLicSection (IaaS/PaaS/SaaS)
- ****************************************************************************************************/
+ ***************************************************************************************************/
 function renderMsLicSection(category, plansBody) {
-  if (!category.msSplaServices) return;
+  if(!category.msSplaServices) return;
 
-  const headerTr = document.createElement('tr');
-  headerTr.innerHTML=`
-    <td colspan="3">
-      <h5 class="mt-4 mb-3">Licencje Microsoft</h5>
-    </td>
+  const row = document.createElement('tr');
+  const col = document.createElement('td');
+  col.colSpan=3;
+
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
+
+  // Tytuł
+  const h5 = document.createElement('h5');
+  h5.textContent= "Licencje Microsoft";
+  secDiv.appendChild(h5);
+
+  // Pasek parametry/cena
+  const headerRow = document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="Koszt licencji w rozliczeniu miesięcznym."></i>
+    </div>
   `;
-  plansBody.appendChild(headerTr);
+  secDiv.appendChild(headerRow);
 
-  const contentTr = document.createElement('tr');
-  contentTr.innerHTML=`
-    <td>
+  // Główny content
+  const contentDiv= document.createElement('div');
+  contentDiv.innerHTML=`
+    <div class="mb-2">
       <label class="form-label me-2">Wybierz licencję:</label>
       <select id="msSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
         <option value="" disabled selected>-- wybierz --</option>
       </select>
-      <label class="form-label ms-3">Ilość:</label>
-      <input type="number" value="1" min="1" id="msQty"
-             style="width:60px;" class="form-control d-inline-block ms-2">
-    </td>
-    <td>
-      <span id="msPrice">0.00</span> PLN
-    </td>
-    <td>
-      <button class="btn btn-outline-primary" id="btnAddMS">Dodaj do koszyka</button>
-    </td>
+      <label class="form-label ms-3 me-2">Ilość:</label>
+      <input type="number" value="1" min="1" id="msQty" style="width:60px;"
+             class="form-control d-inline-block">
+    </div>
+    <div class="d-flex align-items-center">
+      <strong class="me-3" style="font-size:1rem;"><span id="msPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddMS">Dodaj do wyceny</button>
+    </div>
   `;
-  plansBody.appendChild(contentTr);
+  secDiv.appendChild(contentDiv);
 
-  const msSelect  = contentTr.querySelector('#msSelect');
-  const msQty     = contentTr.querySelector('#msQty');
-  const msPriceEl = contentTr.querySelector('#msPrice');
-  const btnAddMS  = contentTr.querySelector('#btnAddMS');
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
 
-  category.msSplaServices.forEach(srv => {
-    const opt = document.createElement('option');
+  // wypełniamy select
+  const msSelect= contentDiv.querySelector('#msSelect');
+  const msQty   = contentDiv.querySelector('#msQty');
+  const msPriceEl= contentDiv.querySelector('#msPrice');
+  const btnAddMS= contentDiv.querySelector('#btnAddMS');
+
+  category.msSplaServices.forEach(srv=>{
+    const opt= document.createElement('option');
     opt.value = srv.price;
     opt.setAttribute('data-label', srv.label);
-    opt.textContent = `${srv.label} (${srv.price} PLN)`;
+    opt.textContent= `${srv.label} (${srv.price} PLN)`;
     msSelect.appendChild(opt);
   });
 
-  function updateMsPrice() {
-    if (!msSelect.value) {
+  function updateMsLicPrice(){
+    if(!msSelect.value){
       msPriceEl.textContent='0.00';
       return;
     }
     const price = parseFloat(msSelect.value)||0;
     const qty   = parseInt(msQty.value,10)||1;
-    msPriceEl.textContent=(price*qty).toFixed(2);
+    msPriceEl.textContent= (price*qty).toFixed(2);
   }
+  msSelect.addEventListener('change', updateMsLicPrice);
+  msQty.addEventListener('input', updateMsLicPrice);
+  updateMsLicPrice();
 
-  msSelect.addEventListener('change', updateMsPrice);
-  msQty.addEventListener('input', updateMsPrice);
-  updateMsPrice();
-
-  btnAddMS.addEventListener('click', () => {
-    if (!msSelect.value) {
+  btnAddMS.addEventListener('click',()=>{
+    if(!msSelect.value){
       alert("Wybierz licencję Microsoft!");
       return;
     }
@@ -311,174 +343,189 @@ function renderMsLicSection(category, plansBody) {
 }
 
 
-/****************************************************************************************************
- * PaaS - Machines + DR
- ****************************************************************************************************/
+/***************************************************************************************************
+ * PaaS - Maszyny
+ ***************************************************************************************************/
 function renderPaaSMachinesSection(category, plansBody) {
-  // Ten sam kod, nic nie zmieniamy, by PaaS nie był pusty
-  // ...
-  const headerTr = document.createElement('tr');
-  headerTr.innerHTML=`
-    <td colspan="3">
-      <h5 class="mb-3">Maszyny wirtualne (PaaS)</h5>
-    </td>
+  const row = document.createElement('tr');
+  const col = document.createElement('td');
+  col.colSpan=3;
+
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
+
+  // Tytuł
+  const h5= document.createElement('h5');
+  h5.textContent= "Maszyny wirtualne (PaaS)";
+  secDiv.appendChild(h5);
+
+  // Pasek
+  const headerRow = document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="Koszt miesięczny instancji PaaS."></i>
+    </div>
   `;
-  plansBody.appendChild(headerTr);
+  secDiv.appendChild(headerRow);
 
-  const contentTr = document.createElement('tr');
-  contentTr.innerHTML=`
-    <td>
-      <div class="mb-2">
-        <label class="form-label me-2">Wybierz instancję:</label>
-        <select id="paasInstanceSelect" class="form-select d-inline-block" style="width:auto; min-width:150px;">
-          <option value="" disabled selected>-- wybierz --</option>
-        </select>
-        <div id="paasInstanceDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
-      </div>
-
-      <div class="mb-2">
-        <label class="form-label me-2">Wsparcie techniczne:</label>
-        <select id="paasSupportSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
-          <option value="" disabled selected>-- wybierz --</option>
-          <option value="gold">C-SUPPORT-GOLD</option>
-          <option value="platinum">C-SUPPORT-PLATINUM-AddON</option>
-        </select>
-        <div id="paasSupportDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
-      </div>
-
-      <div class="mb-2">
-        <label class="form-label me-2">Dysk SSD (GB):</label>
-        <input type="number" id="paasSsdGB" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
-      </div>
-
-      <div class="mb-2">
-        <label class="form-label me-2">
-          Kopie zapasowe (GB)
-          <i class="bi bi-info-circle text-muted ms-1"
-             data-bs-toggle="tooltip"
-             title="Rozmiar kopii zależny od wielkości instancji."></i>
-        </label>
-        <input type="number" id="paasBackupGB" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
-      </div>
-
-      <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="paasPublicIP">
-        <label class="form-check-label" for="paasPublicIP">
-          Dodatkowe publiczne IP
-          <i class="bi bi-info-circle text-muted ms-1"
-             data-bs-toggle="tooltip"
-             title="Wymagane jeśli chcesz osobny adres IP."></i>
-        </label>
-      </div>
-    </td>
-    <td><span id="paasPrice">0.00</span> PLN</td>
-    <td><button class="btn btn-outline-primary" id="btnAddPaaS">Dodaj do koszyka</button></td>
+  // content
+  const contentDiv= document.createElement('div');
+  contentDiv.innerHTML=`
+    <div class="mb-2">
+      <label class="form-label me-2">Wybierz instancję:</label>
+      <select id="paasInstanceSelect" class="form-select d-inline-block" style="width:auto; min-width:150px;">
+        <option value="" disabled selected>-- wybierz --</option>
+      </select>
+      <div id="paasInstDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label me-2">Wsparcie techniczne:</label>
+      <select id="paasSupportSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
+        <option value="" disabled selected>-- wybierz --</option>
+        <option value="gold">C-SUPPORT-GOLD</option>
+        <option value="platinum">C-SUPPORT-PLATINUM-AddON</option>
+      </select>
+      <div id="paasSupportDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
+    </div>
+    <div class="mb-2">
+      <label class="form-label me-2">Dysk SSD (GB):</label>
+      <input type="number" id="paasSsdGB" min="0" value="0"
+             style="width:80px;" class="form-control d-inline-block">
+    </div>
+    <div class="mb-2">
+      <label class="form-label me-2">
+        Kopie zapasowe (GB)
+        <i class="bi bi-info-circle text-muted ms-1"
+           data-bs-toggle="tooltip"
+           title="Rozmiar kopii zależny od wielkości instancji."></i>
+      </label>
+      <input type="number" id="paasBackupGB" min="0" value="0"
+             style="width:80px;" class="form-control d-inline-block">
+    </div>
+    <div class="form-check mb-2">
+      <input class="form-check-input" type="checkbox" id="paasPublicIP">
+      <label class="form-check-label" for="paasPublicIP">
+        Dodatkowe publiczne IP
+      </label>
+    </div>
+    <div class="d-flex align-items-center">
+      <strong class="me-3" style="font-size:1rem;"><span id="paasPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddPaaS">Dodaj do wyceny</button>
+    </div>
   `;
-  plansBody.appendChild(contentTr);
+  secDiv.appendChild(contentDiv);
 
-  const instSelect   = contentTr.querySelector('#paasInstanceSelect');
-  const instDescEl   = contentTr.querySelector('#paasInstanceDesc');
-  const supportSelect= contentTr.querySelector('#paasSupportSelect');
-  const supportDescEl= contentTr.querySelector('#paasSupportDesc');
-  const ssdInput     = contentTr.querySelector('#paasSsdGB');
-  const backupInput  = contentTr.querySelector('#paasBackupGB');
-  const ipCheck      = contentTr.querySelector('#paasPublicIP');
-  const priceEl      = contentTr.querySelector('#paasPrice');
-  const addBtn       = contentTr.querySelector('#btnAddPaaS');
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
+
+  // logika
+  const instSelect   = contentDiv.querySelector('#paasInstanceSelect');
+  const instDescEl   = contentDiv.querySelector('#paasInstDesc');
+  const supportSelect= contentDiv.querySelector('#paasSupportSelect');
+  const supportDescEl= contentDiv.querySelector('#paasSupportDesc');
+  const ssdInput     = contentDiv.querySelector('#paasSsdGB');
+  const backupInput  = contentDiv.querySelector('#paasBackupGB');
+  const ipCheck      = contentDiv.querySelector('#paasPublicIP');
+  const priceEl      = contentDiv.querySelector('#paasPrice');
+  const btnAdd       = contentDiv.querySelector('#btnAddPaaS');
 
   if (category.paasInstances) {
-    category.paasInstances.forEach(inst => {
-      const o = document.createElement('option');
-      o.value = inst.price;
+    category.paasInstances.forEach(inst=>{
+      const o= document.createElement('option');
+      o.value= inst.price;
       o.setAttribute('data-label', inst.label);
       o.setAttribute('data-desc', inst.desc||"");
-      o.textContent = `${inst.label} (${inst.price} PLN)`;
+      o.textContent= `${inst.label} (${inst.price} PLN)`;
       instSelect.appendChild(o);
     });
   }
 
-  function updateInstDesc() {
-    if (!instSelect.value) {
+  function updateInstDesc(){
+    if(!instSelect.value){
       instDescEl.textContent="";
       return;
     }
-    const sel = instSelect.options[instSelect.selectedIndex];
-    instDescEl.textContent = sel.getAttribute('data-desc')||"";
+    const sel= instSelect.options[instSelect.selectedIndex];
+    instDescEl.textContent= sel.getAttribute('data-desc')||"";
   }
-  function updateSupportDesc() {
-    let txt="";
-    if (supportSelect.value==='gold') {
-      txt = category.supportGoldDesc||"";
-    } else if (supportSelect.value==='platinum') {
-      txt = (category.supportGoldDesc||"") + " " + (category.supportPlatinumDesc||"");
+  function updateSupportDesc(){
+    if(supportSelect.value==='gold'){
+      supportDescEl.textContent= category.supportGoldDesc||"";
+    } else if(supportSelect.value==='platinum'){
+      supportDescEl.textContent= (category.supportGoldDesc||"")+" "+(category.supportPlatinumDesc||"");
+    } else {
+      supportDescEl.textContent="";
     }
-    supportDescEl.textContent= txt.trim();
   }
-  function updatePaaSPrice() {
+  function updatePaaSPrice(){
     let total=0;
-    const instPrice = parseFloat(instSelect.value)||0;
+    const instPrice= parseFloat(instSelect.value)||0;
     total+= instPrice;
-    if (supportSelect.value==='gold') {
-      total += (category.supportGoldPrice||0);
+    if(supportSelect.value==='gold'){
+      total+= (category.supportGoldPrice||0);
+    } else if(supportSelect.value==='platinum'){
+      total+= (category.supportGoldPrice||0);
+      total+= (category.supportPlatinumAddOnPrice||0);
     }
-    else if (supportSelect.value==='platinum') {
-      total += (category.supportGoldPrice||0);
-      total += (category.supportPlatinumAddOnPrice||0);
+    const ssdVal= parseFloat(ssdInput.value)||0;
+    // 1 PLN/GB
+    total+= ssdVal*1.0;
+    const backupVal= parseFloat(backupInput.value)||0;
+    if(backupVal>0){
+      total+= backupVal*(category.backupPricePerGB||0);
     }
-    const ssdVal = parseFloat(ssdInput.value)||0;
-    total += ssdVal*1.0; // 1 PLN/GB
-    const backupVal = parseFloat(backupInput.value)||0;
-    if (backupVal>0) {
-      total += backupVal*(category.backupPricePerGB||0);
+    if(ipCheck.checked){
+      total+= (category.publicIPPrice||0);
     }
-    if (ipCheck.checked) {
-      total += (category.publicIPPrice||0);
-    }
-    priceEl.textContent = total.toFixed(2);
+    priceEl.textContent= total.toFixed(2);
   }
 
-  instSelect.addEventListener('change',()=> {
+  instSelect.addEventListener('change',()=>{
     updateInstDesc();
     updatePaaSPrice();
   });
-  supportSelect.addEventListener('change',()=> {
+  supportSelect.addEventListener('change',()=>{
     updateSupportDesc();
     updatePaaSPrice();
   });
-  ssdInput.addEventListener('input', updatePaaSPrice);
-  backupInput.addEventListener('input', updatePaaSPrice);
-  ipCheck.addEventListener('change', updatePaaSPrice);
+  ssdInput.addEventListener('input',updatePaaSPrice);
+  backupInput.addEventListener('input',updatePaaSPrice);
+  ipCheck.addEventListener('change',updatePaaSPrice);
 
   updateInstDesc();
   updateSupportDesc();
   updatePaaSPrice();
 
-  addBtn.addEventListener('click', ()=> {
-    if (!instSelect.value) {
-      alert("Musisz wybrać instancję PaaS!");
+  btnAdd.addEventListener('click',()=>{
+    if(!instSelect.value){
+      alert("Wybierz instancję PaaS!");
       return;
     }
-    if (!supportSelect.value) {
+    if(!supportSelect.value){
       alert("Musisz wybrać co najmniej C-SUPPORT-GOLD!");
       return;
     }
-    const total   = parseFloat(priceEl.textContent)||0;
-    const selInst = instSelect.options[instSelect.selectedIndex];
-    const instLab = selInst.getAttribute('data-label')||"";
+    const total= parseFloat(priceEl.textContent)||0;
+    const selInst= instSelect.options[instSelect.selectedIndex];
+    const instLabel= selInst.getAttribute('data-label')||"";
     let supText="";
-    if (supportSelect.value==='gold') {
+    if(supportSelect.value==='gold'){
       supText="C-SUPPORT-GOLD";
-    } else if (supportSelect.value==='platinum') {
+    } else if(supportSelect.value==='platinum'){
       supText="C-SUPPORT-GOLD + PLATINUM-AddON";
     }
-    const ssdVal    = parseFloat(ssdInput.value)||0;
-    const backupVal = parseFloat(backupInput.value)||0;
-    const ipChecked = ipCheck.checked;
+    const ssdVal= parseFloat(ssdInput.value)||0;
+    const backupVal= parseFloat(backupInput.value)||0;
+    const ipChecked= ipCheck.checked;
 
-    let desc= `Instancja=${instLab}, Wsparcie=${supText}`;
-    if (ssdVal>0) desc+= `, SSD=${ssdVal}GB`;
-    if (backupVal>0) desc+= `, Backup=${backupVal}GB`;
-    if (ipChecked) desc+= `, +PublicIP`;
+    let desc= `Instancja=${instLabel}, Wsparcie=${supText}`;
+    if(ssdVal>0) desc+= `, SSD=${ssdVal}GB`;
+    if(backupVal>0) desc+= `, Backup=${backupVal}GB`;
+    if(ipChecked) desc+= `, +PublicIP`;
 
     cart.push({
       name: "PaaS",
@@ -488,80 +535,93 @@ function renderPaaSMachinesSection(category, plansBody) {
     renderCart();
   });
 }
-function renderPaaSDisasterRecoverySection(category, plansBody) {
+
+function renderPaaSDisasterRecoverySection(category, plansBody){
+  // analogicznie .section-wrapper, tytuł "Disaster Recovery (PaaS)", parametry/cena row, guzik
   // ...
-  if (!category.drServices) return;
-  const headerTr = document.createElement('tr');
-  headerTr.innerHTML=`
-    <td colspan="3">
-      <h5 class="mt-4 mb-3">Disaster Recovery (PaaS)</h5>
-    </td>
-  `;
-  plansBody.appendChild(headerTr);
+  if(!category.drServices) return;
 
-  const contentTr = document.createElement('tr');
-  contentTr.innerHTML=`
-    <td>
-      <div class="mb-2" id="drStorageWrap"></div>
-      <div class="mb-2" id="drIpWrap"></div>
-    </td>
-    <td><span id="drPrice">0.00</span> PLN</td>
-    <td><button class="btn btn-outline-primary" id="btnAddDR">Dodaj do koszyka</button></td>
-  `;
-  plansBody.appendChild(contentTr);
+  const row = document.createElement('tr');
+  const col = document.createElement('td');
+  col.colSpan=3;
 
-  const drStorageWrap= contentTr.querySelector('#drStorageWrap');
-  const drIpWrap     = contentTr.querySelector('#drIpWrap');
-  const drPriceEl    = contentTr.querySelector('#drPrice');
-  const btnAddDR     = contentTr.querySelector('#btnAddDR');
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
 
-  const storObj= category.drServices.find(s=>s.id==='C-DR-STORAGE');
-  const ipObj  = category.drServices.find(s=>s.id==='C-DR-IP');
+  const h5= document.createElement('h5');
+  h5.textContent= "Disaster Recovery (PaaS)";
+  secDiv.appendChild(h5);
 
-  drStorageWrap.innerHTML=`
-    <label class="form-label me-2">${storObj?.label||'C-DR-STORAGE'}
+  const headerRow= document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
       <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-         title="${storObj?.tooltip||''}"></i>
-    </label>
-    <input type="number" id="drStorageInput" min="0" value="0"
-           style="width:80px;" class="form-control d-inline-block">
+         title="Koszt DR w rozliczeniu miesięcznym."></i>
+    </div>
   `;
-  drIpWrap.innerHTML=`
-    <label class="form-label me-2">${ipObj?.label||'C-DR-IP'}
-      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-         title="${ipObj?.tooltip||''}"></i>
-    </label>
-    <input type="number" id="drIpInput" min="1" value="1"
-           style="width:80px;" class="form-control d-inline-block">
+  secDiv.appendChild(headerRow);
+
+  const contentDiv= document.createElement('div');
+  contentDiv.innerHTML=`
+    <div class="mb-2">
+      <label>C-DR-STORAGE (GB)
+        <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+           title="${(category.drServices.find(s=>s.id==='C-DR-STORAGE')?.tooltip)||''}"></i>
+      </label>
+      <input type="number" id="drStorage" min="0" value="0" style="width:80px;" class="form-control d-inline-block">
+    </div>
+    <div class="mb-2">
+      <label>C-DR-IP (szt.)
+        <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+           title="${(category.drServices.find(s=>s.id==='C-DR-IP')?.tooltip)||''}"></i>
+      </label>
+      <input type="number" id="drIp" min="1" value="1" style="width:80px;" class="form-control d-inline-block">
+    </div>
+    <div class="d-flex align-items-center">
+      <strong class="me-3" style="font-size:1rem;"><span id="drPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddDR">Dodaj do wyceny</button>
+    </div>
   `;
-  const drStorageInput= contentTr.querySelector('#drStorageInput');
-  const drIpInput     = contentTr.querySelector('#drIpInput');
+  secDiv.appendChild(contentDiv);
+
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
+
+  // logika
+  const storObj= category.drServices.find(x=>x.id==='C-DR-STORAGE');
+  const ipObj  = category.drServices.find(x=>x.id==='C-DR-IP');
+  const drStorage= contentDiv.querySelector('#drStorage');
+  const drIp     = contentDiv.querySelector('#drIp');
+  const drPriceEl= contentDiv.querySelector('#drPrice');
+  const btnAddDR = contentDiv.querySelector('#btnAddDR');
 
   function updateDrPrice(){
     let total=0;
-    const sVal= parseFloat(drStorageInput.value)||0;
-    const iVal= parseFloat(drIpInput.value)||1;
-    if (storObj) total += sVal*(storObj.price||0);
-    if (ipObj)   total += iVal*(ipObj.price||0);
+    const sVal= parseFloat(drStorage.value)||0;
+    const iVal= parseFloat(drIp.value)||1;
+    if(storObj) total += sVal*(storObj.price||0);
+    if(ipObj)   total += iVal*(ipObj.price||0);
     drPriceEl.textContent= total.toFixed(2);
   }
-
-  drStorageInput.addEventListener('input', updateDrPrice);
-  drIpInput.addEventListener('input', updateDrPrice);
+  drStorage.addEventListener('input', updateDrPrice);
+  drIp.addEventListener('input', updateDrPrice);
   updateDrPrice();
 
-  btnAddDR.addEventListener('click', ()=> {
-    const sVal= parseFloat(drStorageInput.value)||0;
-    const iVal= parseFloat(drIpInput.value)||1;
-    if (iVal<1) {
+  btnAddDR.addEventListener('click',()=>{
+    const sVal= parseFloat(drStorage.value)||0;
+    const iVal= parseFloat(drIp.value)||1;
+    if(iVal<1){
       alert("C-DR-IP musi być >=1!");
       return;
     }
     let total=0;
-    if (storObj) total += sVal*(storObj.price||0);
-    if (ipObj)   total += iVal*(ipObj.price||0);
+    if(storObj) total += sVal*(storObj.price||0);
+    if(ipObj)   total += iVal*(ipObj.price||0);
 
-    let desc= `${storObj?.label||'C-DR-STORAGE'}=${sVal}GB, ${ipObj?.label||'C-DR-IP'}=${iVal}`;
+    let desc= `C-DR-STORAGE=${sVal}GB, C-DR-IP=${iVal}`;
     cart.push({
       name: "PaaS (DR)",
       details: desc,
@@ -572,63 +632,88 @@ function renderPaaSDisasterRecoverySection(category, plansBody) {
 }
 
 
-/****************************************************************************************************
- * SaaS
- ****************************************************************************************************/
-function renderSaaSApplications(category, plansBody) {
-  // Nagłówek "Aplikacje (SaaS)"
-  const headerTr= document.createElement('tr');
-  headerTr.innerHTML=`
-    <td colspan="3">
-      <h5 class="mb-3">Aplikacje (SaaS)</h5>
-    </td>
-  `;
-  plansBody.appendChild(headerTr);
+/***************************************************************************************************
+ * SaaS - Aplikacje (MsSQL, Enova, Enova API, Terminal, Extra) 
+ ***************************************************************************************************/
+function renderSaaSApplications(category, plansBody){
+  // Tworzymy jedną .section-wrapper dla "Aplikacje (SaaS)" ...
+  const row = document.createElement('tr');
+  const col = document.createElement('td');
+  col.colSpan=3;
 
-  // MsSQL
-  renderSaaS_MsSQLRow(category, plansBody);
-  // Enova
-  renderSaaS_EnovaRow(category, plansBody);
-  // Enova API
-  renderSaaS_EnovaApiRow(category, plansBody);
-  // Terminal
-  renderSaaS_TerminalRow(category, plansBody);
-  // Extra data
-  renderSaaS_ExtraDataRow(category, plansBody);
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
+
+  // Tytuł
+  const h5= document.createElement('h5');
+  h5.textContent= "Aplikacje (SaaS)";
+  secDiv.appendChild(h5);
+
+  // Pasek parametry/cena
+  const headerRow= document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="Koszt miesięczny usług SaaS."></i>
+    </div>
+  `;
+  secDiv.appendChild(headerRow);
+
+  // Dalszy content: MsSQL, Enova, Enova API, Terminal, Extra ...
+  // Żeby zachować czytelność, wrzucimy tu po kolei.
+  const contentDiv= document.createElement('div');
+  contentDiv.setAttribute('id','saasContent');
+  secDiv.appendChild(contentDiv);
+
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
+
+  // Teraz wstawiamy poszczególne "pod-bloki" (MsSQL, Enova, API, Terminal, Extra)
+  renderSaaS_MsSQLRow(category, contentDiv);
+  renderSaaS_EnovaRow(category, contentDiv);
+  renderSaaS_EnovaApiRow(category, contentDiv);
+  renderSaaS_TerminalRow(category, contentDiv);
+  renderSaaS_ExtraDataRow(category, contentDiv);
 }
 
-/** MsSQL DB */
-function renderSaaS_MsSQLRow(category, plansBody){
-  // ...
-  const tr= document.createElement('tr');
-  tr.innerHTML=`
-    <td>
-      <label class="me-2">Baza danych Microsoft SQL:</label>
-      <select id="msSqlSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
-        <option value="" disabled selected>-- wybierz --</option>
-      </select>
-      <div id="msSqlDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
-    </td>
-    <td><span id="msSqlPrice">0.00</span> PLN</td>
-    <td><button class="btn btn-outline-primary" id="btnAddMsSql">Dodaj do koszyka</button></td>
+function renderSaaS_MsSQLRow(category, container){
+  // Tworzymy div z polami + guzik
+  const div = document.createElement('div');
+  div.classList.add('mb-3'); // odstęp między "wierszami"
+
+  div.innerHTML=`
+    <label class="d-block mb-1">Baza danych Microsoft SQL:</label>
+    <select id="msSqlSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
+      <option value="" disabled selected>-- wybierz --</option>
+    </select>
+    <div id="msSqlDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
+
+    <div class="d-flex align-items-center mt-2">
+      <strong class="me-3" style="font-size:1rem;"><span id="msSqlPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddMsSql">Dodaj do wyceny</button>
+    </div>
   `;
-  plansBody.appendChild(tr);
+  container.appendChild(div);
 
-  const msSqlSelect  = tr.querySelector('#msSqlSelect');
-  const msSqlDescEl  = tr.querySelector('#msSqlDesc');
-  const msSqlPriceEl = tr.querySelector('#msSqlPrice');
-  const btnAddMsSql  = tr.querySelector('#btnAddMsSql');
+  const msSqlSelect = div.querySelector('#msSqlSelect');
+  const msSqlDescEl = div.querySelector('#msSqlDesc');
+  const msSqlPriceEl= div.querySelector('#msSqlPrice');
+  const btnAddMsSql = div.querySelector('#btnAddMsSql');
 
-  if (category.msSqlDbOptions) {
-    category.msSqlDbOptions.forEach(opt => {
+  if(category.msSqlDbOptions){
+    category.msSqlDbOptions.forEach(opt=>{
       const o= document.createElement('option');
-      o.value = opt.price;
+      o.value= opt.price;
       o.setAttribute('data-label', opt.label);
       o.setAttribute('data-desc', opt.desc||"");
       o.textContent= `${opt.label} (${opt.price} PLN)`;
       msSqlSelect.appendChild(o);
     });
   }
+
   function updateMsSqlPrice(){
     const val= parseFloat(msSqlSelect.value)||0;
     msSqlPriceEl.textContent= val.toFixed(2);
@@ -641,16 +726,16 @@ function renderSaaS_MsSQLRow(category, plansBody){
     const sel= msSqlSelect.options[msSqlSelect.selectedIndex];
     msSqlDescEl.textContent= sel.getAttribute('data-desc')||"";
   }
-  msSqlSelect.addEventListener('change', ()=> {
+  msSqlSelect.addEventListener('change',()=>{
     updateMsSqlPrice();
     updateMsSqlDesc();
   });
   updateMsSqlPrice();
   updateMsSqlDesc();
 
-  btnAddMsSql.addEventListener('click', ()=> {
+  btnAddMsSql.addEventListener('click',()=>{
     if(!msSqlSelect.value){
-      alert("Wybierz Bazę danych SQL!");
+      alert("Wybierz Bazę SQL!");
       return;
     }
     const sel= msSqlSelect.options[msSqlSelect.selectedIndex];
@@ -666,297 +751,52 @@ function renderSaaS_MsSQLRow(category, plansBody){
   });
 }
 
-/** Enova (z Harmonogram) */
-function renderSaaS_EnovaRow(category, plansBody){
-  // ...
-  const tr= document.createElement('tr');
-  tr.innerHTML=`
-    <td>
-      <label class="me-2">Enova365Web:</label>
-      <select id="enovaSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
-        <option value="" disabled selected>-- wybierz --</option>
-      </select>
-      <div id="enovaDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
+/** analogicznie: renderSaaS_EnovaRow, renderSaaS_EnovaApiRow, renderSaaS_TerminalRow, renderSaaS_ExtraDataRow
+ *   - zmiana guzików na "Dodaj do wyceny"
+ */
 
-      <div class="form-check mt-2">
-        <input class="form-check-input" type="checkbox" id="enovaHarmonogram">
-        <label class="form-check-label" for="enovaHarmonogram">
-          Harmonogram zadań
-        </label>
-      </div>
-    </td>
-    <td><span id="enovaPrice">0.00</span> PLN</td>
-    <td><button class="btn btn-outline-primary" id="btnAddEnova">Dodaj do koszyka</button></td>
-  `;
-  plansBody.appendChild(tr);
-
-  const enovaSelect      = tr.querySelector('#enovaSelect');
-  const enovaDescEl      = tr.querySelector('#enovaDesc');
-  const enovaPriceEl     = tr.querySelector('#enovaPrice');
-  const enovaHarmonogram = tr.querySelector('#enovaHarmonogram');
-  const btnAddEnova      = tr.querySelector('#btnAddEnova');
-
-  if (category.enovaWebOptions) {
-    category.enovaWebOptions.forEach(opt => {
-      const o= document.createElement('option');
-      o.value = opt.price;
-      o.setAttribute('data-label', opt.label);
-      o.setAttribute('data-desc', opt.desc||"");
-      o.textContent= `${opt.label} (${opt.price} PLN)`;
-      enovaSelect.appendChild(o);
-    });
-  }
-  function updateEnovaPrice(){
-    let total= parseFloat(enovaSelect.value)||0;
-    if(enovaHarmonogram.checked){
-      total += (category.harmonogramCost||10);
-    }
-    enovaPriceEl.textContent= total.toFixed(2);
-  }
-  function updateEnovaDesc(){
-    if(!enovaSelect.value){
-      enovaDescEl.textContent="";
-      return;
-    }
-    const sel= enovaSelect.options[enovaSelect.selectedIndex];
-    enovaDescEl.textContent= sel.getAttribute('data-desc')||"";
-  }
-  enovaSelect.addEventListener('change', ()=> {
-    updateEnovaPrice();
-    updateEnovaDesc();
-  });
-  enovaHarmonogram.addEventListener('change', updateEnovaPrice);
-
-  updateEnovaPrice();
-  updateEnovaDesc();
-
-  btnAddEnova.addEventListener('click', ()=> {
-    if(!enovaSelect.value){
-      alert("Wybierz Enova!");
-      return;
-    }
-    const sel= enovaSelect.options[enovaSelect.selectedIndex];
-    const label= sel.getAttribute('data-label')||"Enova365Web";
-    const basePrice= parseFloat(enovaSelect.value)||0;
-
-    cart.push({
-      name: "SaaS - Enova365Web",
-      details: label,
-      price: basePrice
-    });
-    if(enovaHarmonogram.checked){
-      const harmCost= category.harmonogramCost||10;
-      cart.push({
-        name: "SaaS - Harmonogram zadań",
-        details: "Dodatkowy moduł",
-        price: harmCost
-      });
-    }
-    renderCart();
-  });
-}
-
-/** Enova API */
-function renderSaaS_EnovaApiRow(category, plansBody){
-  // ...
-  const tr= document.createElement('tr');
-  tr.innerHTML=`
-    <td>
-      <label class="me-2">Enova365Web API:</label>
-      <select id="enovaApiSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
-        <option value="" disabled selected>-- wybierz --</option>
-      </select>
-      <div id="enovaApiDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
-    </td>
-    <td><span id="enovaApiPrice">0.00</span> PLN</td>
-    <td><button class="btn btn-outline-primary" id="btnAddEnovaApi">Dodaj do koszyka</button></td>
-  `;
-  plansBody.appendChild(tr);
-
-  const enovaApiSelect= tr.querySelector('#enovaApiSelect');
-  const enovaApiDescEl= tr.querySelector('#enovaApiDesc');
-  const enovaApiPriceEl= tr.querySelector('#enovaApiPrice');
-  const btnAddEnovaApi= tr.querySelector('#btnAddEnovaApi');
-
-  if(category.enovaWebApiOptions){
-    category.enovaWebApiOptions.forEach(opt => {
-      const o= document.createElement('option');
-      o.value = opt.price;
-      o.setAttribute('data-label', opt.label);
-      o.setAttribute('data-desc', opt.desc||"");
-      o.textContent= `${opt.label} (${opt.price} PLN)`;
-      enovaApiSelect.appendChild(o);
-    });
-  }
-  function updateApiPrice(){
-    const val= parseFloat(enovaApiSelect.value)||0;
-    enovaApiPriceEl.textContent= val.toFixed(2);
-  }
-  function updateApiDesc(){
-    if(!enovaApiSelect.value){
-      enovaApiDescEl.textContent="";
-      return;
-    }
-    const sel= enovaApiSelect.options[enovaApiSelect.selectedIndex];
-    enovaApiDescEl.textContent= sel.getAttribute('data-desc')||"";
-  }
-  enovaApiSelect.addEventListener('change', ()=> {
-    updateApiPrice();
-    updateApiDesc();
-  });
-  updateApiPrice();
-  updateApiDesc();
-
-  btnAddEnovaApi.addEventListener('click', ()=> {
-    if(!enovaApiSelect.value){
-      alert("Wybierz Enova365Web API!");
-      return;
-    }
-    const sel= enovaApiSelect.options[enovaApiSelect.selectedIndex];
-    const label= sel.getAttribute('data-label')||"EnovaAPI";
-    const price= parseFloat(sel.value)||0;
-
-    cart.push({
-      name: "SaaS - EnovaAPI",
-      details: label,
-      price
-    });
-    renderCart();
-  });
-}
-
-/** Terminal w chmurze */
-function renderSaaS_TerminalRow(category, plansBody){
-  // ...
-  const tr= document.createElement('tr');
-  tr.innerHTML=`
-    <td>
-      <label class="me-2">Terminal w chmurze:</label>
-      <input type="number" id="terminalUsers" min="0" value="0" style="width:80px;"
-             class="form-control d-inline-block mt-1">
-      <div class="form-check mt-2">
-        <input class="form-check-input" type="checkbox" id="terminalSecurity">
-        <label class="form-check-label" for="terminalSecurity">
-          Zabezpieczenie terminala
-        </label>
-      </div>
-    </td>
-    <td>
-      <span id="terminalPrice">0.00</span> PLN
-    </td>
-    <td>
-      <button class="btn btn-outline-primary" id="btnAddTerminal">Dodaj do koszyka</button>
-    </td>
-  `;
-  plansBody.appendChild(tr);
-
-  const terminalUsers    = tr.querySelector('#terminalUsers');
-  const terminalSecurity = tr.querySelector('#terminalSecurity');
-  const terminalPriceEl  = tr.querySelector('#terminalPrice');
-  const btnAddTerminal   = tr.querySelector('#btnAddTerminal');
-
-  function updateTerminalPrice(){
-    let total=0;
-    const users= parseInt(terminalUsers.value,10)||0;
-    if(users>0){
-      total += users*(category.terminalPricePerUser||30);
-      if(terminalSecurity.checked){
-        total += (category.terminalSecurityCost||20);
-      }
-    }
-    terminalPriceEl.textContent= total.toFixed(2);
-  }
-  [terminalUsers, terminalSecurity].forEach(el =>
-    el.addEventListener('input', updateTerminalPrice));
-  updateTerminalPrice();
-
-  btnAddTerminal.addEventListener('click', ()=>{
-    const users= parseInt(terminalUsers.value,10)||0;
-    if(users<=0){
-      alert("Podaj liczbę użytkowników >0!");
-      return;
-    }
-    const termCost= users*(category.terminalPricePerUser||30);
-    cart.push({
-      name: "SaaS - Terminal w chmurze",
-      details: `Users=${users}`,
-      price: termCost
-    });
-    if(terminalSecurity.checked){
-      const secCost= category.terminalSecurityCost||20;
-      cart.push({
-        name: "SaaS - Zabezpieczenie terminala",
-        details: "Dodatkowa ochrona",
-        price: secCost
-      });
-    } else {
-      alert("UWAGA: Terminal bez zabezpieczenia!");
-    }
-    renderCart();
-  });
-}
-
-/** Extra data */
-function renderSaaS_ExtraDataRow(category, plansBody){
-  const tr= document.createElement('tr');
-  tr.innerHTML=`
-    <td>
-      <label class="me-2">Dodatkowe miejsce na dane:</label>
-      <input type="number" id="extraDataInput" min="0" value="0"
-             style="width:80px;" class="form-control d-inline-block mt-1">
-    </td>
-    <td>
-      <span id="extraDataPrice">0.00</span> PLN
-    </td>
-    <td>
-      <button class="btn btn-outline-primary" id="btnAddExtraData">Dodaj do koszyka</button>
-    </td>
-  `;
-  plansBody.appendChild(tr);
-
-  const extraDataInput   = tr.querySelector('#extraDataInput');
-  const extraDataPriceEl = tr.querySelector('#extraDataPrice');
-  const btnAddExtraData  = tr.querySelector('#btnAddExtraData');
-
-  function updateExtraDataPrice(){
-    const val= parseInt(extraDataInput.value,10)||0;
-    let cost= val*(category.extraDataStoragePrice||2);
-    extraDataPriceEl.textContent= cost.toFixed(2);
-  }
-  extraDataInput.addEventListener('input', updateExtraDataPrice);
-  updateExtraDataPrice();
-
-  btnAddExtraData.addEventListener('click', ()=>{
-    const val= parseInt(extraDataInput.value,10)||0;
-    if(val<=0){
-      alert("Podaj liczbę > 0!");
-      return;
-    }
-    let cost= val*(category.extraDataStoragePrice||2);
-    cart.push({
-      name: "SaaS - Dodatkowe miejsce",
-      details: `Ilość=${val}`,
-      price: cost
-    });
-    renderCart();
-  });
-}
-
-
-/****************************************************************************************************
+/***************************************************************************************************
  * Acronis / fallback => renderServicesList
- ****************************************************************************************************/
+ ***************************************************************************************************/
 function renderServicesList(category, plansBody){
+  const row= document.createElement('tr');
+  const col= document.createElement('td');
+  col.colSpan=3;
+
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
+
+  const h5= document.createElement('h5');
+  h5.textContent= category.name;
+  secDiv.appendChild(h5);
+
+  // Pasek parametry/cena
+  const headerRow= document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="Koszt miesięczny za wybraną usługę."></i>
+    </div>
+  `;
+  secDiv.appendChild(headerRow);
+
+  const contentDiv= document.createElement('div');
   if(category.services && category.services.length){
     category.services.forEach(srv=>{
-      const tr= document.createElement('tr');
-      tr.innerHTML=`
-        <td>${srv.label}</td>
-        <td>${srv.price} PLN</td>
-        <td><button class="btn btn-outline-primary btn-sm">Dodaj do koszyka</button></td>
+      // Tworzymy "wiersz"
+      const itemDiv = document.createElement('div');
+      itemDiv.classList.add('d-flex','justify-content-between','align-items-center','mb-2');
+      itemDiv.innerHTML=`
+        <div>${srv.label}</div>
+        <div class="d-flex align-items-center">
+          <strong class="me-3">${srv.price} PLN</strong>
+          <button class="btn btn-primary btn-sm">Dodaj do wyceny</button>
+        </div>
       `;
-      plansBody.appendChild(tr);
-      tr.querySelector('button').addEventListener('click', ()=>{
+      const btn= itemDiv.querySelector('button');
+      btn.addEventListener('click',()=>{
         cart.push({
           name: category.name,
           details: srv.label,
@@ -964,104 +804,123 @@ function renderServicesList(category, plansBody){
         });
         renderCart();
       });
+      contentDiv.appendChild(itemDiv);
     });
   } else {
-    const tr= document.createElement('tr');
-    tr.innerHTML=`<td colspan="3">Brak usług w tej kategorii.</td>`;
-    plansBody.appendChild(tr);
+    contentDiv.innerHTML=`<div class="text-muted">Brak usług w tej kategorii.</div>`;
   }
+  secDiv.appendChild(contentDiv);
+
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
 }
 
 
-/****************************************************************************************************
- * Microsoft CSP (type="csp") => sekcja "Microsoft 365"
- ****************************************************************************************************/
-function renderMicrosoft365Section(category, plansBody){
-  // Nagłówek
-  const headerTr= document.createElement('tr');
-  headerTr.innerHTML=`
-    <td colspan="3">
-      <h5 class="mb-3">Microsoft 365</h5>
-    </td>
-  `;
-  plansBody.appendChild(headerTr);
+/***************************************************************************************************
+ * Microsoft CSP => renderMicrosoft365Section
+ ***************************************************************************************************/
+function renderMicrosoft365Section(category, plansBody) {
+  // .section-wrapper
+  const row= document.createElement('tr');
+  const col= document.createElement('td');
+  col.colSpan=3;
 
-  // Wiersz
-  const contentTr= document.createElement('tr');
-  contentTr.innerHTML=`
-    <td>
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
+
+  // Tytuł
+  const h5= document.createElement('h5');
+  h5.textContent= "Microsoft 365";
+  secDiv.appendChild(h5);
+
+  // Pasek parametry/cena
+  const headerRow= document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="Koszt miesięczny subskrypcji M365."></i>
+    </div>
+  `;
+  secDiv.appendChild(headerRow);
+
+  // content
+  const contentDiv= document.createElement('div');
+  contentDiv.innerHTML=`
+    <div class="mb-2">
       <label class="me-2">Wybierz subskrypcję:</label>
       <select id="m365Select" class="form-select d-inline-block" style="width:auto; min-width:200px;">
         <option value="" disabled selected>-- wybierz --</option>
       </select>
       <div id="m365Desc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
-      
+
       <label class="ms-3 me-2">Ilość:</label>
       <input type="number" id="m365Qty" value="1" min="1"
              style="width:60px;" class="form-control d-inline-block">
-    </td>
-    <td>
-      <span id="m365Price">0.00</span> PLN
-    </td>
-    <td>
-      <button class="btn btn-outline-primary" id="btnAddM365">
-        Dodaj do koszyka
-      </button>
-    </td>
+    </div>
+    <div class="d-flex align-items-center">
+      <strong class="me-3" style="font-size:1rem;"><span id="m365Price">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddM365">Dodaj do wyceny</button>
+    </div>
   `;
-  plansBody.appendChild(contentTr);
+  secDiv.appendChild(contentDiv);
 
-  const m365Select= contentTr.querySelector('#m365Select');
-  const m365Desc  = contentTr.querySelector('#m365Desc');
-  const m365Qty   = contentTr.querySelector('#m365Qty');
-  const m365PriceEl= contentTr.querySelector('#m365Price');
-  const btnAdd    = contentTr.querySelector('#btnAddM365');
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
+
+  // logika
+  const selEl   = contentDiv.querySelector('#m365Select');
+  const descEl  = contentDiv.querySelector('#m365Desc');
+  const qtyEl   = contentDiv.querySelector('#m365Qty');
+  const priceEl = contentDiv.querySelector('#m365Price');
+  const btnAdd  = contentDiv.querySelector('#btnAddM365');
 
   if(category.msCspServices && category.msCspServices.length){
     category.msCspServices.forEach(srv=>{
       const opt= document.createElement('option');
-      opt.value = srv.price;
+      opt.value= srv.price;
       opt.setAttribute('data-label', srv.label);
       opt.setAttribute('data-desc', srv.desc||"");
-      opt.textContent = `${srv.label} (${srv.price} PLN)`;
-      m365Select.appendChild(opt);
+      opt.textContent= `${srv.label} (${srv.price} PLN)`;
+      selEl.appendChild(opt);
     });
   }
 
   function updateM365Desc(){
-    if(!m365Select.value){
-      m365Desc.textContent="";
+    if(!selEl.value){
+      descEl.textContent="";
       return;
     }
-    const sel = m365Select.options[m365Select.selectedIndex];
-    m365Desc.textContent= sel.getAttribute('data-desc')||"";
+    const sel= selEl.options[selEl.selectedIndex];
+    descEl.textContent= sel.getAttribute('data-desc')||"";
   }
   function updateM365Price(){
-    const val= parseFloat(m365Select.value)||0;
-    const qty= parseInt(m365Qty.value,10)||1;
+    const val= parseFloat(selEl.value)||0;
+    const qty= parseInt(qtyEl.value,10)||1;
     const total= val*qty;
-    m365PriceEl.textContent= total.toFixed(2);
+    priceEl.textContent= total.toFixed(2);
   }
-
-  m365Select.addEventListener('change', ()=>{
+  selEl.addEventListener('change',()=>{
     updateM365Desc();
     updateM365Price();
   });
-  m365Qty.addEventListener('input', updateM365Price);
-
+  qtyEl.addEventListener('input', updateM365Price);
   updateM365Desc();
   updateM365Price();
 
-  btnAdd.addEventListener('click', ()=>{
-    if(!m365Select.value){
-      alert("Musisz wybrać subskrypcję Microsoft 365!");
+  btnAdd.addEventListener('click',()=>{
+    if(!selEl.value){
+      alert("Wybierz subskrypcję Microsoft 365!");
       return;
     }
-    const sel   = m365Select.options[m365Select.selectedIndex];
-    const label = sel.getAttribute('data-label')||"M365 sub";
-    const val   = parseFloat(m365Select.value)||0;
-    const qty   = parseInt(m365Qty.value,10)||1;
-    const total = val*qty;
+    const sel= selEl.options[selEl.selectedIndex];
+    const label= sel.getAttribute('data-label')||"M365 sub";
+    const val= parseFloat(selEl.value)||0;
+    const qty= parseInt(qtyEl.value,10)||1;
+    const total= val*qty;
 
     cart.push({
       name: category.name + " (Microsoft 365)",
@@ -1073,83 +932,100 @@ function renderMicrosoft365Section(category, plansBody){
 }
 
 
-/****************************************************************************************************
- * Bezpieczeństwo (type="security") => 3 sekcje
- ****************************************************************************************************/
-/** Aplikacje webowe */
+/***************************************************************************************************
+ * Bezpieczeństwo
+ ***************************************************************************************************/
 function renderSecurityWebAppsSection(category, plansBody){
-  const headerTr= document.createElement('tr');
-  headerTr.innerHTML=`
-    <td colspan="3">
-      <h5 class="mb-3">Aplikacje webowe</h5>
-    </td>
-  `;
-  plansBody.appendChild(headerTr);
+  // .section-wrapper
+  const row= document.createElement('tr');
+  const col= document.createElement('td');
+  col.colSpan=3;
 
-  const contentTr= document.createElement('tr');
-  contentTr.innerHTML=`
-    <td>
-      <label class="me-2">Wybierz usługę skanowania:</label>
-      <select id="webAppSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
-        <option value="" disabled selected>-- wybierz --</option>
-      </select>
-      <div id="webAppDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
-    </td>
-    <td>
-      <span id="webAppPrice">0.00</span> PLN
-    </td>
-    <td>
-      <button class="btn btn-outline-primary" id="btnAddWebApp">
-        Dodaj do koszyka
-      </button>
-    </td>
-  `;
-  plansBody.appendChild(contentTr);
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
 
-  const selectEl= contentTr.querySelector('#webAppSelect');
-  const descEl  = contentTr.querySelector('#webAppDesc');
-  const priceEl = contentTr.querySelector('#webAppPrice');
-  const btnAdd  = contentTr.querySelector('#btnAddWebApp');
+  // Tytuł
+  const h5= document.createElement('h5');
+  h5.textContent= "Aplikacje webowe";
+  secDiv.appendChild(h5);
+
+  // Pasek parametry/cena
+  const headerRow= document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="Koszt miesięczny skanowania aplikacji webowej."></i>
+    </div>
+  `;
+  secDiv.appendChild(headerRow);
+
+  // content
+  const contentDiv= document.createElement('div');
+  contentDiv.innerHTML=`
+    <label class="d-block mb-1">Wybierz usługę skanowania:</label>
+    <select id="webAppSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
+      <option value="" disabled selected>-- wybierz --</option>
+    </select>
+    <div id="webAppDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
+
+    <div class="d-flex align-items-center mt-2">
+      <strong class="me-3" style="font-size:1rem;"><span id="webAppPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddWebApp">Dodaj do wyceny</button>
+    </div>
+  `;
+  secDiv.appendChild(contentDiv);
+
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
+
+  // logika
+  const webAppSelect= contentDiv.querySelector('#webAppSelect');
+  const webAppDesc  = contentDiv.querySelector('#webAppDesc');
+  const webAppPriceEl= contentDiv.querySelector('#webAppPrice');
+  const btnAddWebApp= contentDiv.querySelector('#btnAddWebApp');
 
   if(category.securityWebApp && category.securityWebApp.length){
     category.securityWebApp.forEach(srv=>{
       const opt= document.createElement('option');
-      opt.value = srv.price;
+      opt.value= srv.price;
       opt.setAttribute('data-label', srv.label);
       opt.setAttribute('data-desc', srv.desc||"");
       opt.textContent= `${srv.label} (${srv.price} PLN)`;
-      selectEl.appendChild(opt);
+      webAppSelect.appendChild(opt);
     });
   }
 
   function updateWebAppPrice(){
-    const val= parseFloat(selectEl.value)||0;
-    priceEl.textContent= val.toFixed(2);
+    const val= parseFloat(webAppSelect.value)||0;
+    webAppPriceEl.textContent= val.toFixed(2);
   }
   function updateWebAppDesc(){
-    if(!selectEl.value){
-      descEl.textContent="";
+    if(!webAppSelect.value){
+      webAppDesc.textContent="";
       return;
     }
-    const sel= selectEl.options[selectEl.selectedIndex];
-    descEl.textContent= sel.getAttribute('data-desc')||"";
+    const sel= webAppSelect.options[webAppSelect.selectedIndex];
+    webAppDesc.textContent= sel.getAttribute('data-desc')||"";
   }
-
-  selectEl.addEventListener('change',()=>{
+  webAppSelect.addEventListener('change',()=>{
     updateWebAppPrice();
     updateWebAppDesc();
   });
   updateWebAppPrice();
   updateWebAppDesc();
 
-  btnAdd.addEventListener('click', ()=>{
-    if(!selectEl.value){
+  btnAddWebApp.addEventListener('click',()=>{
+    if(!webAppSelect.value){
       alert("Wybierz usługę skanowania aplikacji webowej!");
       return;
     }
-    const sel   = selectEl.options[selectEl.selectedIndex];
-    const label = sel.getAttribute('data-label');
-    const val   = parseFloat(selectEl.value)||0;
+    const sel= webAppSelect.options[webAppSelect.selectedIndex];
+    const label= sel.getAttribute('data-label');
+    const val= parseFloat(sel.value)||0;
+
     cart.push({
       name: category.name + " (Aplikacje webowe)",
       details: label,
@@ -1159,80 +1035,92 @@ function renderSecurityWebAppsSection(category, plansBody){
   });
 }
 
-/** Firewall w chmurze */
 function renderSecurityFirewallSection(category, plansBody){
-  const headerTr= document.createElement('tr');
-  headerTr.innerHTML=`
-    <td colspan="3">
-      <h5 class="mt-4 mb-3">Firewall w chmurze</h5>
-    </td>
-  `;
-  plansBody.appendChild(headerTr);
+  // ... analogicznie ...
+  const row= document.createElement('tr');
+  const col= document.createElement('td');
+  col.colSpan=3;
 
-  const contentTr= document.createElement('tr');
-  contentTr.innerHTML=`
-    <td>
-      <label class="me-2">Wybierz usługę Firewalla:</label>
-      <select id="fwSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
-        <option value="" disabled selected>-- wybierz --</option>
-      </select>
-      <div id="fwDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
-    </td>
-    <td>
-      <span id="fwPrice">0.00</span> PLN
-    </td>
-    <td>
-      <button class="btn btn-outline-primary" id="btnAddFW">
-        Dodaj do koszyka
-      </button>
-    </td>
-  `;
-  plansBody.appendChild(contentTr);
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
 
-  const selectEl= contentTr.querySelector('#fwSelect');
-  const descEl  = contentTr.querySelector('#fwDesc');
-  const priceEl = contentTr.querySelector('#fwPrice');
-  const btnAdd  = contentTr.querySelector('#btnAddFW');
+  const h5= document.createElement('h5');
+  h5.textContent= "Firewall w chmurze";
+  secDiv.appendChild(h5);
+
+  const headerRow= document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="Koszt miesięczny firewall."></i>
+    </div>
+  `;
+  secDiv.appendChild(headerRow);
+
+  const contentDiv= document.createElement('div');
+  contentDiv.innerHTML=`
+    <label class="d-block mb-1">Wybierz usługę Firewalla:</label>
+    <select id="fwSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
+      <option value="" disabled selected>-- wybierz --</option>
+    </select>
+    <div id="fwDesc" class="text-muted mt-1" style="font-size:0.85rem;"></div>
+
+    <div class="d-flex align-items-center mt-2">
+      <strong class="me-3" style="font-size:1rem;"><span id="fwPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddFW">Dodaj do wyceny</button>
+    </div>
+  `;
+  secDiv.appendChild(contentDiv);
+
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
+
+  const fwSelect= contentDiv.querySelector('#fwSelect');
+  const fwDesc  = contentDiv.querySelector('#fwDesc');
+  const fwPriceEl= contentDiv.querySelector('#fwPrice');
+  const btnAddFW= contentDiv.querySelector('#btnAddFW');
 
   if(category.securityFW && category.securityFW.length){
     category.securityFW.forEach(srv=>{
-      const opt= document.createElement('option');
-      opt.value = srv.price;
-      opt.setAttribute('data-label', srv.label);
-      opt.setAttribute('data-desc', srv.desc||"");
-      opt.textContent = `${srv.label} (${srv.price} PLN)`;
-      selectEl.appendChild(opt);
+      const o= document.createElement('option');
+      o.value= srv.price;
+      o.setAttribute('data-label', srv.label);
+      o.setAttribute('data-desc', srv.desc||"");
+      o.textContent= `${srv.label} (${srv.price} PLN)`;
+      fwSelect.appendChild(o);
     });
   }
 
-  function updateFwPrice(){
-    const val= parseFloat(selectEl.value)||0;
-    priceEl.textContent= val.toFixed(2);
+  function updateFWPrice(){
+    const val= parseFloat(fwSelect.value)||0;
+    fwPriceEl.textContent= val.toFixed(2);
   }
-  function updateFwDesc(){
-    if(!selectEl.value){
-      descEl.textContent="";
+  function updateFWDesc(){
+    if(!fwSelect.value){
+      fwDesc.textContent="";
       return;
     }
-    const sel= selectEl.options[selectEl.selectedIndex];
-    descEl.textContent= sel.getAttribute('data-desc')||"";
+    const sel= fwSelect.options[fwSelect.selectedIndex];
+    fwDesc.textContent= sel.getAttribute('data-desc')||"";
   }
-
-  selectEl.addEventListener('change', ()=>{
-    updateFwPrice();
-    updateFwDesc();
+  fwSelect.addEventListener('change',()=>{
+    updateFWPrice();
+    updateFWDesc();
   });
-  updateFwPrice();
-  updateFwDesc();
+  updateFWPrice();
+  updateFWDesc();
 
-  btnAdd.addEventListener('click',()=>{
-    if(!selectEl.value){
+  btnAddFW.addEventListener('click',()=>{
+    if(!fwSelect.value){
       alert("Wybierz usługę Firewalla w chmurze!");
       return;
     }
-    const sel   = selectEl.options[selectEl.selectedIndex];
-    const label = sel.getAttribute('data-label');
-    const val   = parseFloat(selectEl.value)||0;
+    const sel= fwSelect.options[fwSelect.selectedIndex];
+    const label= sel.getAttribute('data-label')||"FW";
+    const val= parseFloat(sel.value)||0;
 
     cart.push({
       name: category.name + " (Firewall)",
@@ -1243,87 +1131,99 @@ function renderSecurityFirewallSection(category, plansBody){
   });
 }
 
-/** Analiza zabezpieczeń */
 function renderSecurityAnalysisSection(category, plansBody){
-  const headerTr= document.createElement('tr');
-  headerTr.innerHTML=`
-    <td colspan="3">
-      <h5 class="mt-4 mb-3">Analiza zabezpieczeń</h5>
-    </td>
+  const row= document.createElement('tr');
+  const col= document.createElement('td');
+  col.colSpan=3;
+
+  const secDiv= document.createElement('div');
+  secDiv.classList.add('section-wrapper');
+
+  const h5= document.createElement('h5');
+  h5.textContent= "Analiza zabezpieczeń";
+  secDiv.appendChild(h5);
+
+  const headerRow= document.createElement('div');
+  headerRow.classList.add('section-header-row');
+  headerRow.innerHTML=`
+    <div>Parametry</div>
+    <div>Cena (MIESIĘCZNIE)
+      <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+         title="Koszt analizy zabezpieczeń w ujęciu miesięcznym."></i>
+    </div>
   `;
-  plansBody.appendChild(headerTr);
+  secDiv.appendChild(headerRow);
 
-  const contentTr= document.createElement('tr');
-  contentTr.innerHTML=`
-    <td>
-      <div class="mb-2">
-        <label class="me-2">
-          Centralne logowanie (szt.)
-          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-             title="${category.analysis?.centralLoggingTooltip||''}"></i>
-        </label>
-        <input type="number" id="centralLogging" min="0" value="0"
-               style="width:80px;" class="form-control d-inline-block">
-      </div>
+  const contentDiv= document.createElement('div');
+  const storObj= category.analysis; // tooltips
+  contentDiv.innerHTML=`
+    <div class="mb-2">
+      <label class="me-2">
+        Centralne logowanie (szt.)
+        <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+           title="${storObj?.centralLoggingTooltip||''}"></i>
+      </label>
+      <input type="number" id="centralLogging" min="0" value="0"
+             style="width:80px;" class="form-control d-inline-block">
+    </div>
 
-      <div class="mb-2">
-        <label class="me-2">
-          Pamięć do centralnego logowania (GB)
-          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
-             title="${category.analysis?.memoryTooltip||''}"></i>
-        </label>
-        <input type="number" id="memoryGB" min="0" value="0"
-               style="width:80px;" class="form-control d-inline-block">
-      </div>
-    </td>
-    <td>
-      <span id="analysisPrice">0.00</span> PLN
-    </td>
-    <td>
-      <button class="btn btn-outline-primary" id="btnAddAnalysis">
-        Dodaj do koszyka
-      </button>
-    </td>
+    <div class="mb-2">
+      <label class="me-2">
+        Pamięć do centralnego logowania (GB)
+        <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+           title="${storObj?.memoryTooltip||''}"></i>
+      </label>
+      <input type="number" id="memoryGB" min="0" value="0"
+             style="width:80px;" class="form-control d-inline-block">
+    </div>
+
+    <div class="d-flex align-items-center">
+      <strong class="me-3" style="font-size:1rem;"><span id="analysisPrice">0.00</span> PLN</strong>
+      <button class="btn btn-primary" id="btnAddAnalysis">Dodaj do wyceny</button>
+    </div>
   `;
-  plansBody.appendChild(contentTr);
+  secDiv.appendChild(contentDiv);
 
-  const loggingInput= contentTr.querySelector('#centralLogging');
-  const memoryInput = contentTr.querySelector('#memoryGB');
-  const priceEl     = contentTr.querySelector('#analysisPrice');
-  const btnAdd      = contentTr.querySelector('#btnAddAnalysis');
+  col.appendChild(secDiv);
+  row.appendChild(col);
+  plansBody.appendChild(row);
+
+  const loggingInput= contentDiv.querySelector('#centralLogging');
+  const memoryInput = contentDiv.querySelector('#memoryGB');
+  const priceEl     = contentDiv.querySelector('#analysisPrice');
+  const btnAdd      = contentDiv.querySelector('#btnAddAnalysis');
 
   function updateAnalysisPrice(){
+    let total=0;
     const logVal= parseInt(loggingInput.value,10)||0;
     const memVal= parseInt(memoryInput.value,10)||0;
-    let total=0;
     if(logVal>0){
-      // np. 20 PLN za szt. logowania, 1 PLN za GB
-      total += logVal*20 + memVal*1;
+      total+= logVal*20; // np. 20 PLN/szt
+      total+= memVal*1;  // 1 PLN/GB
     }
     priceEl.textContent= total.toFixed(2);
   }
-
-  loggingInput.addEventListener('input', updateAnalysisPrice);
-  memoryInput.addEventListener('input', updateAnalysisPrice);
+  [loggingInput, memoryInput].forEach(el =>
+    el.addEventListener('input', updateAnalysisPrice));
   updateAnalysisPrice();
 
   btnAdd.addEventListener('click',()=>{
     const logVal= parseInt(loggingInput.value,10)||0;
     const memVal= parseInt(memoryInput.value,10)||0;
     if(logVal>0 && memVal<5){
-      alert("Jeśli używasz centralnego logowania, pamięć musi być min. 5GB!");
+      alert("Jeśli używasz centralnego logowania, pamięć >=5GB!");
       return;
     }
     let total=0;
     let desc="";
     if(logVal>0){
-      total= logVal*20 + memVal;
+      total= logVal*20 + memVal*1;
       desc= `CentralLog=${logVal}, Memory=${memVal}GB`;
     } else {
       desc= "Brak analizy (0)";
     }
     cart.push({
-      name: category.name + " (Analiza)",
+      name: category.name+" (Analiza)",
       details: desc,
       price: total
     });
@@ -1332,13 +1232,13 @@ function renderSecurityAnalysisSection(category, plansBody){
 }
 
 
-/****************************************************************************************************
- * renderCart
- ****************************************************************************************************/
+/***************************************************************************************************
+ * Koszyk
+ ***************************************************************************************************/
 function renderCart() {
-  const cartSection= document.getElementById('cartSection');
-  const tbody= document.querySelector('#cartTable tbody');
-  const totalEl= document.getElementById('cartTotal');
+  const cartSection = document.getElementById('cartSection');
+  const tbody       = document.querySelector('#cartTable tbody');
+  const totalEl     = document.getElementById('cartTotal');
 
   if(!cart.length){
     cartSection.style.display='none';
@@ -1348,9 +1248,9 @@ function renderCart() {
   tbody.innerHTML='';
 
   let sum=0;
-  cart.forEach((item, index)=>{
-    sum+= item.price;
-    const tr= document.createElement('tr');
+  cart.forEach((item, index) => {
+    sum += item.price;
+    const tr = document.createElement('tr');
     tr.innerHTML=`
       <td>${item.name}</td>
       <td>${item.details}</td>
@@ -1368,9 +1268,9 @@ function renderCart() {
 }
 
 
-/****************************************************************************************************
+/***************************************************************************************************
  * initTooltips
- ****************************************************************************************************/
+ ***************************************************************************************************/
 function initTooltips(){
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
   tooltipTriggerList.map(el => new bootstrap.Tooltip(el));

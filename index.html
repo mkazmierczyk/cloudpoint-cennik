@@ -3,69 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>CloudPoint - IaaS, PaaS, SaaS, Acronis, CSP, Bezpieczeństwo</title>
+
+  <!-- Google Fonts: Wix Medefor Text (przykładowy link) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Jeżeli ta czcionka nie istnieje oficjalnie, to zastąp ją własnym linkiem do wczytania. 
+       Przykład:
+  -->
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600&display=swap" rel="stylesheet">
+  <!-- KONIEC dopasuj do "Wix Medefor Text" jeżeli jest faktycznie w GFonts, 
+       w tym przykładzie używamy Open Sans jako placeholder.
+  -->
+
   <!-- Bootstrap 5 CSS (CDN) -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
   />
+
   <!-- Bootstrap Icons (CDN) -->
   <link
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
   />
+
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+
+  <!-- NAV -->
+  <nav class="navbar navbar-expand-lg navbar-light border-bottom custom-nav">
     <div class="container-fluid">
+      
+      <!-- Logo w lewym górnym rogu zamiast napisu CloudPoint -->
       <a class="navbar-brand d-flex align-items-center" href="#">
-        <span class="fw-bold text-primary">CloudPoint</span>
+        <!-- Podmień src na rzeczywisty link do logo -->
+        <img src="https://upload.wikimedia.org/entexample/logo.png" alt="CloudPoint logo" style="height:40px;">
       </a>
+
+      <!-- Przycisk toggle (dla widoku mobilnego) -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar"
               aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
+
+      <!-- Prawa część navbara - 2 przyciski -->
       <div class="collapse navbar-collapse" id="topNavbar">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item me-3"><a class="nav-link" href="#">Products</a></li>
-          <li class="nav-item me-3"><a class="nav-link" href="#">Solutions</a></li>
-          <li class="nav-item me-3"><a class="nav-link" href="#">Docs</a></li>
-          <li class="nav-item me-3"><a class="nav-link" href="#">Pricing</a></li>
-          <li class="nav-item"><button class="btn btn-outline-primary">Sign up</button></li>
-        </ul>
+        <div class="ms-auto d-flex gap-3">
+
+          <!-- Skontaktuj się z nami -->
+          <a href="https://enteo.pl/skontaktuj-sie-z-nami/" target="_blank" class="btn btn-outline-primary">
+            Skontaktuj się z nami
+          </a>
+
+          <!-- Przeczytaj opis usług -->
+          <a href="https://enteo.pl/wp-content/uploads/2025/02/Cloudpoint_opis_uslug.pdf" target="_blank" class="btn btn-outline-primary">
+            Przeczytaj opis usług
+          </a>
+
+        </div>
       </div>
     </div>
   </nav>
 
+  <!-- MAIN -->
   <div class="container-fluid mt-4">
     <div class="row">
-      <!-- LEWE MENU -->
+      <!-- LEWE MENU (zmiana KATEGORIE -> USŁUGI) -->
       <div class="col-12 col-md-3 col-lg-2 px-4" id="leftMenu">
-        <h6 class="text-uppercase text-muted">KATEGORIE</h6>
-        <ul class="list-unstyled" id="categoriesMenu">
-          <!-- generowane w script.js -->
-        </ul>
+        <h6 class="text-uppercase text-muted">USŁUGI</h6>
+        <ul class="list-unstyled" id="categoriesMenu"></ul>
       </div>
 
-      <!-- PRAWA KOLUMNA: Tabela planów + koszyk -->
+      <!-- Prawa kolumna -->
       <div class="col-12 col-md-9 col-lg-10 px-4" id="rightContent">
         <h2 class="mt-3" id="categoryTitle">Wybierz kategorię...</h2>
-        <p class="text-muted" id="categoryDesc">Proszę wybrać jedną z kategorii po lewej, aby zobaczyć dostępne plany/usługi.</p>
+        <p class="text-muted" id="categoryDesc">
+          Proszę wybrać jedną z kategorii po lewej, aby zobaczyć dostępne plany/usługi.
+        </p>
 
         <div class="table-responsive mb-4" id="plansTableWrapper" style="display:none;">
-          <table class="table align-middle table-hover packages-table">
-            <thead>
-              <tr class="text-muted">
-                <th style="width:60%">PARAMETRY</th>
-                <th style="width:20%">CENA (MIESIĘCZNIE)</th>
-                <th style="width:20%"></th>
-              </tr>
-            </thead>
-            <tbody id="plansTableBody">
-              <!-- generowane w script.js -->
-            </tbody>
-          </table>
+          <tbody id="plansTableBody">
+            <!-- generowane w script.js 
+                 UWAGA: 
+                 Każda sekcja sama tworzy "thead" (Parametry/Cena) 
+                 i "tbody" wewnętrznie, z tłem i border-radius.
+            -->
+          </tbody>
         </div>
 
         <!-- Koszyk -->
@@ -81,7 +107,7 @@
                   <th>Usuń</th>
                 </tr>
               </thead>
-              <tbody><!-- generowane w script.js --></tbody>
+              <tbody></tbody>
             </table>
           </div>
           <div class="text-end mt-2">
