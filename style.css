@@ -1,4 +1,4 @@
-/* Reset tła i podstawowy font */
+/* Reset i font */
 body {
   margin: 0;
   padding: 0;
@@ -6,7 +6,7 @@ body {
   background-color: #f8f9fa;
 }
 
-/* Navbar delikatny cień */
+/* Navbar */
 .navbar {
   box-shadow: 0 1px 2px rgba(0,0,0,0.1);
 }
@@ -43,20 +43,17 @@ body {
   background-color: #edf5ff;
 }
 
-/* SEKCJE */
+/* Sekcje */
 .section-wrapper {
-  margin-bottom: 1rem;   /* odstęp między sekcjami */
-  border-radius: 8px;    /* zaokrąglone rogi */
-  overflow: hidden;      /* żeby górny tytuł też się zaokrąglał */
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
-
-/* Pasek tytułu sekcji – niebieskie tło */
 .section-title {
   background-color: #e3f1ff;
   padding: 0.75rem 1rem;
 }
-
-/* Wnętrze sekcji – białe tło */
 .section-body {
   background-color: #ffffff;
   padding: 1rem;
@@ -64,8 +61,7 @@ body {
 
 /* Tabela w sekcji */
 .section-body .table {
-  margin-bottom: 0; /* bez dodatkowych odstępów */
-  border-collapse: separate;
+  margin-bottom: 0;
   width: 100%;
 }
 .section-body .table thead th {
@@ -73,9 +69,21 @@ body {
   font-size: 0.9rem;
   color: #555;
 }
-.section-body .table td, 
+.section-body .table td,
 .section-body .table th {
   vertical-align: middle;
+}
+
+/* Dla pól z ilością oraz selectów – ustawiamy inline */
+.inline-fields {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Przykładowy padding dla etykiet, by nie były zbyt sklejone */
+.label-inline {
+  margin-bottom: 0;
 }
 
 /* Koszyk */
@@ -92,4 +100,3 @@ body {
   padding: 0.5rem;
   border-top: none;
 }
-
