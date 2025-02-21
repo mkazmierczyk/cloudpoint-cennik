@@ -106,6 +106,7 @@
       ],
       "terminalPricePerUser": 30,
       "extraDataStoragePrice": 2,
+
       "msSplaServices": [
         { "label": "Office 365 Business", "price": 35 },
         { "label": "Office 365 E3",       "price": 70 }
