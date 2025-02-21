@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 /**
- * Rysujemy w #categoriesMenu listę <li> z linkami do kategorii
+ * Rysujemy listę kategorii w menu
  */
 function renderCategoriesMenu(categories) {
   const menuUl = document.getElementById('categoriesMenu');
@@ -26,9 +26,7 @@ function renderCategoriesMenu(categories) {
 
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      // Wybieramy kategorię
       selectCategory(index);
-      // Podświetlenie "active"
       document.querySelectorAll('#categoriesMenu a').forEach(a => a.classList.remove('active'));
       link.classList.add('active');
     });
@@ -39,7 +37,7 @@ function renderCategoriesMenu(categories) {
 }
 
 /**
- * Po kliknięciu w kategorię (index) - pokazujemy odpowiednią tabelę
+ * Po kliknięciu kategorii
  */
 function selectCategory(catIndex) {
   const category = categoriesData[catIndex];
@@ -55,199 +53,216 @@ function selectCategory(catIndex) {
   plansWrapper.style.display = 'block';
   plansBody.innerHTML = '';
 
-  // Sprawdzamy typ
   if (category.type === 'iaas') {
-    // Dwie sekcje
+    // IaaS (jak poprzednio)
     renderIaaSMachinesSection(category, plansBody);
-    renderMicrosoftLicSection(category, plansBody);
-  } else {
-    // Inne kategorie
+    renderMsLicSection(category, plansBody);
+  } 
+  else if (category.type === 'paas') {
+    // Nowa funkcja dla PaaS
+    renderPaaSSection(category, plansBody);
+    renderMsLicSection(category, plansBody); // licencje Microsoft wewnątrz PaaS
+    renderPaasDisasterRecoverySection(plansBody);
+  }
+  else {
+    // Inne kategorie - standardowa lista services
     renderServicesList(category, plansBody);
   }
 
-  // Po dynamicznym dodaniu elementów - włącz tooltips
+  // Po dynamicznym stworzeniu elementów - włącz tooltips
   initTooltips();
 }
 
 /**
- * Sekcja (A) "Maszyny wirtualne" w IaaS
+ * Funkcja IaaS (jak poprzednio).
  */
 function renderIaaSMachinesSection(category, plansBody) {
+  // ... (pomijam, bo już mieliśmy w poprzednim przykładzie)
+  // W skrócie: suwaki CPU/RAM/SSD + backup + IP + przycisk
+  // updateIaaSPrice() itp.
+  // ...
+  // Oraz MsLicSection => wewnątrz IaaS
+}
+
+/**
+ * FUNKCJA: renderuje PaaS w układzie podobnym do IaaS,
+ * ale:
+ *  - Zamiast suwaków => "Wybierz instancję" (z category.paasInstances)
+ *  - "Wsparcie techniczne" (Gold lub Platinum)
+ *  - Kopie zapasowe (GB)
+ *  - Public IP (checkbox)
+ *  - Cena i "Dodaj do koszyka" z walidacją wsparcia.
+ */
+function renderPaaSSection(category, plansBody) {
   // Nagłówek
   const headerTr = document.createElement('tr');
   headerTr.innerHTML = `
     <td colspan="3">
-      <h5 class="mb-3">Maszyny wirtualne</h5>
+      <h5 class="mb-3">Maszyny wirtualne (PaaS)</h5>
     </td>
   `;
   plansBody.appendChild(headerTr);
 
-  // Wiersz z suwakami + backup + IP
+  // Główny wiersz
   const contentTr = document.createElement('tr');
   contentTr.innerHTML = `
     <td>
-      <!-- Suwaki CPU/RAM/SSD -->
+      <!-- Lista instancji -->
       <div class="mb-2">
-        <label class="form-label me-2">CPU: <span id="cpuValue">1</span></label>
-        <input type="range" min="${category.sliders[0].min}" max="${category.sliders[0].max}" step="${category.sliders[0].step}" value="${category.sliders[0].min}" id="cpuSlider" style="width:150px;">
-      </div>
-      <div class="mb-2">
-        <label class="form-label me-2">RAM (GB): <span id="ramValue">${category.sliders[1].min}</span></label>
-        <input type="range" min="${category.sliders[1].min}" max="${category.sliders[1].max}" step="${category.sliders[1].step}" value="${category.sliders[1].min}" id="ramSlider" style="width:150px;">
-      </div>
-      <div class="mb-2">
-        <label class="form-label me-2">SSD (GB): <span id="ssdValue">${category.sliders[2].min}</span></label>
-        <input type="range" min="${category.sliders[2].min}" max="${category.sliders[2].max}" step="${category.sliders[2].step}" value="${category.sliders[2].min}" id="ssdSlider" style="width:150px;">
+        <label class="form-label me-2">Wybierz instancję:</label>
+        <select id="paasInstanceSelect" class="form-select d-inline-block" style="width:auto; min-width:150px;">
+          <option value="" disabled selected>-- wybierz --</option>
+        </select>
       </div>
 
-      <!-- Kopie zapasowe (GB) -->
+      <!-- Wsparcie techniczne -->
+      <div class="mb-2">
+        <label class="form-label me-2">Wsparcie techniczne:</label>
+        <select id="paasSupportSelect" class="form-select d-inline-block" style="width:auto; min-width:200px;">
+          <option value="" disabled selected>-- wybierz --</option>
+          <option value="gold">C-SUPPORT-GOLD</option>
+          <option value="platinum">C-SUPPORT-PLATINUM-AddON</option>
+        </select>
+      </div>
+
+      <!-- Kopie zapasowe -->
       <div class="mb-2">
         <label class="form-label me-2">
           Kopie zapasowe (GB)
-          <i class="bi bi-info-circle text-muted ms-1"
-             data-bs-toggle="tooltip" 
-             title="Rozmiar kopii powinien zbliżony być do rozmiaru VM.">
+          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+             title="Rozmiar kopii zależny od wielkości instancji.">
           </i>
         </label>
-        <input type="number" min="0" value="0" id="backupGB" style="width:80px;" class="form-control d-inline-block">
+        <input type="number" min="0" value="0" id="paasBackupGB" style="width:80px;" class="form-control d-inline-block">
       </div>
 
-      <!-- Public IP (checkbox) -->
+      <!-- Public IP -->
       <div class="form-check">
-        <input class="form-check-input" type="checkbox" value="" id="publicIP">
-        <label class="form-check-label" for="publicIP">
+        <input class="form-check-input" type="checkbox" value="" id="paasPublicIP">
+        <label class="form-check-label" for="paasPublicIP">
           Dodatkowe publiczne IP
-          <i class="bi bi-info-circle text-muted ms-1"
-             data-bs-toggle="tooltip" 
-             title="Jeśli VM wymaga osobnego IP.">
+          <i class="bi bi-info-circle text-muted ms-1" data-bs-toggle="tooltip"
+             title="Wymagane jeśli chcesz osobny adres IP.">
           </i>
         </label>
       </div>
     </td>
     <td>
-      <span id="iaasPrice">0.00</span> PLN
+      <span id="paasPrice">0.00</span> PLN
     </td>
     <td>
-      <button class="btn btn-outline-primary" id="btnAddIaas">
+      <button class="btn btn-outline-primary" id="btnAddPaaS">
         Dodaj do koszyka
       </button>
     </td>
   `;
   plansBody.appendChild(contentTr);
 
+  const instSelect = contentTr.querySelector('#paasInstanceSelect');
+  const supportSelect = contentTr.querySelector('#paasSupportSelect');
+  const backupInput = contentTr.querySelector('#paasBackupGB');
+  const ipCheck = contentTr.querySelector('#paasPublicIP');
+  const priceEl = contentTr.querySelector('#paasPrice');
+  const addBtn = contentTr.querySelector('#btnAddPaaS');
+
+  // Uzupełniamy listę instancji
+  category.paasInstances.forEach(inst => {
+    const opt = document.createElement('option');
+    opt.value = inst.price;
+    opt.setAttribute('data-label', inst.label);
+    opt.textContent = `${inst.label} (${inst.price} PLN)`;
+    instSelect.appendChild(opt);
+  });
+
+  // Funkcja licząca cenę PaaS
+  function updatePaaSPrice() {
+    let total = 0;
+    // Instancja
+    const instPrice = parseFloat(instSelect.value) || 0;
+    total += instPrice;
+    // Wsparcie
+    if (supportSelect.value === 'gold') {
+      // minimalne gold
+      total += category.supportGoldPrice || 0;
+    } else if (supportSelect.value === 'platinum') {
+      // platinum => gold + platinum
+      total += (category.supportGoldPrice || 0);
+      total += (category.supportPlatinumAddOnPrice || 0);
+    }
+    // Backup
+    const backupGB = parseFloat(backupInput.value) || 0;
+    if (backupGB > 0 && category.backupPricePerGB) {
+      total += backupGB * category.backupPricePerGB;
+    }
+    // Public IP
+    if (ipCheck.checked && category.publicIPPrice) {
+      total += category.publicIPPrice;
+    }
+
+    priceEl.textContent = total.toFixed(2);
+  }
+
   // Eventy
-  const cpuSlider = contentTr.querySelector('#cpuSlider');
-  const ramSlider = contentTr.querySelector('#ramSlider');
-  const ssdSlider = contentTr.querySelector('#ssdSlider');
-  const backupInput = contentTr.querySelector('#backupGB');
-  const publicIPcheck = contentTr.querySelector('#publicIP');
+  instSelect.addEventListener('change', updatePaaSPrice);
+  supportSelect.addEventListener('change', updatePaaSPrice);
+  backupInput.addEventListener('input', updatePaaSPrice);
+  ipCheck.addEventListener('change', updatePaaSPrice);
 
-  cpuSlider.addEventListener('input', () => {
-    contentTr.querySelector('#cpuValue').textContent = cpuSlider.value;
-    updateIaaSPrice(category, contentTr);
-  });
-  ramSlider.addEventListener('input', () => {
-    contentTr.querySelector('#ramValue').textContent = ramSlider.value;
-    updateIaaSPrice(category, contentTr);
-  });
-  ssdSlider.addEventListener('input', () => {
-    contentTr.querySelector('#ssdValue').textContent = ssdSlider.value;
-    updateIaaSPrice(category, contentTr);
-  });
-  backupInput.addEventListener('input', () => {
-    updateIaaSPrice(category, contentTr);
-  });
-  publicIPcheck.addEventListener('change', () => {
-    updateIaaSPrice(category, contentTr);
-  });
+  // Na start
+  updatePaaSPrice();
 
-  // Pierwsze wywołanie
-  updateIaaSPrice(category, contentTr);
-
-  // Dodawanie do koszyka
-  const addBtn = contentTr.querySelector('#btnAddIaas');
+  // Dodaj do koszyka (z walidacją wsparcia)
   addBtn.addEventListener('click', () => {
-    addIaaSConfigToCart(category, contentTr);
+    if (!instSelect.value) {
+      alert("Musisz wybrać instancję PaaS!");
+      return;
+    }
+    if (!supportSelect.value) {
+      alert("Musisz wybrać co najmniej C-SUPPORT-GOLD!");
+      return;
+    }
+
+    const instLabel = instSelect.options[instSelect.selectedIndex].getAttribute('data-label');
+    const instPrice = parseFloat(instSelect.value);
+
+    let supportCost = 0;
+    let supportDesc = "";
+    if (supportSelect.value === 'gold') {
+      supportCost = category.supportGoldPrice || 0;
+      supportDesc = "C-SUPPORT-GOLD";
+    } else if (supportSelect.value === 'platinum') {
+      supportCost = (category.supportGoldPrice || 0) + (category.supportPlatinumAddOnPrice || 0);
+      supportDesc = "C-SUPPORT-GOLD + C-SUPPORT-PLATINUM-AddON";
+    }
+
+    const backupGB = parseFloat(backupInput.value) || 0;
+    const backupCost = backupGB * (category.backupPricePerGB || 0);
+    const ipCost = ipCheck.checked ? (category.publicIPPrice || 0) : 0;
+
+    let total = instPrice + supportCost + backupCost + ipCost;
+
+    let desc = `Instancja=${instLabel}, Wsparcie=${supportDesc}`;
+    if (backupGB > 0) desc += `, Backup=${backupGB}GB`;
+    if (ipCheck.checked) desc += `, +PublicIP`;
+
+    // Tworzymy pozycję koszyka
+    const cartItem = {
+      name: category.name,
+      details: desc,
+      price: total
+    };
+    cart.push(cartItem);
+    renderCart();
   });
 }
 
 /**
- * Funkcja licząca cenę IaaS
+ * Sekcja Licencje Microsoft (wewnątrz IaaS lub PaaS),
+ * bazuje na polu "msSplaServices"
  */
-function updateIaaSPrice(category, container) {
-  const cpuVal = parseInt(container.querySelector('#cpuSlider').value, 10);
-  const ramVal = parseInt(container.querySelector('#ramSlider').value, 10);
-  const ssdVal = parseInt(container.querySelector('#ssdSlider').value, 10);
-  const backupGB = parseFloat(container.querySelector('#backupGB').value) || 0;
-  const publicIPchecked = container.querySelector('#publicIP').checked;
-
-  let total = 0;
-
-  // CPU
-  total += cpuVal * category.sliders[0].pricePerUnit;
-  // RAM
-  total += ramVal * category.sliders[1].pricePerUnit;
-  // SSD
-  total += ssdVal * category.sliders[2].pricePerUnit;
-
-  // Backup
-  if (category.backupPricePerGB && backupGB > 0) {
-    total += backupGB * category.backupPricePerGB;
-  }
-  // Public IP
-  if (publicIPchecked && category.publicIPPrice) {
-    total += category.publicIPPrice;
-  }
-
-  container.querySelector('#iaasPrice').textContent = total.toFixed(2);
-}
-
-/**
- * Dodawanie IaaS do koszyka
- */
-function addIaaSConfigToCart(category, container) {
-  const cpuVal = parseInt(container.querySelector('#cpuSlider').value, 10);
-  const ramVal = parseInt(container.querySelector('#ramSlider').value, 10);
-  const ssdVal = parseInt(container.querySelector('#ssdSlider').value, 10);
-  const backupGB = parseFloat(container.querySelector('#backupGB').value) || 0;
-  const publicIPchecked = container.querySelector('#publicIP').checked;
-
-  let total = 0;
-  total += cpuVal * category.sliders[0].pricePerUnit;
-  total += ramVal * category.sliders[1].pricePerUnit;
-  total += ssdVal * category.sliders[2].pricePerUnit;
-  if (category.backupPricePerGB && backupGB > 0) {
-    total += backupGB * category.backupPricePerGB;
-  }
-  if (publicIPchecked && category.publicIPPrice) {
-    total += category.publicIPPrice;
-  }
-
-  let desc = `CPU=${cpuVal}, RAM=${ramVal}GB, SSD=${ssdVal}GB`;
-  if (backupGB > 0) {
-    desc += `, Backup=${backupGB}GB`;
-  }
-  if (publicIPchecked) {
-    desc += `, +PublicIP`;
-  }
-
-  const cartItem = {
-    name: category.name,
-    details: desc,
-    price: total
-  };
-  cart.push(cartItem);
-  renderCart();
-}
-
-/**
- * Sekcja (B) "Licencje Microsoft" w IaaS
- * Dane pobieramy z category.msSplaServices
- */
-function renderMicrosoftLicSection(category, plansBody) {
+function renderMsLicSection(category, plansBody) {
   if (!category.msSplaServices) return;
 
-  // Nagłówek
   const headerTr = document.createElement('tr');
   headerTr.innerHTML = `
     <td colspan="3">
@@ -256,7 +271,7 @@ function renderMicrosoftLicSection(category, plansBody) {
   `;
   plansBody.appendChild(headerTr);
 
-  // Wiersz: select + ilość + cena + przycisk
+  // Wiersz: select + ilość + cena + "Dodaj"
   const contentTr = document.createElement('tr');
   contentTr.innerHTML = `
     <td>
@@ -309,7 +324,7 @@ function renderMicrosoftLicSection(category, plansBody) {
 
   btnAddMS.addEventListener('click', () => {
     if (!msSelect.value) {
-      alert('Wybierz licencję Microsoft!');
+      alert("Wybierz licencję Microsoft!");
       return;
     }
     const label = msSelect.options[msSelect.selectedIndex].getAttribute('data-label');
@@ -328,7 +343,114 @@ function renderMicrosoftLicSection(category, plansBody) {
 }
 
 /**
- * Renderowanie usług w innych kategoriach (PaaS, SaaS, Acronis, CSP)
+ * "Disaster Recovery" sekcja dla PaaS, bierzemy z kategorii "PaaS_DR"
+ *  - 2 usługi: C-DR-STORAGE, C-DR-IP
+ *  - Każda ma input (liczba) + tooltip
+ *  - 1 przycisk "Dodaj do koszyka"
+ */
+function renderPaasDisasterRecoverySection(plansBody) {
+  // Znajdź w data kategorie "PaaS_DR"
+  const drCat = categoriesData.find(c => c.type === 'paas_dr');
+  if (!drCat || !drCat.services) return;
+
+  // Nagłówek
+  const headerTr = document.createElement('tr');
+  headerTr.innerHTML = `
+    <td colspan="3">
+      <h5 class="mt-4 mb-3">Disaster Recovery</h5>
+    </td>
+  `;
+  plansBody.appendChild(headerTr);
+
+  // Wiersz z polami
+  const contentTr = document.createElement('tr');
+  contentTr.innerHTML = `
+    <td>
+      <!-- 2 usługi: C-DR-STORAGE, C-DR-IP -->
+      <div class="mb-2">
+        <label class="form-label me-2">
+          C-DR-STORAGE
+          <i class="bi bi-info-circle text-muted ms-1"
+             data-bs-toggle="tooltip"
+             title="Storage w GB dla DR">
+          </i>
+        </label>
+        <input type="number" min="0" value="0" id="drStorageInput" style="width:80px;" class="form-control d-inline-block">
+      </div>
+
+      <div class="mb-2">
+        <label class="form-label me-2">
+          C-DR-IP
+          <i class="bi bi-info-circle text-muted ms-1"
+             data-bs-toggle="tooltip"
+             title="Adresy IP dla DR (min 1)">
+          </i>
+        </label>
+        <input type="number" min="1" value="1" id="drIpInput" style="width:80px;" class="form-control d-inline-block">
+      </div>
+    </td>
+    <td>
+      <span id="drPrice">0.00</span> PLN
+    </td>
+    <td>
+      <button class="btn btn-outline-primary" id="btnAddDR">
+        Dodaj do koszyka
+      </button>
+    </td>
+  `;
+  plansBody.appendChild(contentTr);
+
+  const storageInput = contentTr.querySelector('#drStorageInput');
+  const ipInput = contentTr.querySelector('#drIpInput');
+  const priceEl = contentTr.querySelector('#drPrice');
+  const btnAddDR = contentTr.querySelector('#btnAddDR');
+
+  // Znajdź obiekty w drCat.services
+  const storageSrv = drCat.services.find(s => s.id === 'C-DR-STORAGE');
+  const ipSrv = drCat.services.find(s => s.id === 'C-DR-IP');
+
+  function updateDrPrice() {
+    const sVal = parseFloat(storageInput.value) || 0;
+    const iVal = parseFloat(ipInput.value) || 1;
+
+    let total = 0;
+    if (storageSrv) {
+      total += sVal * storageSrv.price;
+    }
+    if (ipSrv) {
+      total += iVal * ipSrv.price;
+    }
+    priceEl.textContent = total.toFixed(2);
+  }
+
+  storageInput.addEventListener('input', updateDrPrice);
+  ipInput.addEventListener('input', updateDrPrice);
+  updateDrPrice();
+
+  btnAddDR.addEventListener('click', () => {
+    const sVal = parseFloat(storageInput.value) || 0;
+    const iVal = parseFloat(ipInput.value) || 1;
+    if (iVal < 1) {
+      alert("C-DR-IP musi być co najmniej 1!");
+      return;
+    }
+    let total = 0;
+    if (storageSrv) total += sVal * storageSrv.price;
+    if (ipSrv) total += iVal * ipSrv.price;
+
+    let desc = `C-DR-STORAGE=${sVal}GB, C-DR-IP=${iVal}`;
+    const cartItem = {
+      name: 'PaaS (DR)',
+      details: desc,
+      price: total
+    };
+    cart.push(cartItem);
+    renderCart();
+  });
+}
+
+/**
+ * Render usług (dla pozostałych kategorii)
  */
 function renderServicesList(category, plansBody) {
   if (category.services && category.services.length) {
@@ -363,7 +485,7 @@ function renderServicesList(category, plansBody) {
 }
 
 /**
- * Rysowanie koszyka
+ * Rysuje koszyk
  */
 function renderCart() {
   const cartSection = document.getElementById('cartSection');
@@ -373,9 +495,8 @@ function renderCart() {
   if (cart.length === 0) {
     cartSection.style.display = 'none';
     return;
-  } else {
-    cartSection.style.display = 'block';
   }
+  cartSection.style.display = 'block';
 
   tbody.innerHTML = '';
 
@@ -395,7 +516,6 @@ function renderCart() {
       cart.splice(index, 1);
       renderCart();
     });
-
     tbody.appendChild(tr);
   });
 

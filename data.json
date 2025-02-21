@@ -31,7 +31,6 @@
       ],
       "backupPricePerGB": 0.1, 
       "publicIPPrice": 10,
-
       "msSplaServices": [
         { "label": "Windows Server Std (1 licencja)", "price": 20 },
         { "label": "Windows Server DC (1 licencja)",  "price": 50 },
@@ -41,10 +40,30 @@
     {
       "name": "PaaS",
       "type": "paas",
+
+      "paasInstances": [
+        { "label": "PaaS Basic VM",    "price": 40 },
+        { "label": "PaaS Standard VM", "price": 80 },
+        { "label": "PaaS Premium VM",  "price": 160 }
+      ],
+
+      "supportGoldPrice": 50,
+      "supportPlatinumAddOnPrice": 100,
+      "backupPricePerGB": 0.3,
+      "publicIPPrice": 15,
+  
+      "msSplaServices": [
+        { "label": "MS SQL Web Edition",   "price": 25 },
+        { "label": "MS SQL Standard",      "price": 70 }
+      ]
+    },
+    {
+      "name": "PaaS_DR",
+      "type": "paas_dr",
+
       "services": [
-        { "label": "Pakiet PaaS Basic",    "price": 50 },
-        { "label": "Pakiet PaaS Standard", "price": 100 },
-        { "label": "Pakiet PaaS Premium",  "price": 200 }
+        { "id": "C-DR-STORAGE", "label": "C-DR-STORAGE", "price": 0.2, "tooltip": "Storage w GB" },
+        { "id": "C-DR-IP",      "label": "C-DR-IP",      "price": 10,  "tooltip": "Liczba adresów IP" }
       ]
     },
     {
@@ -76,3 +95,4 @@
     }
   ]
 }
+
