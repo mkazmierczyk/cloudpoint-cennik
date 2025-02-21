@@ -29,8 +29,8 @@
           "pricePerUnit": 0.2
         }
       ],
-      "backupPricePerGB": 0.1,        /* Kopie zapasowe do innego DC */
-      "publicIPPrice": 10            /* Dodatkowe publiczne IP */
+      "backupPricePerGB": 0.1,
+      "publicIPPrice": 10
     },
     {
       "name": "Microsoft SPLA",
