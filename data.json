@@ -4,37 +4,16 @@
       "name": "IaaS",
       "type": "iaas",
       "sliders": [
-        {
-          "id": "cpu",
-          "label": "CPU (vCore)",
-          "min": 1,
-          "max": 64,
-          "step": 1,
-          "pricePerUnit": 5
-        },
-        {
-          "id": "ram",
-          "label": "RAM (GB)",
-          "min": 1,
-          "max": 128,
-          "step": 1,
-          "pricePerUnit": 2
-        },
-        {
-          "id": "storage",
-          "label": "SSD (GB)",
-          "min": 10,
-          "max": 1000,
-          "step": 10,
-          "pricePerUnit": 0.2
-        }
+        { "id": "cpu", "label": "CPU (vCore)", "min": 1, "max": 64, "step": 1, "pricePerUnit": 5 },
+        { "id": "ram", "label": "RAM (GB)",   "min": 1, "max": 128, "step": 1, "pricePerUnit": 2 },
+        { "id": "storage", "label": "SSD (GB)", "min": 10, "max": 1000, "step": 10, "pricePerUnit": 0.2 }
       ],
       "backupPricePerGB": 0.1,
       "publicIPPrice": 10,
       "msSplaServices": [
         { "label": "Windows Server Std (1 licencja)", "price": 20 },
-        { "label": "Windows Server DC (1 licencja)", "price": 50 },
-        { "label": "SQL Server Std (1 licencja)", "price": 45 }
+        { "label": "Windows Server DC (1 licencja)",  "price": 50 },
+        { "label": "SQL Server Std (1 licencja)",     "price": 45 }
       ]
     },
     {
@@ -44,51 +23,85 @@
         {
           "label": "PaaS Basic VM",
           "price": 40,
-          "desc": "Podstawowa instancja PaaS z ograniczonymi zasobami, odpowiednia do testów."
+          "desc": "Podstawowa instancja PaaS z ograniczonymi zasobami."
         },
         {
           "label": "PaaS Standard VM",
           "price": 80,
-          "desc": "Średnia instancja PaaS, zbalansowane zasoby i wsparcie dla większości aplikacji."
+          "desc": "Instancja PaaS o zbalansowanych zasobach."
         },
         {
           "label": "PaaS Premium VM",
           "price": 160,
-          "desc": "Najwyższy poziom wydajności i zasobów, zalecany dla kluczowych obciążeń."
+          "desc": "Najwyższa wydajność PaaS."
         }
       ],
       "supportGoldPrice": 50,
-      "supportGoldDesc": "Wsparcie GOLD – 24/7, SLA do 2h reakcji, wsparcie mail i telefon.",
+      "supportGoldDesc": "Wsparcie GOLD – SLA 24/7, czas reakcji do 2h.",
       "supportPlatinumAddOnPrice": 100,
-      "supportPlatinumDesc": "PLATINUM Add-On – rozszerzone wsparcie GOLD o priorytetową obsługę i dedykowanego opiekuna.",
+      "supportPlatinumDesc": "PLATINUM-AddON – priorytetowe wsparcie i dedykowany opiekun.",
       "backupPricePerGB": 0.3,
       "publicIPPrice": 15,
       "msSplaServices": [
         { "label": "MS SQL Web Edition", "price": 25 },
-        { "label": "MS SQL Standard", "price": 70 }
+        { "label": "MS SQL Standard",    "price": 70 }
       ],
       "drServices": [
-        {
-          "id": "C-DR-STORAGE",
-          "label": "C-DR-STORAGE",
-          "price": 0.2,
-          "tooltip": "GB dla kopii DR (min. 0)."
-        },
-        {
-          "id": "C-DR-IP",
-          "label": "C-DR-IP",
-          "price": 10,
-          "tooltip": "Adresy IP (min 1)."
-        }
+        { "id": "C-DR-STORAGE", "label": "C-DR-STORAGE", "price": 0.2, "tooltip": "Storage w GB (min 0)." },
+        { "id": "C-DR-IP",      "label": "C-DR-IP",      "price": 10,  "tooltip": "Adresy IP (min 1)." }
       ]
     },
     {
       "name": "SaaS",
       "type": "saas",
-      "services": [
-        { "label": "Licencja SaaS A", "price": 30 },
-        { "label": "Licencja SaaS B", "price": 50 },
-        { "label": "Licencja SaaS C", "price": 70 }
+
+      "msSqlDbOptions": [
+        {
+          "label": "SQL Basic DB",
+          "price": 30,
+          "desc": "Podstawowa baza danych MS SQL."
+        },
+        {
+          "label": "SQL Standard DB",
+          "price": 60,
+          "desc": "Standardowa baza MS SQL, optymalna dla większości zastosowań."
+        },
+        {
+          "label": "SQL Enterprise DB",
+          "price": 120,
+          "desc": "Najwyższy poziom SQL, przeznaczony dla dużych środowisk."
+        }
+      ],
+      "enovaWebOptions": [
+        {
+          "label": "Enova365Web Basic",
+          "price": 50,
+          "desc": "Podstawowa licencja Enova365Web z ograniczonym modułem."
+        },
+        {
+          "label": "Enova365Web Full",
+          "price": 100,
+          "desc": "Pełna funkcjonalność Enova365Web."
+        }
+      ],
+      "enovaWebApiOptions": [
+        {
+          "label": "Enova365Web API Basic",
+          "price": 20,
+          "desc": "Umożliwia podstawową komunikację API z Enova365Web."
+        },
+        {
+          "label": "Enova365Web API Extended",
+          "price": 40,
+          "desc": "Rozszerzone możliwości API dla Enova365Web."
+        }
+      ],
+      "terminalPricePerUser": 30,
+      "extraDataStoragePrice": 2,
+
+      "msSplaServices": [
+        { "label": "Office 365 Business", "price": 35 },
+        { "label": "Office 365 E3",       "price": 70 }
       ]
     },
     {
@@ -96,8 +109,8 @@
       "type": "acronis",
       "services": [
         { "label": "Backup Windows Agent", "price": 10 },
-        { "label": "Backup Linux Agent", "price": 12 },
-        { "label": "Backup MacOS Agent", "price": 15 }
+        { "label": "Backup Linux Agent",   "price": 12 },
+        { "label": "Backup MacOS Agent",   "price": 15 }
       ]
     },
     {
