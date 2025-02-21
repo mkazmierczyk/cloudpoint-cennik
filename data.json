@@ -64,8 +64,10 @@
     {
       "name": "SaaS",
       "type": "saas",
+
       "harmonogramCost": 10,
       "terminalSecurityCost": 20,
+
       "msSqlDbOptions": [
         {
           "label": "SQL Basic DB",
@@ -104,6 +106,7 @@
       ],
       "terminalPricePerUser": 30,
       "extraDataStoragePrice": 2,
+
       "msSplaServices": [
         { "label": "Office 365 Business", "price": 35 },
         { "label": "Office 365 E3",       "price": 70 }
@@ -125,50 +128,51 @@
         {
           "label": "M365 Business Basic",
           "price": 5,
-          "desc": "Microsoft 365 Business Basic – podstawowe narzędzia."
+          "desc": "Microsoft 365 Business Basic: Podstawowe narzędzia online."
         },
         {
           "label": "M365 Business Standard",
           "price": 10,
-          "desc": "Microsoft 365 Business Standard – email, Office, OneDrive."
+          "desc": "Microsoft 365 Business Standard: Pełny Office, poczta, OneDrive."
         },
         {
           "label": "M365 Business Premium",
           "price": 15,
-          "desc": "Microsoft 365 Business Premium – dodatkowe zabezpieczenia."
+          "desc": "Microsoft 365 Business Premium: dodatkowe zabezpieczenia i Intune."
         }
       ]
     },
     {
       "name": "Bezpieczeństwo",
       "type": "security",
-      "webAppServices": [
+
+      "securityWebApp": [
         {
-          "label": "Skanner Aplikacji W1",
+          "label": "Skanner W1",
           "price": 50,
-          "desc": "Automatyczne skanowanie aplikacji webowej pod kątem OWASP."
+          "desc": "Automatyczne skanowanie aplikacji webowej."
         },
         {
-          "label": "Skanner Aplikacji W2",
+          "label": "Skanner W2",
           "price": 100,
-          "desc": "Zaawansowane skanowanie, raporty i rekomendacje."
+          "desc": "Zaawansowane skanowanie z raportami i rekomendacjami."
         }
       ],
-      "fwServices": [
+      "securityFW": [
         {
           "label": "Firewall L1",
           "price": 40,
-          "desc": "Podstawowa zapora w chmurze."
+          "desc": "Podstawowy firewall w chmurze."
         },
         {
           "label": "Firewall L2",
           "price": 80,
-          "desc": "Zaawansowana zapora z IPS."
+          "desc": "Zaawansowany firewall z IPS/IDS."
         }
       ],
       "analysis": {
-        "centralLoggingTooltip": "Podaj liczbę użytkowników (min 1) do logowania centralnego.",
-        "memoryTooltip": "Podaj ilość GB (min 5) jeśli używasz centralnego logowania."
+        "centralLoggingTooltip": "Podaj liczbę licencji lub instancji logowania (min 1).",
+        "memoryTooltip": "Jeśli centralne logowanie > 0, min 5GB pamięci."
       }
     }
   ]
