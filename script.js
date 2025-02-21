@@ -1,25 +1,16 @@
 /****************************************************************************************************
- * script.js – spełnia 4 ostatnie wymagania:
- * 1) Pola typu "ilość szt." są tuż obok etykiety,
- * 2) Cena w kolumnie jest wyśrodkowana,
- * 3) Sekcje mają zaokrąglone rogi, nazwa sekcji na niebieskim tle, odstęp między sekcjami,
- * 4) W SaaS inputy i selecty są w tej samej linii co etykieta (nie pod spodem).
- *
- * Struktura:
- *   - Dla każdej sekcji (IaaS, PaaS, SaaS, itp.) tworzymy:
- *       <div class="section-wrapper">
- *         <div class="section-title">Nazwa sekcji</div>
- *         <div class="section-body">
- *           <table> z 3 kolumnami: Parametry | Cena | Przycisk
- *         </div>
- *       </div>
+ * script.js – spełnia wszystkie najnowsze wymagania:
+ *   - Sekcje jako zaokrąglone boksy z paskiem tytułu (niebieskie tło).
+ *   - Parametry w tabeli 3-kolumnowej: Parametry | Cena (wyśrodkowana) | Przycisk.
+ *   - Pola liczby (np. dysk SSD) są tuż obok etykiety (nie float:right).
+ *   - W SaaS (MsSQL, Enova, EnovaAPI, Terminal, Extra) label i pole w jednej linii.
  ***************************************************************************************************/
 
 let categoriesData = [];
 let cart = [];
 
 /****************************************************************************************************
- * Po załadowaniu DOM – wczytujemy data.json => categoriesData => render menu
+ * 1) Ładujemy data.json i budujemy menu
  ****************************************************************************************************/
 document.addEventListener('DOMContentLoaded', () => {
   fetch('data.json')
@@ -31,10 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .catch(err => console.error("Błąd wczytywania data.json:", err));
 });
 
-
-/****************************************************************************************************
- * renderCategoriesMenu – listuje kategorie w #categoriesMenu
- ****************************************************************************************************/
 function renderCategoriesMenu(categories) {
   const menuUl = document.getElementById('categoriesMenu');
   menuUl.innerHTML = '';
@@ -44,33 +31,30 @@ function renderCategoriesMenu(categories) {
     const link = document.createElement('a');
     link.href = '#';
     link.textContent = cat.name;
+
     link.addEventListener('click', e => {
       e.preventDefault();
       selectCategory(idx);
       document.querySelectorAll('#categoriesMenu a').forEach(a => a.classList.remove('active'));
       link.classList.add('active');
     });
+
     li.appendChild(link);
     menuUl.appendChild(li);
   });
 }
 
-
 /****************************************************************************************************
- * selectCategory – rysujemy sekcje w #plansContainer (lub #plansTableBody)
+ * 2) selectCategory – rysuje sekcje w <div id="plansContainer">
  ****************************************************************************************************/
 function selectCategory(catIndex) {
   const category = categoriesData[catIndex];
-  
-  // Ustawiamy tytuł, opis
   document.getElementById('categoryTitle').textContent = category.name;
   document.getElementById('categoryDesc').textContent  = `Opcje dostępne w kategorii: ${category.name}.`;
 
-  // Czyścimy container
-  const container = document.getElementById('plansContainer');  // np. <div id="plansContainer">
-  container.innerHTML = '';
+  const container = document.getElementById('plansContainer');
+  container.innerHTML = '';  // czyścimy
 
-  // W zależności od category.type
   switch (category.type) {
     case 'iaas':
       renderIaaS(category, container);
@@ -103,26 +87,21 @@ function selectCategory(catIndex) {
   initTooltips();
 }
 
-
 /****************************************************************************************************
- * Helper: tworzy <div class="section-wrapper"> z dwiema warstwami:
- *   <div class="section-title">tytuł na niebieskim tle</div>
- *   <div class="section-body">białe tło z margin/padding</div>
- * Zwraca obiekt { wrapper, bodyContainer }, by móc wstawić tam <table> lub cokolwiek
+ * 3) Helper: createSection(titleText) – tworzy <div class="section-wrapper"> z:
+ *    - <div class="section-title"> (niebieski pasek)
+ *    - <div class="section-body"> (białe wnętrze)
  ****************************************************************************************************/
 function createSection(titleText) {
-  // Główny wrapper
   const wrapper = document.createElement('div');
-  wrapper.classList.add('section-wrapper');  // styl w CSS: margin-bottom, border-radius
+  wrapper.classList.add('section-wrapper');  // styl w CSS: margin, border-radius
 
-  // Pasek tytułu (niebieskie tło)
   const titleDiv = document.createElement('div');
-  titleDiv.classList.add('section-title');   // w CSS: background-color, padding
+  titleDiv.classList.add('section-title');   // styl w CSS: background, padding
   titleDiv.innerHTML = `<h5 class="m-0">${titleText}</h5>`;
 
-  // Białe wnętrze
   const bodyDiv = document.createElement('div');
-  bodyDiv.classList.add('section-body');     // w CSS: background-color:white, padding
+  bodyDiv.classList.add('section-body');     // styl w CSS: background:white, padding
 
   wrapper.appendChild(titleDiv);
   wrapper.appendChild(bodyDiv);
@@ -130,15 +109,13 @@ function createSection(titleText) {
   return { wrapper, bodyContainer: bodyDiv };
 }
 
-
 /****************************************************************************************************
- * Helper: tworzy <table> z thead: Parametry | Cena (MIESIĘCZNIE) | [puste]
- * i zwraca obiekt { table, tbodyEl }
+ * 4) Helper: createParamTable(tooltip) – tworzy <table> z 3 kolumnami (Parametry, Cena, [puste])
+ *    i zwraca { table, tbodyEl } do wstawiania wierszy
  ****************************************************************************************************/
 function createParamTable(tooltip="Koszt miesięczny") {
   const table = document.createElement('table');
-  table.classList.add('table', 'mb-0');
-  table.style.borderCollapse = 'separate';
+  table.classList.add('table');
   table.style.width = '100%';
 
   // Thead
@@ -162,47 +139,43 @@ function createParamTable(tooltip="Koszt miesięczny") {
   return { table, tbodyEl: tbody };
 }
 
-
 /****************************************************************************************************
- * 1) IaaS
+ * 5) IaaS
  ****************************************************************************************************/
 function renderIaaS(category, container) {
-  // Tworzymy sekcję
   const sec = createSection("Maszyny wirtualne (IaaS)");
-
-  // Wewnątrz sekcji – tabela 3 kolumny
   const { table, tbodyEl } = createParamTable("Koszt miesięczny za parametry VM");
   sec.bodyContainer.appendChild(table);
 
-  // Dodajemy wiersz z polami
+  // Wiersz
   const tr = document.createElement('tr');
   tr.innerHTML = `
     <td>
       <div class="mb-2">
         <label>CPU (vCore):</label>
         <input type="range" id="cpuSlider" min="${category.sliders[0].min}" max="${category.sliders[0].max}"
-               step="${category.sliders[0].step}" value="${category.sliders[0].min}" style="width:100px;">
+               step="${category.sliders[0].step}" value="${category.sliders[0].min}" style="width:100px; margin-left:8px;">
         <span id="cpuVal">${category.sliders[0].min}</span>
       </div>
       <div class="mb-2">
         <label>RAM (GB):</label>
         <input type="range" id="ramSlider" min="${category.sliders[1].min}" max="${category.sliders[1].max}"
-               step="${category.sliders[1].step}" value="${category.sliders[1].min}" style="width:100px;">
+               step="${category.sliders[1].step}" value="${category.sliders[1].min}" style="width:100px; margin-left:8px;">
         <span id="ramVal">${category.sliders[1].min}</span>
       </div>
       <div class="mb-2">
         <label>SSD (GB):</label>
         <input type="range" id="ssdSlider" min="${category.sliders[2].min}" max="${category.sliders[2].max}"
-               step="${category.sliders[2].step}" value="${category.sliders[2].min}" style="width:100px;">
+               step="${category.sliders[2].step}" value="${category.sliders[2].min}" style="width:100px; margin-left:8px;">
         <span id="ssdVal">${category.sliders[2].min}</span>
       </div>
       <div class="mb-2">
         <label>Kopie zapasowe (GB):</label>
-        <input type="number" id="backupGB" value="0" min="0" style="width:60px;">
+        <input type="number" id="backupGB" value="0" min="0" style="width:60px; margin-left:8px;">
       </div>
       <div class="mb-2">
         <label>Dodatkowe publiczne IP (szt.):</label>
-        <input type="number" id="publicIp" value="0" min="0" style="width:60px;">
+        <input type="number" id="publicIp" value="0" min="0" style="width:60px; margin-left:8px;">
       </div>
     </td>
     <td style="text-align:center;">
@@ -214,7 +187,7 @@ function renderIaaS(category, container) {
   `;
   tbodyEl.appendChild(tr);
 
-  container.appendChild(sec.wrapper); // wstawiamy do #plansContainer
+  container.appendChild(sec.wrapper);
 
   // Logika
   const cpuSlider  = tr.querySelector('#cpuSlider');
@@ -239,10 +212,10 @@ function renderIaaS(category, container) {
     if(backupVal>0) total+= backupVal*(category.backupPricePerGB||0);
     if(ipVal>0)     total+= ipVal*(category.publicIPPrice||0);
 
-    tr.querySelector('#cpuVal').textContent = cpuVal;
-    tr.querySelector('#ramVal').textContent = ramVal;
-    tr.querySelector('#ssdVal').textContent = ssdVal;
-    priceEl.textContent = total.toFixed(2);
+    tr.querySelector('#cpuVal').textContent= cpuVal;
+    tr.querySelector('#ramVal').textContent= ramVal;
+    tr.querySelector('#ssdVal').textContent= ssdVal;
+    priceEl.textContent= total.toFixed(2);
   }
   [cpuSlider, ramSlider, ssdSlider, backupGB, publicIp].forEach(el =>
     el.addEventListener('input', updateIaaSPrice)
@@ -270,9 +243,8 @@ function renderIaaS(category, container) {
   });
 }
 
-
 /****************************************************************************************************
- * MsLicSection (IaaS/PaaS/SaaS)
+ * MsLicSection – wspólne dla IaaS/PaaS/SaaS
  ****************************************************************************************************/
 function renderMsLicSection(category, container) {
   if(!category.msSplaServices) return;
@@ -281,8 +253,7 @@ function renderMsLicSection(category, container) {
   const { table, tbodyEl } = createParamTable("Koszt licencji w rozliczeniu miesięcznym");
   sec.bodyContainer.appendChild(table);
 
-  // Wiersz
-  const tr = document.createElement('tr');
+  const tr= document.createElement('tr');
   tr.innerHTML=`
     <td>
       <label>Wybierz licencję:</label>
@@ -309,7 +280,6 @@ function renderMsLicSection(category, container) {
   const msPriceEl = tr.querySelector('#msPrice');
   const btnAddMS  = tr.querySelector('#btnAddMS');
 
-  // Wypełniamy
   category.msSplaServices.forEach(srv=>{
     const opt= document.createElement('option');
     opt.value= srv.price;
@@ -350,7 +320,6 @@ function renderMsLicSection(category, container) {
   });
 }
 
-
 /****************************************************************************************************
  * PaaS
  ****************************************************************************************************/
@@ -359,7 +328,6 @@ function renderPaaSMachinesSection(category, container) {
   const { table, tbodyEl } = createParamTable("Koszt miesięczny instancji PaaS");
   sec.bodyContainer.appendChild(table);
 
-  // Wiersz
   const tr= document.createElement('tr');
   tr.innerHTML=`
     <td>
@@ -402,7 +370,7 @@ function renderPaaSMachinesSection(category, container) {
   tbodyEl.appendChild(tr);
   container.appendChild(sec.wrapper);
 
-  // Logika
+  // Logika ...
   const instSelect   = tr.querySelector('#paasInst');
   const instDescEl   = tr.querySelector('#paasInstDesc');
   const supportSel   = tr.querySelector('#paasSupport');
@@ -413,7 +381,6 @@ function renderPaaSMachinesSection(category, container) {
   const priceEl      = tr.querySelector('#paasPrice');
   const btnAdd       = tr.querySelector('#btnAddPaaS');
 
-  // Instancje
   if(category.paasInstances){
     category.paasInstances.forEach(inst=>{
       const opt= document.createElement('option');
@@ -425,15 +392,14 @@ function renderPaaSMachinesSection(category, container) {
     });
   }
 
-  function updateDesc(){
+  function updateAll(){
+    // opis
     if(!instSelect.value){
       instDescEl.textContent="";
-      return;
+    } else {
+      const sel= instSelect.options[instSelect.selectedIndex];
+      instDescEl.textContent= sel.getAttribute('data-desc')||"";
     }
-    const sel= instSelect.options[instSelect.selectedIndex];
-    instDescEl.textContent= sel.getAttribute('data-desc')||"";
-  }
-  function updateSupportDesc(){
     if(supportSel.value==='gold'){
       supportDescEl.textContent= category.supportGoldDesc||"";
     } else if(supportSel.value==='platinum'){
@@ -441,20 +407,18 @@ function renderPaaSMachinesSection(category, container) {
     } else {
       supportDescEl.textContent="";
     }
-  }
-  function updatePaaSPrice(){
-    let total=0;
-    const instVal = parseFloat(instSelect.value)||0;
-    total+= instVal;
 
+    // cena
+    let total=0;
+    const instVal= parseFloat(instSelect.value)||0;
+    total+= instVal;
     if(supportSel.value==='gold'){
       total+=(category.supportGoldPrice||0);
     } else if(supportSel.value==='platinum'){
-      total+=(category.supportGoldPrice||0);
-      total+=(category.supportPlatinumAddOnPrice||0);
+      total+=(category.supportGoldPrice||0)+(category.supportPlatinumAddOnPrice||0);
     }
-    const ssdVal = parseInt(ssdInput.value,10)||0;
-    total+= ssdVal*1; // 1 PLN/GB
+    const ssdVal= parseInt(ssdInput.value,10)||0;
+    total+= ssdVal*1;
     const backupVal= parseInt(backupInput.value,10)||0;
     if(backupVal>0) total+= backupVal*(category.backupPricePerGB||0);
     const ipVal= parseInt(ipInput.value,10)||0;
@@ -462,22 +426,11 @@ function renderPaaSMachinesSection(category, container) {
 
     priceEl.textContent= total.toFixed(2);
   }
-
   [instSelect, supportSel, ssdInput, backupInput, ipInput].forEach(el=>{
-    el.addEventListener('change', ()=>{
-      updateDesc();
-      updateSupportDesc();
-      updatePaaSPrice();
-    });
-    el.addEventListener('input', ()=>{
-      updateDesc();
-      updateSupportDesc();
-      updatePaaSPrice();
-    });
+    el.addEventListener('change', updateAll);
+    el.addEventListener('input', updateAll);
   });
-  updateDesc();
-  updateSupportDesc();
-  updatePaaSPrice();
+  updateAll();
 
   btnAdd.addEventListener('click',()=>{
     if(!instSelect.value){
@@ -489,7 +442,7 @@ function renderPaaSMachinesSection(category, container) {
       return;
     }
     const total= parseFloat(priceEl.textContent)||0;
-    const sel= instSelect.options[instSelect.selectedIndex];
+    const sel   = instSelect.options[instSelect.selectedIndex];
     const instLabel= sel.getAttribute('data-label')||"";
     let supText="";
     if(supportSel.value==='gold') {
@@ -552,7 +505,7 @@ function renderPaaSDisasterRecoverySection(category, container) {
   const drPriceEl= tr.querySelector('#drPrice');
   const btnAddDR = tr.querySelector('#btnAddDR');
 
-  function updateDrPrice(){
+  function updateDRPrice(){
     let total=0;
     const sVal= parseInt(drStorage.value,10)||0;
     const iVal= parseInt(drIp.value,10)||1;
@@ -560,8 +513,8 @@ function renderPaaSDisasterRecoverySection(category, container) {
     if(ipObj)   total+= iVal*(ipObj.price||0);
     drPriceEl.textContent= total.toFixed(2);
   }
-  [drStorage, drIp].forEach(el => el.addEventListener('input', updateDrPrice));
-  updateDrPrice();
+  [drStorage, drIp].forEach(el=> el.addEventListener('input', updateDRPrice));
+  updateDRPrice();
 
   btnAddDR.addEventListener('click',()=>{
     const sVal= parseInt(drStorage.value,10)||0;
@@ -584,7 +537,6 @@ function renderPaaSDisasterRecoverySection(category, container) {
   });
 }
 
-
 /****************************************************************************************************
  * SaaS
  ****************************************************************************************************/
@@ -593,20 +545,21 @@ function renderSaaSApplications(category, container){
   const { table, tbodyEl } = createParamTable("Koszt miesięczny usług SaaS");
   sec.bodyContainer.appendChild(table);
 
-  // 1) MsSQL
+  // MsSQL
   renderSaaS_MsSQLRow(category, tbodyEl);
-  // 2) Enova
+  // Enova
   renderSaaS_EnovaRow(category, tbodyEl);
-  // 3) Enova API
+  // Enova API
   renderSaaS_EnovaApiRow(category, tbodyEl);
-  // 4) Terminal
+  // Terminal
   renderSaaS_TerminalRow(category, tbodyEl);
-  // 5) Extra
+  // Extra
   renderSaaS_ExtraDataRow(category, tbodyEl);
 
   container.appendChild(sec.wrapper);
 }
 
+// 5 wierszy w tabeli SaaS:
 function renderSaaS_MsSQLRow(category, tbodyEl){
   const tr= document.createElement('tr');
   tr.innerHTML=`
@@ -626,8 +579,8 @@ function renderSaaS_MsSQLRow(category, tbodyEl){
   `;
   tbodyEl.appendChild(tr);
 
-  const msSqlSelect= tr.querySelector('#msSqlSelect');
-  const msSqlDescEl= tr.querySelector('#msSqlDesc');
+  const msSqlSelect = tr.querySelector('#msSqlSelect');
+  const msSqlDescEl = tr.querySelector('#msSqlDesc');
   const msSqlPriceEl= tr.querySelector('#msSqlPrice');
   const btnAddMsSql = tr.querySelector('#btnAddMsSql');
 
@@ -666,9 +619,9 @@ function renderSaaS_MsSQLRow(category, tbodyEl){
       alert("Wybierz Bazę SQL!");
       return;
     }
-    const sel= msSqlSelect.options[msSqlSelect.selectedIndex];
-    const label= sel.getAttribute('data-label')||"SQL DB";
-    const price= parseFloat(sel.value)||0;
+    const sel   = msSqlSelect.options[msSqlSelect.selectedIndex];
+    const label = sel.getAttribute('data-label')||"SQL DB";
+    const price = parseFloat(sel.value)||0;
     cart.push({
       name: "SaaS - MS SQL",
       details: label,
@@ -849,8 +802,8 @@ function renderSaaS_TerminalRow(category, tbodyEl){
         <input type="number" id="termUsers" value="0" min="0" style="width:60px; margin-left:8px;">
       </div>
       <div class="form-check">
-        <input class="form-check-input" type="checkbox" id="termSecurity">
-        <label class="form-check-label" for="termSecurity">Zabezpieczenie terminala</label>
+        <input class="form-check-input" type="checkbox" id="termSec">
+        <label class="form-check-label" for="termSec">Zabezpieczenie terminala</label>
       </div>
     </td>
     <td style="text-align:center;">
@@ -862,10 +815,10 @@ function renderSaaS_TerminalRow(category, tbodyEl){
   `;
   tbodyEl.appendChild(tr);
 
-  const termUsers   = tr.querySelector('#termUsers');
-  const termSec     = tr.querySelector('#termSecurity');
-  const termPriceEl = tr.querySelector('#termPrice');
-  const btnAddTerm  = tr.querySelector('#btnAddTerm');
+  const termUsers= tr.querySelector('#termUsers');
+  const termSec  = tr.querySelector('#termSec');
+  const termPriceEl= tr.querySelector('#termPrice');
+  const btnAddTerm= tr.querySelector('#btnAddTerm');
 
   function updateTermPrice(){
     let total=0;
@@ -873,18 +826,18 @@ function renderSaaS_TerminalRow(category, tbodyEl){
     if(users>0){
       total+= users*(category.terminalPricePerUser||30);
       if(termSec.checked){
-        total+=(category.terminalSecurityCost||20);
+        total+= (category.terminalSecurityCost||20);
       }
     }
     termPriceEl.textContent= total.toFixed(2);
   }
-  [termUsers, termSec].forEach(el=> el.addEventListener('input', updateTermPrice));
+  [termUsers, termSec].forEach(el => el.addEventListener('input', updateTermPrice));
   updateTermPrice();
 
   btnAddTerm.addEventListener('click',()=>{
     const users= parseInt(termUsers.value,10)||0;
     if(users<=0){
-      alert("Podaj liczbę użytkowników terminala > 0!");
+      alert("Podaj liczbę użytkowników > 0!");
       return;
     }
     const base= users*(category.terminalPricePerUser||30);
@@ -951,11 +904,10 @@ function renderSaaS_ExtraDataRow(category, tbodyEl){
   });
 }
 
-
 /****************************************************************************************************
  * Acronis / fallback => renderServicesList
  ****************************************************************************************************/
-function renderServicesList(category, container) {
+function renderServicesList(category, container){
   const sec = createSection(category.name);
   const { table, tbodyEl } = createParamTable("Koszt miesięczny");
   sec.bodyContainer.appendChild(table);
@@ -989,7 +941,6 @@ function renderServicesList(category, container) {
   }
   container.appendChild(sec.wrapper);
 }
-
 
 /****************************************************************************************************
  * Microsoft CSP => "Microsoft 365"
@@ -1080,7 +1031,6 @@ function renderMicrosoft365Section(category, container){
   });
 }
 
-
 /****************************************************************************************************
  * Bezpieczeństwo
  ****************************************************************************************************/
@@ -1108,19 +1058,19 @@ function renderSecurityWebAppsSection(category, container){
   tbodyEl.appendChild(tr);
   container.appendChild(sec.wrapper);
 
-  const webAppSelect  = tr.querySelector('#webAppSelect');
-  const webAppDesc    = tr.querySelector('#webAppDesc');
-  const webAppPriceEl = tr.querySelector('#webAppPrice');
-  const btnAddWebApp  = tr.querySelector('#btnAddWebApp');
+  const webAppSelect= tr.querySelector('#webAppSelect');
+  const webAppDesc  = tr.querySelector('#webAppDesc');
+  const webAppPriceEl= tr.querySelector('#webAppPrice');
+  const btnAddWebApp= tr.querySelector('#btnAddWebApp');
 
-  if(category.securityWebApp){
+  if(category.securityWebApp && category.securityWebApp.length){
     category.securityWebApp.forEach(srv=>{
-      const o= document.createElement('option');
-      o.value= srv.price;
-      o.setAttribute('data-label', srv.label);
-      o.setAttribute('data-desc', srv.desc||"");
-      o.textContent= `${srv.label} (${srv.price} PLN)`;
-      webAppSelect.appendChild(o);
+      const opt= document.createElement('option');
+      opt.value= srv.price;
+      opt.setAttribute('data-label', srv.label);
+      opt.setAttribute('data-desc', srv.desc||"");
+      opt.textContent= `${srv.label} (${srv.price} PLN)`;
+      webAppSelect.appendChild(opt);
     });
   }
 
@@ -1189,7 +1139,7 @@ function renderSecurityFirewallSection(category, container){
   const fwPriceEl= tr.querySelector('#fwPrice');
   const btnAddFW= tr.querySelector('#btnAddFW');
 
-  if(category.securityFW){
+  if(category.securityFW && category.securityFW.length){
     category.securityFW.forEach(srv=>{
       const o= document.createElement('option');
       o.value= srv.price;
@@ -1227,7 +1177,6 @@ function renderSecurityFirewallSection(category, container){
     const sel   = fwSelect.options[fwSelect.selectedIndex];
     const label = sel.getAttribute('data-label')||"";
     const val   = parseFloat(sel.value)||0;
-
     cart.push({
       name: category.name + " (Firewall)",
       details: label,
@@ -1274,8 +1223,8 @@ function renderSecurityAnalysisSection(category, container){
     const logVal= parseInt(centralLog.value,10)||0;
     const memVal= parseInt(memoryGB.value,10)||0;
     if(logVal>0){
-      // np. 20 PLN/szt log, 1 PLN/GB
-      total+= logVal*20 + memVal*1;
+      total+= logVal*20; // np. 20 PLN/szt
+      total+= memVal*1;  // 1 PLN/GB
     }
     priceEl.textContent= total.toFixed(2);
   }
@@ -1298,7 +1247,7 @@ function renderSecurityAnalysisSection(category, container){
       desc= "Brak analizy (0)";
     }
     cart.push({
-      name: category.name+" (Analiza)",
+      name: category.name + " (Analiza)",
       details: desc,
       price: total
     });
@@ -1306,14 +1255,13 @@ function renderSecurityAnalysisSection(category, container){
   });
 }
 
-
 /****************************************************************************************************
- * KOSZYK
+ * Koszyk
  ****************************************************************************************************/
 function renderCart() {
-  const cartSection= document.getElementById('cartSection');
-  const tbody= document.querySelector('#cartTable tbody');
-  const totalEl= document.getElementById('cartTotal');
+  const cartSection = document.getElementById('cartSection');
+  const tbody       = document.querySelector('#cartTable tbody');
+  const totalEl     = document.getElementById('cartTotal');
 
   if(!cart.length){
     cartSection.style.display='none';
@@ -1342,11 +1290,10 @@ function renderCart() {
   totalEl.textContent= sum.toFixed(2);
 }
 
-
 /****************************************************************************************************
  * initTooltips – bootstrap
  ****************************************************************************************************/
-function initTooltips() {
+function initTooltips(){
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
   tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
 }
