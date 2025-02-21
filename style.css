@@ -1,8 +1,16 @@
+/* Definicje kolorów – zmienne CSS */
+:root {
+  --primary-color: #007bff;       /* główny niebieski */
+  --accent-color:  #00aaff;        /* jasnoniebieski */
+  --primary-hover: #0056b3;        /* ciemniejszy niebieski */
+  --accent-hover:  #0088cc;        /* ciemniejszy akcent */
+}
+
 /* Reset i font */
 body {
   margin: 0;
   padding: 0;
-  font-family: "Open Sans", sans-serif;
+  font-family: 'Montserrat', sans-serif;
   background-color: #f8f9fa;
 }
 
@@ -50,10 +58,16 @@ body {
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
+
+/* Pasek tytułu sekcji – gradient */
 .section-title {
-  background-color: #e3f1ff;
+  /* Zamiast statycznego tła, używamy gradientu */
+  background-image: linear-gradient(135deg, var(--primary-hover), var(--accent-color));
+  color: #fff;
   padding: 0.75rem 1rem;
 }
+
+/* Wnętrze sekcji */
 .section-body {
   background-color: #ffffff;
   padding: 1rem;
@@ -80,10 +94,20 @@ body {
   align-items: center;
   gap: 8px;
 }
-
-/* Przykładowy padding dla etykiet, by nie były zbyt sklejone */
 .label-inline {
   margin-bottom: 0;
+}
+
+/* Przyciski – gradient dla btn-primary */
+.btn-primary {
+  background-image: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  border: none;
+  color: #fff;
+  transition: background 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+.btn-primary:hover {
+  background-image: linear-gradient(90deg, var(--primary-hover), var(--accent-hover));
 }
 
 /* Koszyk */
