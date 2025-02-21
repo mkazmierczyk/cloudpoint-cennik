@@ -7,12 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     .then(data => {
       categoriesData = data.categories;
       renderCategoriesMenu(categoriesData);
-
-      // Inicjuj tooltips w całym dokumencie (Bootstrap 5)
-      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-      tooltipTriggerList.map(tooltipTriggerEl => {
-        return new bootstrap.Tooltip(tooltipTriggerEl);
-      });
     })
     .catch(err => console.error("Błąd wczytywania data.json:", err));
 });
@@ -45,7 +39,7 @@ function renderCategoriesMenu(categories) {
 }
 
 /**
- * Po kliknięciu w kategorię (index) - pokazujemy odpowiednie sekcje
+ * Po kliknięciu w kategorię (index) - pokazujemy odpowiednią tabelę
  */
 function selectCategory(catIndex) {
   const category = categoriesData[catIndex];
@@ -55,34 +49,31 @@ function selectCategory(catIndex) {
   const plansWrapper = document.getElementById('plansTableWrapper');
   const plansBody = document.getElementById('plansTableBody');
 
-  // Ustawiamy tytuł i opis
   titleEl.textContent = category.name;
   descEl.textContent = `Opcje dostępne w kategorii: ${category.name}.`;
 
-  // Pokaż tabelę
   plansWrapper.style.display = 'block';
-  // Czyścimy wiersze
   plansBody.innerHTML = '';
 
+  // Sprawdzamy typ
   if (category.type === 'iaas') {
-    // Rysujemy dwie sekcje: (A) Maszyny wirtualne, (B) Licencje Microsoft
+    // Dwie sekcje
     renderIaaSMachinesSection(category, plansBody);
-    renderMicrosoftLicSection(plansBody);
-  }
-  else {
+    renderMicrosoftLicSection(category, plansBody);
+  } else {
     // Inne kategorie
     renderServicesList(category, plansBody);
   }
 
-  // Re-inicjuj tooltips (bo wygenerowaliśmy nowe elementy)
+  // Po dynamicznym dodaniu elementów - włącz tooltips
   initTooltips();
 }
 
 /**
- * Sekcja (A): "Maszyny wirtualne"
+ * Sekcja (A) "Maszyny wirtualne" w IaaS
  */
 function renderIaaSMachinesSection(category, plansBody) {
-  // Tworzymy wiersz z nagłówkiem
+  // Nagłówek
   const headerTr = document.createElement('tr');
   headerTr.innerHTML = `
     <td colspan="3">
@@ -91,7 +82,7 @@ function renderIaaSMachinesSection(category, plansBody) {
   `;
   plansBody.appendChild(headerTr);
 
-  // Drugi wiersz - suwak CPU, RAM, SSD, backupGB, publicIP
+  // Wiersz z suwakami + backup + IP
   const contentTr = document.createElement('tr');
   contentTr.innerHTML = `
     <td>
@@ -115,7 +106,7 @@ function renderIaaSMachinesSection(category, plansBody) {
           Kopie zapasowe (GB)
           <i class="bi bi-info-circle text-muted ms-1"
              data-bs-toggle="tooltip" 
-             title="Wybierz rozmiar dopasowany do wielkości VM.">
+             title="Rozmiar kopii powinien zbliżony być do rozmiaru VM.">
           </i>
         </label>
         <input type="number" min="0" value="0" id="backupGB" style="width:80px;" class="form-control d-inline-block">
@@ -128,7 +119,7 @@ function renderIaaSMachinesSection(category, plansBody) {
           Dodatkowe publiczne IP
           <i class="bi bi-info-circle text-muted ms-1"
              data-bs-toggle="tooltip" 
-             title="Jeśli potrzebujesz dodatkowego IP do VM.">
+             title="Jeśli VM wymaga osobnego IP.">
           </i>
         </label>
       </div>
@@ -181,7 +172,7 @@ function renderIaaSMachinesSection(category, plansBody) {
 }
 
 /**
- * Logika liczenia ceny IaaS
+ * Funkcja licząca cenę IaaS
  */
 function updateIaaSPrice(category, container) {
   const cpuVal = parseInt(container.querySelector('#cpuSlider').value, 10);
@@ -208,12 +199,11 @@ function updateIaaSPrice(category, container) {
     total += category.publicIPPrice;
   }
 
-  const priceEl = container.querySelector('#iaasPrice');
-  priceEl.textContent = total.toFixed(2);
+  container.querySelector('#iaasPrice').textContent = total.toFixed(2);
 }
 
 /**
- * Dodawanie IaaS konfiguracji do koszyka
+ * Dodawanie IaaS do koszyka
  */
 function addIaaSConfigToCart(category, container) {
   const cpuVal = parseInt(container.querySelector('#cpuSlider').value, 10);
@@ -222,7 +212,6 @@ function addIaaSConfigToCart(category, container) {
   const backupGB = parseFloat(container.querySelector('#backupGB').value) || 0;
   const publicIPchecked = container.querySelector('#publicIP').checked;
 
-  // Przeliczamy jeszcze raz
   let total = 0;
   total += cpuVal * category.sliders[0].pricePerUnit;
   total += ramVal * category.sliders[1].pricePerUnit;
@@ -242,7 +231,6 @@ function addIaaSConfigToCart(category, container) {
     desc += `, +PublicIP`;
   }
 
-  // Dodaj do koszyka
   const cartItem = {
     name: category.name,
     details: desc,
@@ -253,12 +241,11 @@ function addIaaSConfigToCart(category, container) {
 }
 
 /**
- * Sekcja (B): "Licencje Microsoft" (pobrane z kategorii ms-spla)
+ * Sekcja (B) "Licencje Microsoft" w IaaS
+ * Dane pobieramy z category.msSplaServices
  */
-function renderMicrosoftLicSection(plansBody) {
-  // Znajdź kategorię ms-spla w data
-  const msCat = categoriesData.find(cat => cat.type === 'ms-spla');
-  if (!msCat) return; // jeśli brak takiej kategorii, nie rysuj
+function renderMicrosoftLicSection(category, plansBody) {
+  if (!category.msSplaServices) return;
 
   // Nagłówek
   const headerTr = document.createElement('tr');
@@ -269,7 +256,7 @@ function renderMicrosoftLicSection(plansBody) {
   `;
   plansBody.appendChild(headerTr);
 
-  // Wiersz z selectem + ilość + cena + Dodaj
+  // Wiersz: select + ilość + cena + przycisk
   const contentTr = document.createElement('tr');
   contentTr.innerHTML = `
     <td>
@@ -298,7 +285,7 @@ function renderMicrosoftLicSection(plansBody) {
   const btnAddMS = contentTr.querySelector('#btnAddMS');
 
   // Uzupełniamy select
-  msCat.services.forEach(srv => {
+  category.msSplaServices.forEach(srv => {
     const opt = document.createElement('option');
     opt.value = srv.price;
     opt.setAttribute('data-label', srv.label);
@@ -306,7 +293,6 @@ function renderMicrosoftLicSection(plansBody) {
     msSelect.appendChild(opt);
   });
 
-  // Obsługa zmiany
   function updateMsPrice() {
     if (!msSelect.value) {
       msPriceEl.textContent = '0.00';
@@ -319,11 +305,8 @@ function renderMicrosoftLicSection(plansBody) {
 
   msSelect.addEventListener('change', updateMsPrice);
   msQty.addEventListener('input', updateMsPrice);
-
-  // Na start
   updateMsPrice();
 
-  // Dodawanie do koszyka
   btnAddMS.addEventListener('click', () => {
     if (!msSelect.value) {
       alert('Wybierz licencję Microsoft!');
@@ -335,8 +318,8 @@ function renderMicrosoftLicSection(plansBody) {
     const total = price * qty;
 
     const cartItem = {
-      name: 'Microsoft SPLA',
-      details: `${label}, x${qty}`,
+      name: `${category.name} (Licencje MS)`,
+      details: `${label} x${qty}`,
       price: total
     };
     cart.push(cartItem);
@@ -345,7 +328,7 @@ function renderMicrosoftLicSection(plansBody) {
 }
 
 /**
- * Dla innych kategorii (np. PaaS, SaaS) - normalna lista services
+ * Renderowanie usług w innych kategoriach (PaaS, SaaS, Acronis, CSP)
  */
 function renderServicesList(category, plansBody) {
   if (category.services && category.services.length) {
@@ -362,12 +345,17 @@ function renderServicesList(category, plansBody) {
       `;
       const btn = tr.querySelector('button');
       btn.addEventListener('click', () => {
-        addServiceToCart(category, srv);
+        const cartItem = {
+          name: category.name,
+          details: srv.label,
+          price: srv.price
+        };
+        cart.push(cartItem);
+        renderCart();
       });
       plansBody.appendChild(tr);
     });
   } else {
-    // brak services
     const tr = document.createElement('tr');
     tr.innerHTML = `<td colspan="3">Brak usług w tej kategorii.</td>`;
     plansBody.appendChild(tr);
@@ -375,20 +363,7 @@ function renderServicesList(category, plansBody) {
 }
 
 /**
- * Dodawanie usług (PaaS, SaaS itp.) do koszyka
- */
-function addServiceToCart(category, srv) {
-  const cartItem = {
-    name: category.name,
-    details: srv.label,
-    price: srv.price
-  };
-  cart.push(cartItem);
-  renderCart();
-}
-
-/**
- * Renderuje koszyk
+ * Rysowanie koszyka
  */
 function renderCart() {
   const cartSection = document.getElementById('cartSection');
@@ -428,11 +403,9 @@ function renderCart() {
 }
 
 /**
- * Ponowna inicjalizacja tooltipów Bootstrapa (po dynamicznym dodaniu elementów)
+ * Inicjalizacja tooltipów (Bootstrap)
  */
 function initTooltips() {
   const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-  tooltipTriggerList.map(tooltipTriggerEl => {
-    return new bootstrap.Tooltip(tooltipTriggerEl);
-  });
+  tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
 }

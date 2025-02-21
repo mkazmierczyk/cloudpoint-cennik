@@ -29,16 +29,13 @@
           "pricePerUnit": 0.2
         }
       ],
-      "backupPricePerGB": 0.1,
-      "publicIPPrice": 10
-    },
-    {
-      "name": "Microsoft SPLA",
-      "type": "ms-spla",
-      "services": [
-        { "label": "Windows Server Std (1 licencja)",   "price": 20 },
-        { "label": "Windows Server DC (1 licencja)",    "price": 50 },
-        { "label": "SQL Server Std (1 licencja)",       "price": 45 }
+      "backupPricePerGB": 0.1, 
+      "publicIPPrice": 10,
+
+      "msSplaServices": [
+        { "label": "Windows Server Std (1 licencja)", "price": 20 },
+        { "label": "Windows Server DC (1 licencja)",  "price": 50 },
+        { "label": "SQL Server Std (1 licencja)",     "price": 45 }
       ]
     },
     {
@@ -57,6 +54,24 @@
         { "label": "Licencja SaaS A", "price": 30 },
         { "label": "Licencja SaaS B", "price": 50 },
         { "label": "Licencja SaaS C", "price": 70 }
+      ]
+    },
+    {
+      "name": "Acronis",
+      "type": "acronis",
+      "services": [
+        { "label": "Backup Windows Agent", "price": 10 },
+        { "label": "Backup Linux Agent",   "price": 12 },
+        { "label": "Backup MacOS Agent",   "price": 15 }
+      ]
+    },
+    {
+      "name": "Microsoft CSP",
+      "type": "csp",
+      "services": [
+        { "label": "Azure Credits 100 USD", "price": 100 },
+        { "label": "Azure Credits 250 USD", "price": 250 },
+        { "label": "Azure Credits 500 USD", "price": 500 }
       ]
     }
   ]
