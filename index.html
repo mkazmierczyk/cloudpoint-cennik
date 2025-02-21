@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CloudPoint - IaaS, PaaS, SaaS, Acronis, CSP</title>
+  <title>CloudPoint - IaaS, PaaS, SaaS, Acronis, CSP, Bezpieczeństwo</title>
   <!-- Bootstrap 5 CSS (CDN) -->
   <link
     rel="stylesheet"
@@ -17,17 +17,15 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Górny pasek a'la DigitalOcean -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="#">
         <span class="fw-bold text-primary">CloudPoint</span>
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar" 
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar"
               aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
-      <!-- Prawa część navbara -->
       <div class="collapse navbar-collapse" id="topNavbar">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item me-3"><a class="nav-link" href="#">Products</a></li>
@@ -40,7 +38,6 @@
     </div>
   </nav>
 
-  <!-- Główna zawartość -->
   <div class="container-fluid mt-4">
     <div class="row">
       <!-- LEWE MENU -->
@@ -48,8 +45,7 @@
         <h6 class="text-uppercase text-muted">KATEGORIE</h6>
         <ul class="list-unstyled" id="categoriesMenu"></ul>
       </div>
-
-      <!-- PRAWA KOLUMNA: Tabela planów + koszyk -->
+      <!-- PRAWA KOLUMNA -->
       <div class="col-12 col-md-9 col-lg-10 px-4" id="rightContent">
         <h2 class="mt-3" id="categoryTitle">Wybierz kategorię...</h2>
         <p class="text-muted" id="categoryDesc">
@@ -66,7 +62,6 @@
               </tr>
             </thead>
             <tbody id="plansTableBody">
-              <!-- generowane w script.js -->
             </tbody>
           </table>
         </div>
@@ -91,15 +86,15 @@
             <strong>Razem: <span id="cartTotal">0.00</span> PLN</strong>
           </div>
         </div>
-      </div><!-- col -->
-    </div><!-- row -->
-  </div><!-- container -->
+      </div>
+    </div>
+  </div>
 
   <footer class="text-center text-muted py-4 mt-5">
     <small>&copy; 2025 CloudPoint, All rights reserved.</small>
   </footer>
 
-  <!-- Bootstrap JS -->
+  <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="script.js"></script>
 </body>

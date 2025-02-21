@@ -121,11 +121,55 @@
     {
       "name": "Microsoft CSP",
       "type": "csp",
-      "services": [
-        { "label": "Azure Credits 100 USD", "price": 100 },
-        { "label": "Azure Credits 250 USD", "price": 250 },
-        { "label": "Azure Credits 500 USD", "price": 500 }
+      "msCspServices": [
+        {
+          "label": "M365 Business Basic",
+          "price": 5,
+          "desc": "Microsoft 365 Business Basic – podstawowe narzędzia."
+        },
+        {
+          "label": "M365 Business Standard",
+          "price": 10,
+          "desc": "Microsoft 365 Business Standard – email, Office, OneDrive."
+        },
+        {
+          "label": "M365 Business Premium",
+          "price": 15,
+          "desc": "Microsoft 365 Business Premium – dodatkowe zabezpieczenia."
+        }
       ]
+    },
+    {
+      "name": "Bezpieczeństwo",
+      "type": "security",
+      "webAppServices": [
+        {
+          "label": "Skanner Aplikacji W1",
+          "price": 50,
+          "desc": "Automatyczne skanowanie aplikacji webowej pod kątem OWASP."
+        },
+        {
+          "label": "Skanner Aplikacji W2",
+          "price": 100,
+          "desc": "Zaawansowane skanowanie, raporty i rekomendacje."
+        }
+      ],
+      "fwServices": [
+        {
+          "label": "Firewall L1",
+          "price": 40,
+          "desc": "Podstawowa zapora w chmurze."
+        },
+        {
+          "label": "Firewall L2",
+          "price": 80,
+          "desc": "Zaawansowana zapora z IPS."
+        }
+      ],
+      "analysis": {
+        "centralLoggingTooltip": "Podaj liczbę użytkowników (min 1) do logowania centralnego.",
+        "memoryTooltip": "Podaj ilość GB (min 5) jeśli używasz centralnego logowania."
+      }
     }
   ]
 }
