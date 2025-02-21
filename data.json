@@ -65,28 +65,26 @@
       "name": "SaaS",
       "type": "saas",
 
+      "harmonogramCost": 10,
+      "terminalSecurityCost": 20,
+
       "msSqlDbOptions": [
         {
           "label": "SQL Basic DB",
           "price": 30,
-          "desc": "Podstawowa baza danych MS SQL."
+          "desc": "Podstawowa baza MS SQL."
         },
         {
           "label": "SQL Standard DB",
           "price": 60,
-          "desc": "Standardowa baza MS SQL, optymalna dla większości zastosowań."
-        },
-        {
-          "label": "SQL Enterprise DB",
-          "price": 120,
-          "desc": "Najwyższy poziom SQL, przeznaczony dla dużych środowisk."
+          "desc": "Standardowa baza MS SQL."
         }
       ],
       "enovaWebOptions": [
         {
           "label": "Enova365Web Basic",
           "price": 50,
-          "desc": "Podstawowa licencja Enova365Web z ograniczonym modułem."
+          "desc": "Podstawowa licencja Enova365Web."
         },
         {
           "label": "Enova365Web Full",
@@ -98,17 +96,16 @@
         {
           "label": "Enova365Web API Basic",
           "price": 20,
-          "desc": "Umożliwia podstawową komunikację API z Enova365Web."
+          "desc": "Podstawowa komunikacja API."
         },
         {
           "label": "Enova365Web API Extended",
           "price": 40,
-          "desc": "Rozszerzone możliwości API dla Enova365Web."
+          "desc": "Rozszerzone możliwości API."
         }
       ],
       "terminalPricePerUser": 30,
       "extraDataStoragePrice": 2,
-
       "msSplaServices": [
         { "label": "Office 365 Business", "price": 35 },
         { "label": "Office 365 E3",       "price": 70 }
