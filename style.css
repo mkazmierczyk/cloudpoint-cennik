@@ -144,3 +144,9 @@ body {
   padding: 0.5rem;
   border-top: none;
 }
+/* Odstępy między usługami w tej samej sekcji*/
+.section-body .row-desktop + .row-desktop {
+  margin-top: 1rem;          /* odstęp między kolejnymi usługami */
+  border-top: 1px solid #ddd; /* delikatna linia oddzielająca */
+  padding-top: 1rem;         /* odstęp od linii */
+}
