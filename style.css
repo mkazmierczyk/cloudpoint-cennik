@@ -1,4 +1,4 @@
-/* Zmienne kolorów (opcjonalne) */
+/* Zmienne kolorów */
 :root {
   --primary-color: #007bff;
   --accent-color:  #00aaff;
@@ -68,17 +68,15 @@ body {
   padding: 1rem;
 }
 
-/* Rząd 3 kolumn (parametry, cena, guzik) - w widoku desktop */
+/* Układ wiersza – 3 kolumny (parametry, cena, przycisk) */
 .row-desktop {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
 }
-
-/* Każda z 3 "kolumn" wewnątrz row-desktop */
 .col-params {
-  flex: 1; /* parametry zajmują więcej miejsca */
+  flex: 1;
 }
 .col-price {
   width: 150px;
@@ -89,8 +87,7 @@ body {
   text-align: right;
 }
 
-/* RESPONSYWNOŚĆ:
-   Dla wąskich ekranów (max-width:576px) zmieniamy .row-desktop -> kolumny w pionie */
+/* Responsywność: Na wąskich ekranach układ pionowy */
 @media (max-width: 576px) {
   .row-desktop {
     flex-direction: column;
@@ -103,7 +100,7 @@ body {
   }
 }
 
-/* Pola i etykiety w jednej linii */
+/* Inline fields: etykieta, select i input obok siebie */
 .inline-fields {
   display: flex;
   flex-wrap: wrap;
@@ -115,11 +112,10 @@ body {
   margin-bottom: 0;
 }
 
-/* Przyciski – gradient (opcjonalnie) */
+/* Przyciski – gradient i mniejsze rozmiary */
 .btn-primary {
-  /* Zmniejszamy padding i font-size */
-  font-size: 0.85rem;        /* mniejsza czcionka */
-  padding: 0.4rem 0.75rem;   /* mniejszy odstęp w pionie */
+  font-size: 0.85rem;
+  padding: 0.4rem 0.75rem;
   border: none;
   color: #fff;
   background-image: linear-gradient(90deg, var(--primary-color), var(--accent-color));
@@ -128,6 +124,13 @@ body {
 }
 .btn-primary:hover {
   background-image: linear-gradient(90deg, var(--primary-hover), var(--accent-hover));
+}
+
+/* Separator między kolejnymi usługami w jednej sekcji */
+.section-body .row-desktop:not(:first-child) {
+  margin-top: 1rem;
+  border-top: 1px solid #ddd;
+  padding-top: 1rem;
 }
 
 /* Koszyk */
@@ -143,10 +146,4 @@ body {
 #cartTable td, #cartTable th {
   padding: 0.5rem;
   border-top: none;
-}
-/* Odstępy między usługami w tej samej sekcji*/
-.section-body .row-desktop + .row-desktop {
-  margin-top: 1rem;          /* odstęp między kolejnymi usługami */
-  border-top: 1px solid #ddd; /* delikatna linia oddzielająca */
-  padding-top: 1rem;         /* odstęp od linii */
 }

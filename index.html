@@ -6,58 +6,36 @@
   <title>CloudPoint - Cennik</title>
 
   <!-- Bootstrap 5 CSS (CDN) -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-  />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
   <!-- Bootstrap Icons (CDN) -->
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
-  />
-  <!-- Przykład Google Fonts (Montserrat) - podmień jeśli chcesz inną -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" />
+  <!-- Google Fonts - Montserrat (możesz zamienić na Wix Medefor Text, jeśli masz link) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
-    rel="stylesheet"
-  />
-
-  <!-- Twój plik CSS -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Custom CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-light border-bottom">
     <div class="container-fluid">
-      <!-- Logo po lewej -->
+      <!-- Logo -->
       <a class="navbar-brand" href="#">
-        <img
-          src="https://enteo.pl/wp-content/uploads/2023/11/Warstwa_1-5.svg"
-          alt="CloudPoint Logo"
-          style="height:40px;"
-        />
+        <img src="https://enteo.pl/wp-content/uploads/2023/11/Warstwa_1-5.svg" alt="CloudPoint Logo" style="height:40px;">
       </a>
-      <!-- Prawa część navbara - 2 przyciski -->
+      <!-- Toggler i przyciski -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar"
               aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="topNavbar">
         <div class="ms-auto d-flex gap-3">
-          <a
-            href="https://enteo.pl/skontaktuj-sie-z-nami/"
-            target="_blank"
-            class="btn btn-outline-primary"
-          >
+          <a href="https://enteo.pl/skontaktuj-sie-z-nami/" target="_blank" class="btn btn-outline-primary">
             Skontaktuj się z nami
           </a>
-          <a
-            href="https://enteo.pl/wp-content/uploads/2025/02/Cloudpoint_opis_uslug.pdf"
-            target="_blank"
-            class="btn btn-outline-primary"
-          >
+          <a href="https://enteo.pl/wp-content/uploads/2025/02/Cloudpoint_opis_uslug.pdf" target="_blank" class="btn btn-outline-primary">
             Przeczytaj opis usług
           </a>
         </div>
@@ -72,7 +50,7 @@
       <div class="col-12 col-md-3 col-lg-2 px-4" id="leftMenu">
         <h6 class="text-uppercase text-muted">USŁUGI</h6>
         <ul class="list-unstyled" id="categoriesMenu">
-          <!-- generowane w script.js -->
+          <!-- Menu generowane dynamicznie -->
         </ul>
       </div>
 
@@ -83,7 +61,7 @@
           Proszę wybrać jedną z kategorii po lewej, aby zobaczyć dostępne plany/usługi.
         </p>
 
-        <!-- Kontener na sekcje -->
+        <!-- Kontener na sekcje (każda sekcja to box z tytułem i treścią) -->
         <div id="plansContainer"></div>
 
         <!-- KOSZYK -->
@@ -99,7 +77,7 @@
                   <th>Usuń</th>
                 </tr>
               </thead>
-              <tbody><!-- generowane w script.js --></tbody>
+              <tbody><!-- Generowane dynamicznie --></tbody>
             </table>
           </div>
           <div class="text-end mt-2">
@@ -114,9 +92,9 @@
     <small>&copy; 2025 CloudPoint, All rights reserved.</small>
   </footer>
 
-  <!-- Bootstrap 5 JS -->
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Twój script.js -->
+  <!-- Script JS -->
   <script src="script.js"></script>
 </body>
 </html>
