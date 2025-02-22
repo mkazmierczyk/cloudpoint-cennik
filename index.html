@@ -15,7 +15,7 @@
     rel="stylesheet"
     href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
   />
-  <!-- Google Fonts – przykład użycia Open Sans (podmień na "Wix Medefor Text" jeśli masz właściwy link) -->
+  <!-- Przykład Google Fonts (Montserrat) - podmień jeśli chcesz inną -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
@@ -23,7 +23,7 @@
     rel="stylesheet"
   />
 
-  <!-- Twój style -->
+  <!-- Twój plik CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -33,19 +33,31 @@
     <div class="container-fluid">
       <!-- Logo po lewej -->
       <a class="navbar-brand" href="#">
-        <img src="https://enteo.pl/wp-content/uploads/2023/11/Warstwa_1-5.svg" alt="CloudPoint Logo" style="height:40px;">
+        <img
+          src="https://enteo.pl/wp-content/uploads/2023/11/Warstwa_1-5.svg"
+          alt="CloudPoint Logo"
+          style="height:40px;"
+        />
       </a>
-      <!-- Przyciski na prawej -->
+      <!-- Prawa część navbara - 2 przyciski -->
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar"
               aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="topNavbar">
         <div class="ms-auto d-flex gap-3">
-          <a href="https://enteo.pl/skontaktuj-sie-z-nami/" target="_blank" class="btn btn-outline-primary">
+          <a
+            href="https://enteo.pl/skontaktuj-sie-z-nami/"
+            target="_blank"
+            class="btn btn-outline-primary"
+          >
             Skontaktuj się z nami
           </a>
-          <a href="https://enteo.pl/wp-content/uploads/2025/02/Cloudpoint_opis_uslug.pdf" target="_blank" class="btn btn-outline-primary">
+          <a
+            href="https://enteo.pl/wp-content/uploads/2025/02/Cloudpoint_opis_uslug.pdf"
+            target="_blank"
+            class="btn btn-outline-primary"
+          >
             Przeczytaj opis usług
           </a>
         </div>
@@ -60,7 +72,7 @@
       <div class="col-12 col-md-3 col-lg-2 px-4" id="leftMenu">
         <h6 class="text-uppercase text-muted">USŁUGI</h6>
         <ul class="list-unstyled" id="categoriesMenu">
-          <!-- generowane przez script.js -->
+          <!-- generowane w script.js -->
         </ul>
       </div>
 
@@ -71,7 +83,7 @@
           Proszę wybrać jedną z kategorii po lewej, aby zobaczyć dostępne plany/usługi.
         </p>
 
-        <!-- Kontener, do którego renderujemy sekcje (każda jako .section-wrapper) -->
+        <!-- Kontener na sekcje -->
         <div id="plansContainer"></div>
 
         <!-- KOSZYK -->
@@ -87,7 +99,7 @@
                   <th>Usuń</th>
                 </tr>
               </thead>
-              <tbody><!-- generowane przez script.js --></tbody>
+              <tbody><!-- generowane w script.js --></tbody>
             </table>
           </div>
           <div class="text-end mt-2">
