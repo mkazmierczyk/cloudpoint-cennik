@@ -147,3 +147,21 @@ body {
   padding: 0.5rem;
   border-top: none;
 }
+.footer-kontakt {
+  background-color: #000; /* czarne tło */
+  color: #fff;            /* biały tekst */
+}
+
+.footer-kontakt h1 {
+  font-weight: 700;       /* pogrubienie tytułu */
+  letter-spacing: -1px;   /* delikatne ścieśnienie liter (opcjonalne) */
+}
+
+.footer-kontakt p {
+  margin-bottom: 0.5rem;
+  line-height: 1.5;       /* nieco większy odstęp między wierszami */
+}
+
+.footer-kontakt strong {
+  font-weight: 600;
+}
