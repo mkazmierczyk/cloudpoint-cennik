@@ -59,7 +59,8 @@ body {
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 .section-title {
-  background-color: #e3f1ff;
+  background-image: linear-gradient(135deg, var(--primary-hover), var(--accent-color));
+  color: #fff;
   padding: 0.75rem 1rem;
 }
 .section-body {
@@ -116,9 +117,12 @@ body {
 
 /* Przyciski – gradient (opcjonalnie) */
 .btn-primary {
-  background-image: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  /* Zmniejszamy padding i font-size */
+  font-size: 0.85rem;        /* mniejsza czcionka */
+  padding: 0.4rem 0.75rem;   /* mniejszy odstęp w pionie */
   border: none;
   color: #fff;
+  background-image: linear-gradient(90deg, var(--primary-color), var(--accent-color));
   transition: background 0.3s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.2);
 }
