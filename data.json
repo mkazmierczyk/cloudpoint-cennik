@@ -10,7 +10,15 @@
       ],
       "backupPricePerGB": 0.1,
       "publicIPPrice": 10,
+
       "services": [
+        { "label": "Windows Server Std (1 licencja)", "price": 20 },
+        { "label": "Windows Server DC (1 licencja)",  "price": 50 },
+        { "label": "SQL Server Std (1 licencja)",     "price": 45 }
+      ],
+
+
+      "msSplaServices": [
         { "label": "Windows Server Std (1 licencja)", "price": 20 },
         { "label": "Windows Server DC (1 licencja)",  "price": 50 },
         { "label": "SQL Server Std (1 licencja)",     "price": 45 }
@@ -42,10 +50,17 @@
       "supportPlatinumDesc": "PLATINUM-AddON – priorytetowe wsparcie i dedykowany opiekun.",
       "backupPricePerGB": 0.3,
       "publicIPPrice": 15,
+
       "services": [
         { "label": "MS SQL Web Edition", "price": 25 },
         { "label": "MS SQL Standard",    "price": 70 }
       ],
+
+      "msSplaServices": [
+        { "label": "MS SQL Web Edition", "price": 25 },
+        { "label": "MS SQL Standard",    "price": 70 }
+      ],
+
       "drServices": [
         {
           "id": "C-DR-STORAGE",
@@ -66,6 +81,8 @@
       "type": "saas",
       "harmonogramCost": 10,
       "terminalSecurityCost": 20,
+
+
       "services": [
         {
           "id": "saas_msSQL",
@@ -111,6 +128,12 @@
           "price": 2,
           "desc": "Cena za GB dodatkowego miejsca."
         }
+      ],
+
+
+      "msSplaServices": [
+        { "label": "Office 365 Business", "price": 35 },
+        { "label": "Office 365 E3",       "price": 70 }
       ]
     },
     {
