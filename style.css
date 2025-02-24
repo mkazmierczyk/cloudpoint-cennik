@@ -68,7 +68,7 @@ body {
   padding: 1rem;
 }
 
-/* Wiersz oparty o flex (3 kolumny: parametry, cena, przycisk) */
+/* Układ wiersza – 3 kolumny */
 .row-desktop {
   display: flex;
   align-items: center;
@@ -87,7 +87,7 @@ body {
   text-align: right;
 }
 
-/* Responsywność: na wąskich ekranach układ pionowy */
+/* Responsywność – na wąskich ekranach układ pionowy */
 @media (max-width: 576px) {
   .row-desktop {
     flex-direction: column;
@@ -100,7 +100,7 @@ body {
   }
 }
 
-/* Inline fields – etykiety, selecty, inputy ustawione obok siebie */
+/* Inline fields – etykiety, inputy, selecty w jednym wierszu */
 .inline-fields {
   display: flex;
   flex-wrap: wrap;
@@ -112,7 +112,7 @@ body {
   margin-bottom: 0;
 }
 
-/* Przyciski – gradient i mniejsze rozmiary */
+/* Przyciski – gradient i mniejszy rozmiar */
 .btn-primary {
   font-size: 0.85rem;
   padding: 0.4rem 0.75rem;

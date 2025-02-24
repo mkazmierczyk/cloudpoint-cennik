@@ -1,17 +1,17 @@
 /****************************************************************************************************
  * script.js – Kompletny plik aplikacji
  *
- * Obsługuje kategorie:
- * - IaaS (konfiguracja z sliderami, backup, public IP)
- * - PaaS (instancje, wsparcie, dysk, backup, IP, DR)
- * - SaaS (usługi – baza MS SQL, Enova, Enova API, Terminal, Extra miejsce; z ewentualnymi zależnościami)
- * - Acronis (usługi pobierane z data.json – filtrowane po prefiksach:
- *      acronis_perGB, acronis_perWorkload, acronis_M365_GSuite, acronis_security, acronis_management)
- * - Microsoft CSP (Microsoft 365)
- * - Bezpieczeństwo (usługi webowe, firewall, analiza zabezpieczeń)
+ * Kategorie:
+ * • IaaS – Konfiguracja sliderami oraz sekcja "Licencje Microsoft"
+ * • PaaS – Instancje, wsparcie, backup, IP, dodatkowo: sekcje "Licencje Microsoft" i "Disaster Recovery"
+ * • SaaS – Aplikacje (MS SQL, Enova, Enova API, Terminal, Extra miejsce) oraz osobna sekcja "Licencje Microsoft"
+ * • Acronis – Usługi pobierane z data.json, filtrowane po prefiksach:
+ *       acronis_perGB, acronis_perWorkload, acronis_M365_GSuite, acronis_security, acronis_management
+ * • Microsoft CSP – Sekcja Microsoft 365
+ * • Bezpieczeństwo – Aplikacje webowe, Firewall, Analiza zabezpieczeń
  *
- * Layout oparty jest o flexbox (desktop: 3 kolumny; mobile: kolumny układają się pionowo),
- * a koszyk jest aktualizowany przy każdej zmianie.
+ * Layout oparty o flexbox (desktop: 3 kolumny, mobile: kolumny układają się pionowo).
+ * Koszyk jest aktualizowany przy każdej zmianie.
  ****************************************************************************************************/
 
 let categoriesData = [];
@@ -53,7 +53,7 @@ function renderCategoriesMenu(categories) {
 }
 
 /****************************************************************************************************
- * selectCategory – wybiera kategorię i wywołuje funkcje renderujące
+ * selectCategory – wybiera kategorię i wywołuje odpowiednie funkcje renderujące
  ****************************************************************************************************/
 function selectCategory(catIndex) {
   const category = categoriesData[catIndex];
@@ -64,16 +64,16 @@ function selectCategory(catIndex) {
   switch (category.type) {
     case 'iaas':
       renderIaaS(category, container);
-      renderMsLicSection(category, container);
+      renderMsLicSection(category, container); // Licencje Microsoft dla IaaS
       break;
     case 'paas':
       renderPaaSMachinesSection(category, container);
-      renderMsLicSection(category, container);
+      renderMsLicSection(category, container); // Licencje Microsoft dla PaaS
       renderPaaSDisasterRecoverySection(category, container);
       break;
     case 'saas':
       renderSaaSApplications(category, container);
-      renderMsLicSection(category, container);
+      renderSaaS_MsLicSection(category, container); // Licencje Microsoft dla SaaS
       break;
     case 'acronis':
       renderAcronisSections(category, container);
@@ -128,11 +128,10 @@ function createFlexRow() {
 }
 
 /****************************************************************************************************
- * Funkcje dla kategorii IaaS, PaaS, SaaS, Microsoft CSP, Bezpieczeństwo
- * – implementacje oparte na wcześniejszych wersjach.
+ * Funkcje dla IaaS, PaaS, SaaS, Microsoft CSP, Bezpieczeństwo
  ****************************************************************************************************/
 
-// IaaS – używamy sliderów
+// IaaS – konfiguracja sliderami
 function renderIaaS(category, container) {
   const sec = createSection("Maszyny wirtualne (IaaS)");
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
@@ -202,6 +201,62 @@ function renderIaaS(category, container) {
     if (backupVal > 0) desc += `, Backup=${backupVal}GB`;
     if (ipVal > 0) desc += `, +${ipVal}xPublicIP`;
     cart.push({ name: "IaaS", details: desc, price: total });
+    renderCart();
+  });
+}
+
+// Licencje Microsoft dla IaaS i PaaS
+function renderMsLicSection(category, container) {
+  if (!category.msSplaServices) return;
+  const sec = createSection("Licencje Microsoft");
+  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
+  paramCol.innerHTML = `
+    <div class="inline-fields">
+      <label class="label-inline">Wybierz licencję:</label>
+      <select id="msSelect" class="form-select" style="width:auto; min-width:150px;">
+        <option value="" disabled selected>-- wybierz --</option>
+      </select>
+      <label class="label-inline">Ilość:</label>
+      <input type="number" id="msQty" value="1" min="1" style="width:60px;">
+    </div>
+  `;
+  priceCol.innerHTML = `<strong><span id="msPrice">0.00</span> PLN</strong>`;
+  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddMS">Dodaj do wyceny</button>`;
+  sec.bodyContainer.appendChild(row);
+  container.appendChild(sec.wrapper);
+  const msSelect = paramCol.querySelector('#msSelect');
+  const msQty = paramCol.querySelector('#msQty');
+  const msPriceEl = priceCol.querySelector('#msPrice');
+  const btnAddMS = buttonCol.querySelector('#btnAddMS');
+  category.msSplaServices.forEach(srv => {
+    const opt = document.createElement('option');
+    opt.value = srv.price;
+    opt.setAttribute('data-label', srv.label);
+    opt.textContent = `${srv.label} (${srv.price} PLN)`;
+    msSelect.appendChild(opt);
+  });
+  function updateMsPrice() {
+    if (!msSelect.value) {
+      msPriceEl.textContent = '0.00';
+      return;
+    }
+    const price = parseFloat(msSelect.value) || 0;
+    const qty = parseInt(msQty.value, 10) || 1;
+    msPriceEl.textContent = (price * qty).toFixed(2);
+  }
+  msSelect.addEventListener('change', updateMsPrice);
+  msQty.addEventListener('input', updateMsPrice);
+  updateMsPrice();
+  btnAddMS.addEventListener('click', () => {
+    if (!msSelect.value) {
+      alert("Wybierz licencję Microsoft!");
+      return;
+    }
+    const label = msSelect.options[msSelect.selectedIndex].getAttribute('data-label') || "";
+    const price = parseFloat(msSelect.value) || 0;
+    const qty = parseInt(msQty.value, 10) || 1;
+    const total = price * qty;
+    cart.push({ name: "Licencje Microsoft", details: `${label} x${qty}`, price: total });
     renderCart();
   });
 }
@@ -389,6 +444,63 @@ function renderSaaSApplications(category, container) {
   container.appendChild(sec.wrapper);
 }
 
+// SaaS – Licencje Microsoft (osobna sekcja)
+function renderSaaS_MsLicSection(category, container) {
+  if (!category.msSplaServices) return;
+  const sec = createSection("Licencje Microsoft (SaaS)");
+  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
+  paramCol.innerHTML = `
+    <div class="inline-fields">
+      <label class="label-inline">Wybierz licencję:</label>
+      <select id="saasMsSelect" class="form-select" style="width:auto; min-width:150px;">
+        <option value="" disabled selected>-- wybierz --</option>
+      </select>
+      <label class="label-inline">Ilość:</label>
+      <input type="number" id="saasMsQty" value="1" min="1" style="width:60px;">
+    </div>
+  `;
+  priceCol.innerHTML = `<strong><span id="saasMsPrice">0.00</span> PLN</strong>`;
+  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddSaasMs">Dodaj do wyceny</button>`;
+  sec.bodyContainer.appendChild(row);
+  container.appendChild(sec.wrapper);
+  const saasMsSelect = paramCol.querySelector('#saasMsSelect');
+  const saasMsQty = paramCol.querySelector('#saasMsQty');
+  const saasMsPriceEl = priceCol.querySelector('#saasMsPrice');
+  const btnAddSaasMs = buttonCol.querySelector('#btnAddSaasMs');
+  category.msSplaServices.forEach(srv => {
+    const opt = document.createElement('option');
+    opt.value = srv.price;
+    opt.setAttribute('data-label', srv.label);
+    opt.textContent = `${srv.label} (${srv.price} PLN)`;
+    saasMsSelect.appendChild(opt);
+  });
+  function updateSaasMsPrice() {
+    if (!saasMsSelect.value) {
+      saasMsPriceEl.textContent = '0.00';
+      return;
+    }
+    const price = parseFloat(saasMsSelect.value) || 0;
+    const qty = parseInt(saasMsQty.value, 10) || 1;
+    saasMsPriceEl.textContent = (price * qty).toFixed(2);
+  }
+  saasMsSelect.addEventListener('change', updateSaasMsPrice);
+  saasMsQty.addEventListener('input', updateSaasMsPrice);
+  updateSaasMsPrice();
+  btnAddSaasMs.addEventListener('click', () => {
+    if (!saasMsSelect.value) {
+      alert("Wybierz licencję Microsoft!");
+      return;
+    }
+    const label = saasMsSelect.options[saasMsSelect.selectedIndex].getAttribute('data-label') || "";
+    const price = parseFloat(saasMsSelect.value) || 0;
+    const qty = parseInt(saasMsQty.value, 10) || 1;
+    const total = price * qty;
+    cart.push({ name: "Licencje Microsoft (SaaS)", details: `${label} x${qty}`, price: total });
+    renderCart();
+  });
+}
+
+// SaaS – MS SQL, Enova, Enova API, Terminal, Extra miejsce
 function renderSaaS_MsSQLRow(category, bodyContainer) {
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
   paramCol.innerHTML = `
@@ -417,11 +529,11 @@ function renderSaaS_MsSQLRow(category, bodyContainer) {
       msSqlSelect.appendChild(o);
     });
   }
-  function updatePrice() {
+  function updateMsSqlPrice() {
     const val = parseFloat(msSqlSelect.value) || 0;
     msSqlPriceEl.textContent = val.toFixed(2);
   }
-  function updateDesc() {
+  function updateMsSqlDesc() {
     if (!msSqlSelect.value) {
       msSqlDescEl.textContent = "";
       return;
@@ -430,11 +542,11 @@ function renderSaaS_MsSQLRow(category, bodyContainer) {
     msSqlDescEl.textContent = sel.getAttribute('data-desc') || "";
   }
   msSqlSelect.addEventListener('change', () => {
-    updatePrice();
-    updateDesc();
+    updateMsSqlPrice();
+    updateMsSqlDesc();
   });
-  updatePrice();
-  updateDesc();
+  updateMsSqlPrice();
+  updateMsSqlDesc();
   btnAddMsSql.addEventListener('click', () => {
     if (!msSqlSelect.value) {
       alert("Wybierz Bazę SQL!");
@@ -481,14 +593,14 @@ function renderSaaS_EnovaRow(category, bodyContainer) {
       enovaSelect.appendChild(o);
     });
   }
-  function updatePrice() {
+  function updateEnovaPrice() {
     let total = parseFloat(enovaSelect.value) || 0;
     if (enovaHarm.checked) {
       total += (category.harmonogramCost || 10);
     }
     enovaPrice.textContent = total.toFixed(2);
   }
-  function updateDesc() {
+  function updateEnovaDesc() {
     if (!enovaSelect.value) {
       enovaDesc.textContent = "";
       return;
@@ -497,12 +609,12 @@ function renderSaaS_EnovaRow(category, bodyContainer) {
     enovaDesc.textContent = sel.getAttribute('data-desc') || "";
   }
   enovaSelect.addEventListener('change', () => {
-    updatePrice();
-    updateDesc();
+    updateEnovaPrice();
+    updateEnovaDesc();
   });
-  enovaHarm.addEventListener('change', updatePrice);
-  updatePrice();
-  updateDesc();
+  enovaHarm.addEventListener('change', updateEnovaPrice);
+  updateEnovaPrice();
+  updateEnovaDesc();
   btnAddEnova.addEventListener('click', () => {
     if (!enovaSelect.value) {
       alert("Wybierz Enova!");
@@ -548,11 +660,11 @@ function renderSaaS_EnovaApiRow(category, bodyContainer) {
       enovaApiSelect.appendChild(o);
     });
   }
-  function updatePrice() {
+  function updateEnovaApiPrice() {
     const val = parseFloat(enovaApiSelect.value) || 0;
     enovaApiPriceEl.textContent = val.toFixed(2);
   }
-  function updateDesc() {
+  function updateEnovaApiDesc() {
     if (!enovaApiSelect.value) {
       enovaApiDescEl.textContent = "";
       return;
@@ -561,11 +673,11 @@ function renderSaaS_EnovaApiRow(category, bodyContainer) {
     enovaApiDescEl.textContent = sel.getAttribute('data-desc') || "";
   }
   enovaApiSelect.addEventListener('change', () => {
-    updatePrice();
-    updateDesc();
+    updateEnovaApiPrice();
+    updateEnovaApiDesc();
   });
-  updatePrice();
-  updateDesc();
+  updateEnovaApiPrice();
+  updateEnovaApiDesc();
   btnAddEnovaApi.addEventListener('click', () => {
     if (!enovaApiSelect.value) {
       alert("Wybierz Enova365Web API!");
@@ -659,250 +771,6 @@ function renderSaaS_ExtraDataRow(category, bodyContainer) {
     }
     const cost = val * (category.extraDataStoragePrice || 2);
     cart.push({ name: "SaaS - Dodatkowe miejsce", details: `Ilość=${val}GB`, price: cost });
-    renderCart();
-  });
-}
-
-// Microsoft CSP
-function renderMicrosoft365Section(category, container) {
-  const sec = createSection("Microsoft 365");
-  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
-  paramCol.innerHTML = `
-    <div class="inline-fields">
-      <label class="label-inline">Wybierz subskrypcję:</label>
-      <select id="m365Select" class="form-select" style="width:auto; min-width:150px;">
-        <option value="" disabled selected>-- wybierz --</option>
-      </select>
-      <label class="label-inline">Ilość:</label>
-      <input type="number" id="m365Qty" value="1" min="1" style="width:60px;">
-    </div>
-    <div id="m365Desc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
-  `;
-  priceCol.innerHTML = `<strong><span id="m365Price">0.00</span> PLN</strong>`;
-  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddM365">Dodaj do wyceny</button>`;
-  sec.bodyContainer.appendChild(row);
-  container.appendChild(sec.wrapper);
-  const m365Select = paramCol.querySelector('#m365Select');
-  const m365Desc = paramCol.querySelector('#m365Desc');
-  const m365Qty = paramCol.querySelector('#m365Qty');
-  const m365PriceEl = priceCol.querySelector('#m365Price');
-  const btnAddM365 = buttonCol.querySelector('#btnAddM365');
-  if (category.msCspServices && category.msCspServices.length) {
-    category.msCspServices.forEach(srv => {
-      const opt = document.createElement('option');
-      opt.value = srv.price;
-      opt.setAttribute('data-label', srv.label);
-      opt.setAttribute('data-desc', srv.desc || "");
-      opt.textContent = `${srv.label} (${srv.price} PLN)`;
-      m365Select.appendChild(opt);
-    });
-  }
-  function updateM365Desc() {
-    if (!m365Select.value) {
-      m365Desc.textContent = "";
-      return;
-    }
-    const sel = m365Select.options[m365Select.selectedIndex];
-    m365Desc.textContent = sel.getAttribute('data-desc') || "";
-  }
-  function updateM365Price() {
-    const val = parseFloat(m365Select.value) || 0;
-    const qty = parseInt(m365Qty.value, 10) || 1;
-    m365PriceEl.textContent = (val * qty).toFixed(2);
-  }
-  m365Select.addEventListener('change', () => {
-    updateM365Desc();
-    updateM365Price();
-  });
-  m365Qty.addEventListener('input', updateM365Price);
-  updateM365Desc();
-  updateM365Price();
-  btnAddM365.addEventListener('click', () => {
-    if (!m365Select.value) {
-      alert("Wybierz subskrypcję Microsoft 365!");
-      return;
-    }
-    const sel = m365Select.options[m365Select.selectedIndex];
-    const label = sel.getAttribute('data-label') || "M365 sub";
-    const val = parseFloat(m365Select.value) || 0;
-    const qty = parseInt(m365Qty.value, 10) || 1;
-    const total = val * qty;
-    cart.push({ name: "Microsoft 365", details: `${label} x${qty}`, price: total });
-    renderCart();
-  });
-}
-
-// Bezpieczeństwo – Aplikacje webowe, Firewall, Analiza zabezpieczeń
-function renderSecurityWebAppsSection(category, container) {
-  const sec = createSection("Aplikacje webowe");
-  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
-  paramCol.innerHTML = `
-    <div class="inline-fields">
-      <label class="label-inline">Wybierz usługę:</label>
-      <select id="webAppSelect" class="form-select" style="width:auto; min-width:150px;">
-        <option value="" disabled selected>-- wybierz --</option>
-      </select>
-    </div>
-    <div id="webAppDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
-  `;
-  priceCol.innerHTML = `<strong><span id="webAppPrice">0.00</span> PLN</strong>`;
-  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddWebApp">Dodaj do wyceny</button>`;
-  sec.bodyContainer.appendChild(row);
-  container.appendChild(sec.wrapper);
-  const webAppSelect = paramCol.querySelector('#webAppSelect');
-  const webAppDesc = paramCol.querySelector('#webAppDesc');
-  const webAppPriceEl = priceCol.querySelector('#webAppPrice');
-  const btnAddWebApp = buttonCol.querySelector('#btnAddWebApp');
-  if (category.securityWebApp && category.securityWebApp.length) {
-    category.securityWebApp.forEach(srv => {
-      const opt = document.createElement('option');
-      opt.value = srv.price;
-      opt.setAttribute('data-label', srv.label);
-      opt.setAttribute('data-desc', srv.desc || "");
-      opt.textContent = `${srv.label} (${srv.price} PLN)`;
-      webAppSelect.appendChild(opt);
-    });
-  }
-  function updatePrice() {
-    const val = parseFloat(webAppSelect.value) || 0;
-    webAppPriceEl.textContent = val.toFixed(2);
-  }
-  function updateDesc() {
-    if (!webAppSelect.value) {
-      webAppDesc.textContent = "";
-      return;
-    }
-    const sel = webAppSelect.options[webAppSelect.selectedIndex];
-    webAppDesc.textContent = sel.getAttribute('data-desc') || "";
-  }
-  webAppSelect.addEventListener('change', () => {
-    updatePrice();
-    updateDesc();
-  });
-  updatePrice();
-  updateDesc();
-  btnAddWebApp.addEventListener('click', () => {
-    if (!webAppSelect.value) {
-      alert("Wybierz usługę skanowania!");
-      return;
-    }
-    const sel = webAppSelect.options[webAppSelect.selectedIndex];
-    const label = sel.getAttribute('data-label') || "";
-    const val = parseFloat(sel.value) || 0;
-    cart.push({ name: "Aplikacje webowe", details: label, price: val });
-    renderCart();
-  });
-}
-
-function renderSecurityFirewallSection(category, container) {
-  const sec = createSection("Firewall w chmurze");
-  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
-  paramCol.innerHTML = `
-    <div class="inline-fields">
-      <label class="label-inline">Wybierz usługę:</label>
-      <select id="fwSelect" class="form-select" style="width:auto; min-width:150px;">
-        <option value="" disabled selected>-- wybierz --</option>
-      </select>
-    </div>
-    <div id="fwDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
-  `;
-  priceCol.innerHTML = `<strong><span id="fwPrice">0.00</span> PLN</strong>`;
-  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddFW">Dodaj do wyceny</button>`;
-  sec.bodyContainer.appendChild(row);
-  container.appendChild(sec.wrapper);
-  const fwSelect = paramCol.querySelector('#fwSelect');
-  const fwDesc = paramCol.querySelector('#fwDesc');
-  const fwPriceEl = priceCol.querySelector('#fwPrice');
-  const btnAddFW = buttonCol.querySelector('#btnAddFW');
-  if (category.securityFW && category.securityFW.length) {
-    category.securityFW.forEach(srv => {
-      const o = document.createElement('option');
-      o.value = srv.price;
-      o.setAttribute('data-label', srv.label);
-      o.setAttribute('data-desc', srv.desc || "");
-      o.textContent = `${srv.label} (${srv.price} PLN)`;
-      fwSelect.appendChild(o);
-    });
-  }
-  function updatePrice() {
-    const val = parseFloat(fwSelect.value) || 0;
-    fwPriceEl.textContent = val.toFixed(2);
-  }
-  function updateDesc() {
-    if (!fwSelect.value) {
-      fwDesc.textContent = "";
-      return;
-    }
-    const sel = fwSelect.options[fwSelect.selectedIndex];
-    fwDesc.textContent = sel.getAttribute('data-desc') || "";
-  }
-  fwSelect.addEventListener('change', () => {
-    updatePrice();
-    updateDesc();
-  });
-  updatePrice();
-  updateDesc();
-  btnAddFW.addEventListener('click', () => {
-    if (!fwSelect.value) {
-      alert("Wybierz usługę Firewalla!");
-      return;
-    }
-    const sel = fwSelect.options[fwSelect.selectedIndex];
-    const label = sel.getAttribute('data-label') || "";
-    const val = parseFloat(sel.value) || 0;
-    cart.push({ name: "Firewall w chmurze", details: label, price: val });
-    renderCart();
-  });
-}
-
-function renderSecurityAnalysisSection(category, container) {
-  const sec = createSection("Analiza zabezpieczeń");
-  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
-  paramCol.innerHTML = `
-    <div class="inline-fields">
-      <label class="label-inline">Centralne logowanie (szt.):</label>
-      <input type="number" id="centralLog" value="0" min="0" style="width:60px;">
-    </div>
-    <div class="inline-fields mt-2">
-      <label class="label-inline">Pamięć do logowania (GB):</label>
-      <input type="number" id="memoryGB" value="0" min="0" style="width:60px;">
-    </div>
-  `;
-  priceCol.innerHTML = `<strong><span id="analysisPrice">0.00</span> PLN</strong>`;
-  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddAnalysis">Dodaj do wyceny</button>`;
-  sec.bodyContainer.appendChild(row);
-  container.appendChild(sec.wrapper);
-  const centralLog = paramCol.querySelector('#centralLog');
-  const memoryGB = paramCol.querySelector('#memoryGB');
-  const priceEl = priceCol.querySelector('#analysisPrice');
-  const btnAdd = buttonCol.querySelector('#btnAddAnalysis');
-  function updateAnalysis() {
-    let total = 0;
-    const logVal = parseInt(centralLog.value, 10) || 0;
-    const memVal = parseInt(memoryGB.value, 10) || 0;
-    if (logVal > 0) {
-      total += logVal * 20 + memVal * 1;
-    }
-    priceEl.textContent = total.toFixed(2);
-  }
-  [centralLog, memoryGB].forEach(el => el.addEventListener('input', updateAnalysis));
-  updateAnalysis();
-  btnAdd.addEventListener('click', () => {
-    const logVal = parseInt(centralLog.value, 10) || 0;
-    const memVal = parseInt(memoryGB.value, 10) || 0;
-    if (logVal > 0 && memVal < 5) {
-      alert("Jeśli używasz centralnego logowania, pamięć musi być min. 5GB!");
-      return;
-    }
-    let total = 0;
-    let desc = "";
-    if (logVal > 0) {
-      total = logVal * 20 + memVal;
-      desc = `CentralLog=${logVal}, Memory=${memVal}GB`;
-    } else {
-      desc = "Brak analizy (0)";
-    }
-    cart.push({ name: "Analiza zabezpieczeń", details: desc, price: total });
     renderCart();
   });
 }
@@ -1007,11 +875,11 @@ function renderSecurityWebAppsSection(category, container) {
       webAppSelect.appendChild(opt);
     });
   }
-  function updatePrice() {
+  function updateWebAppPrice() {
     const val = parseFloat(webAppSelect.value) || 0;
     webAppPriceEl.textContent = val.toFixed(2);
   }
-  function updateDesc() {
+  function updateWebAppDesc() {
     if (!webAppSelect.value) {
       webAppDesc.textContent = "";
       return;
@@ -1020,11 +888,11 @@ function renderSecurityWebAppsSection(category, container) {
     webAppDesc.textContent = sel.getAttribute('data-desc') || "";
   }
   webAppSelect.addEventListener('change', () => {
-    updatePrice();
-    updateDesc();
+    updateWebAppPrice();
+    updateWebAppDesc();
   });
-  updatePrice();
-  updateDesc();
+  updateWebAppPrice();
+  updateWebAppDesc();
   btnAddWebApp.addEventListener('click', () => {
     if (!webAppSelect.value) {
       alert("Wybierz usługę skanowania!");
@@ -1068,11 +936,11 @@ function renderSecurityFirewallSection(category, container) {
       fwSelect.appendChild(o);
     });
   }
-  function updatePrice() {
+  function updateFwPrice() {
     const val = parseFloat(fwSelect.value) || 0;
     fwPriceEl.textContent = val.toFixed(2);
   }
-  function updateDesc() {
+  function updateFwDesc() {
     if (!fwSelect.value) {
       fwDesc.textContent = "";
       return;
@@ -1081,11 +949,11 @@ function renderSecurityFirewallSection(category, container) {
     fwDesc.textContent = sel.getAttribute('data-desc') || "";
   }
   fwSelect.addEventListener('change', () => {
-    updatePrice();
-    updateDesc();
+    updateFwPrice();
+    updateFwDesc();
   });
-  updatePrice();
-  updateDesc();
+  updateFwPrice();
+  updateFwDesc();
   btnAddFW.addEventListener('click', () => {
     if (!fwSelect.value) {
       alert("Wybierz usługę Firewalla!");
@@ -1467,6 +1335,19 @@ function renderAcronisSections(category, container) {
   renderAcronisM365GSuiteSection(category, container);
   renderAcronisSecuritySection(category, container);
   renderAcronisManagementSection(category, container);
+}
+
+// Bezpieczeństwo – analiza zabezpieczeń jest już częścią renderSecurityAnalysisSection
+// Microsoft CSP – Microsoft 365 jest renderowany w renderMicrosoft365Section
+// SaaS – Aplikacje zostały rozbite na renderSaaS_MsSQLRow, renderSaaS_EnovaRow, renderSaaS_EnovaApiRow, renderSaaS_TerminalRow, renderSaaS_ExtraDataRow
+
+// Fallback – renderServicesList
+function renderServicesList(category, container) {
+  const sec = createSection(category.name);
+  const div = document.createElement('div');
+  div.textContent = "Brak szczegółowej konfiguracji.";
+  sec.bodyContainer.appendChild(div);
+  container.appendChild(sec.wrapper);
 }
 
 /****************************************************************************************************
