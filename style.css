@@ -68,7 +68,7 @@ body {
   padding: 1rem;
 }
 
-/* Układ wiersza – 3 kolumny (parametry, cena, przycisk) */
+/* Wiersz oparty o flex (3 kolumny: parametry, cena, przycisk) */
 .row-desktop {
   display: flex;
   align-items: center;
@@ -87,7 +87,7 @@ body {
   text-align: right;
 }
 
-/* Responsywność: Na wąskich ekranach układ pionowy */
+/* Responsywność: na wąskich ekranach układ pionowy */
 @media (max-width: 576px) {
   .row-desktop {
     flex-direction: column;
@@ -100,7 +100,7 @@ body {
   }
 }
 
-/* Inline fields: etykieta, select i input obok siebie */
+/* Inline fields – etykiety, selecty, inputy ustawione obok siebie */
 .inline-fields {
   display: flex;
   flex-wrap: wrap;
@@ -126,7 +126,7 @@ body {
   background-image: linear-gradient(90deg, var(--primary-hover), var(--accent-hover));
 }
 
-/* Separator między kolejnymi usługami w jednej sekcji */
+/* Separator między wierszami usług w jednej sekcji */
 .section-body .row-desktop:not(:first-child) {
   margin-top: 1rem;
   border-top: 1px solid #ddd;
@@ -147,21 +147,21 @@ body {
   padding: 0.5rem;
   border-top: none;
 }
+
+/* Footer – przykładowy czarny footer */
 .footer-kontakt {
-  background-color: #000; /* czarne tło */
-  color: #fff;            /* biały tekst */
+  background-color: #000;
+  color: #fff;
+  padding: 2rem 0;
 }
-
 .footer-kontakt h1 {
-  font-weight: 700;       /* pogrubienie tytułu */
-  letter-spacing: -1px;   /* delikatne ścieśnienie liter (opcjonalne) */
+  font-weight: 700;
+  letter-spacing: -1px;
 }
-
 .footer-kontakt p {
   margin-bottom: 0.5rem;
-  line-height: 1.5;       /* nieco większy odstęp między wierszami */
+  line-height: 1.5;
 }
-
 .footer-kontakt strong {
   font-weight: 600;
 }

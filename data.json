@@ -10,7 +10,7 @@
       ],
       "backupPricePerGB": 0.1,
       "publicIPPrice": 10,
-      "msSplaServices": [
+      "services": [
         { "label": "Windows Server Std (1 licencja)", "price": 20 },
         { "label": "Windows Server DC (1 licencja)",  "price": 50 },
         { "label": "SQL Server Std (1 licencja)",     "price": 45 }
@@ -42,7 +42,7 @@
       "supportPlatinumDesc": "PLATINUM-AddON – priorytetowe wsparcie i dedykowany opiekun.",
       "backupPricePerGB": 0.3,
       "publicIPPrice": 15,
-      "msSplaServices": [
+      "services": [
         { "label": "MS SQL Web Edition", "price": 25 },
         { "label": "MS SQL Standard",    "price": 70 }
       ],
@@ -64,78 +64,163 @@
     {
       "name": "SaaS",
       "type": "saas",
-
       "harmonogramCost": 10,
       "terminalSecurityCost": 20,
-
-      "msSqlDbOptions": [
+      "services": [
         {
-          "label": "SQL Basic DB",
+          "id": "saas_msSQL",
+          "label": "Baza danych Microsoft SQL",
           "price": 30,
           "desc": "Podstawowa baza MS SQL."
         },
         {
-          "label": "SQL Standard DB",
-          "price": 60,
-          "desc": "Standardowa baza MS SQL."
-        }
-      ],
-      "enovaWebOptions": [
-        {
-          "label": "Enova365Web Basic",
+          "id": "saas_enova",
+          "label": "Enova365Web",
           "price": 50,
           "desc": "Podstawowa licencja Enova365Web."
         },
         {
-          "label": "Enova365Web Full",
-          "price": 100,
-          "desc": "Pełna funkcjonalność Enova365Web."
-        }
-      ],
-      "enovaWebApiOptions": [
+          "id": "saas_enova_harmonogram",
+          "label": "Harmonogram zadań",
+          "price": 10,
+          "desc": "Dodatkowy moduł harmonogramu.",
+          "dependsOn": "saas_enova"
+        },
         {
-          "label": "Enova365Web API Basic",
+          "id": "saas_enovaApi",
+          "label": "Enova365Web API",
           "price": 20,
           "desc": "Podstawowa komunikacja API."
         },
         {
-          "label": "Enova365Web API Extended",
-          "price": 40,
-          "desc": "Rozszerzone możliwości API."
+          "id": "saas_terminal",
+          "label": "Terminal w chmurze",
+          "pricePerUser": 30,
+          "desc": "Terminal dostępowy w chmurze."
+        },
+        {
+          "id": "saas_terminal_security",
+          "label": "Zabezpieczenie terminala",
+          "price": 20,
+          "desc": "Dodatkowa ochrona terminala.",
+          "dependsOn": "saas_terminal"
+        },
+        {
+          "id": "saas_extraData",
+          "label": "Dodatkowe miejsce na dane",
+          "price": 2,
+          "desc": "Cena za GB dodatkowego miejsca."
         }
-      ],
-      "terminalPricePerUser": 30,
-      "extraDataStoragePrice": 2,
-
-      "msSplaServices": [
-        { "label": "Office 365 Business", "price": 35 },
-        { "label": "Office 365 E3",       "price": 70 }
       ]
     },
     {
       "name": "Acronis",
       "type": "acronis",
       "services": [
-        { "label": "Backup Windows Agent", "price": 10 },
-        { "label": "Backup Linux Agent",   "price": 12 },
-        { "label": "Backup MacOS Agent",   "price": 15 }
+        {
+          "id": "acronis_perGB_cloud",
+          "label": "Kopie do chmury",
+          "price": 0.1,
+          "tip": "Backup w chmurze Acronis – cena za GB."
+        },
+        {
+          "id": "acronis_perGB_local",
+          "label": "Kopie lokalne",
+          "price": 0.05,
+          "tip": "Backup do repozytorium lokalnego – cena za GB."
+        },
+        {
+          "id": "acronis_perGB_archM365",
+          "label": "Archiwizacja M365",
+          "price": 0.15,
+          "tip": "Archiwizacja danych Microsoft 365 – cena za GB."
+        },
+        {
+          "id": "acronis_perWorkload_base",
+          "label": "Workload Base",
+          "price": 50,
+          "tip": "Cena bazowa dla zabezpieczanego środowiska."
+        },
+        {
+          "id": "acronis_perWorkload_cloud",
+          "label": "Workload Kopie do chmury",
+          "price": 0.2,
+          "tip": "Backup do chmury dla workload – cena za GB."
+        },
+        {
+          "id": "acronis_perWorkload_local",
+          "label": "Workload Kopie lokalne",
+          "price": 0.1,
+          "tip": "Backup lokalny dla workload – cena za GB."
+        },
+        {
+          "id": "acronis_M365_GSuite_kopia",
+          "label": "Kopia Microsoft 365",
+          "price": 5,
+          "tip": "Backup skrzynek pocztowych i OneDrive w M365."
+        },
+        {
+          "id": "acronis_M365_GSuite_archiwizacja",
+          "label": "Archiwizacja Microsoft 365",
+          "price": 3,
+          "tip": "Archiwizacja poczty i dokumentów M365."
+        },
+        {
+          "id": "acronis_M365_GSuite_gsuite",
+          "label": "Kopie G-Suite",
+          "price": 4,
+          "tip": "Backup Gmail, Dysk Google i innych usług G-Suite."
+        },
+        {
+          "id": "acronis_security_antivirus",
+          "label": "Antywirus",
+          "price": 5,
+          "tip": "Podstawowy antywirus Acronis."
+        },
+        {
+          "id": "acronis_security_edr",
+          "label": "EDR (AI)",
+          "price": 10,
+          "tip": "Zaawansowany system EDR z wykorzystaniem AI."
+        },
+        {
+          "id": "acronis_management_basic",
+          "label": "Stacje robocze Basic",
+          "price": 8,
+          "tip": "Podstawowe zarządzanie stacjami roboczymi."
+        },
+        {
+          "id": "acronis_management_full",
+          "label": "Stacje robocze Full",
+          "price": 12,
+          "tip": "Pełne zarządzanie stacjami z automatycznym patchowaniem."
+        },
+        {
+          "id": "acronis_management_servers",
+          "label": "Serwery",
+          "price": 20,
+          "tip": "Zarządzanie serwerami fizycznymi i wirtualnymi."
+        }
       ]
     },
     {
       "name": "Microsoft CSP",
       "type": "csp",
-      "msCspServices": [
+      "services": [
         {
+          "id": "csp_m365_basic",
           "label": "M365 Business Basic",
           "price": 5,
           "desc": "Podstawowe narzędzia online."
         },
         {
+          "id": "csp_m365_standard",
           "label": "M365 Business Standard",
           "price": 10,
           "desc": "Pełny Office, Poczta, OneDrive."
         },
         {
+          "id": "csp_m365_premium",
           "label": "M365 Business Premium",
           "price": 15,
           "desc": "Więcej zabezpieczeń, Intune."
@@ -145,29 +230,36 @@
     {
       "name": "Bezpieczeństwo",
       "type": "security",
-
-      "securityWebApp": [
+      "services": [
         {
+          "id": "security_webapp_w1",
           "label": "Skanner W1",
           "price": 50,
           "desc": "Automatyczne skanowanie aplikacji webowej."
         },
         {
+          "id": "security_webapp_w2",
           "label": "Skanner W2",
           "price": 100,
           "desc": "Zaawansowane skanowanie z raportami i rekomendacjami."
-        }
-      ],
-      "securityFW": [
+        },
         {
+          "id": "security_fw_l1",
           "label": "Firewall L1",
           "price": 40,
           "desc": "Podstawowy firewall w chmurze."
         },
         {
+          "id": "security_fw_l2",
           "label": "Firewall L2",
           "price": 80,
           "desc": "Zaawansowany firewall z IPS."
+        },
+        {
+          "id": "security_analysis",
+          "label": "Analiza zabezpieczeń",
+          "price": 0,
+          "desc": "Wprowadź dodatkowe dane w sekcji."
         }
       ],
       "analysis": {
