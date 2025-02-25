@@ -534,7 +534,9 @@ function renderSaaS_MsLicSection(category, container) {
   });
 }
 
+//
 // Podfunkcja: MS SQL (SaaS)
+//
 function renderSaaS_MsSQLRow(category, bodyContainer) {
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
   paramCol.innerHTML = `
@@ -593,7 +595,9 @@ function renderSaaS_MsSQLRow(category, bodyContainer) {
   });
 }
 
+//
 // Podfunkcja: Enova (SaaS)
+//
 function renderSaaS_EnovaRow(category, bodyContainer) {
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
   paramCol.innerHTML = `
@@ -665,7 +669,9 @@ function renderSaaS_EnovaRow(category, bodyContainer) {
   });
 }
 
+//
 // Podfunkcja: Enova API (SaaS)
+//
 function renderSaaS_EnovaApiRow(category, bodyContainer) {
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
   paramCol.innerHTML = `
@@ -724,7 +730,9 @@ function renderSaaS_EnovaApiRow(category, bodyContainer) {
   });
 }
 
+//
 // Podfunkcja: Terminal (SaaS)
+//
 function renderSaaS_TerminalRow(category, bodyContainer) {
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
   paramCol.innerHTML = `
@@ -776,7 +784,9 @@ function renderSaaS_TerminalRow(category, bodyContainer) {
   });
 }
 
+//
 // Podfunkcja: Dodatkowe miejsce (SaaS)
+//
 function renderSaaS_ExtraDataRow(category, bodyContainer) {
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
   paramCol.innerHTML = `
@@ -1428,6 +1438,420 @@ function renderAcronisManagementSection(category, container) {
     const label = sel.getAttribute('data-label') || "";
     const total = (parseFloat(paramCol.querySelector('#acronisManagementSelect').value) || 0) * qty;
     cart.push({ name: "Zarządzanie stacjami/serwerami", details: `${label} x${qty}`, price: total });
+    renderCart();
+  });
+}
+
+/****************************************************************************************************
+ * Fallback – renderServicesList (dla kategorii bez dedykowanej logiki)
+ ****************************************************************************************************/
+function renderServicesList(category, container) {
+  console.log("→ renderServicesList – fallback");
+  const sec = createSection(category.name);
+  const div = document.createElement('div');
+  div.textContent = "Brak szczegółowej konfiguracji.";
+  sec.bodyContainer.appendChild(div);
+  container.appendChild(sec.wrapper);
+}
+
+/****************************************************************************************************
+ * renderCart – aktualizuje koszyk
+ ****************************************************************************************************/
+function renderCart() {
+  console.log("→ renderCart, liczba elementów w koszyku =", cart.length);
+  const cartSection = document.getElementById('cartSection');
+  const tbody = document.querySelector('#cartTable tbody');
+  const totalEl = document.getElementById('cartTotal');
+  if (!cart.length) {
+    cartSection.style.display = 'none';
+    return;
+  }
+  cartSection.style.display = 'block';
+  tbody.innerHTML = '';
+  let sum = 0;
+  cart.forEach((item, index) => {
+    sum += item.price;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${item.name}</td>
+      <td>${item.details}</td>
+      <td>${item.price.toFixed(2)}</td>
+      <td><button class="btn btn-sm btn-danger">X</button></td>
+    `;
+    const btnRemove = tr.querySelector('button');
+    btnRemove.addEventListener('click', () => {
+      cart.splice(index, 1);
+      renderCart();
+    });
+    tbody.appendChild(tr);
+  });
+  totalEl.textContent = sum.toFixed(2);
+}
+
+/****************************************************************************************************
+ * initTooltips – inicjuje tooltipy Bootstrap 5
+ ****************************************************************************************************/
+function initTooltips() {
+  console.log("→ initTooltips");
+  const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+  tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+}
+
+/****************************************************************************************************
+ * SaaS – Sekcja Aplikacje
+ ****************************************************************************************************/
+function renderSaaSApplications(category, container) {
+  console.log("→ renderSaaSApplications");
+  const sec = createSection("Aplikacje (SaaS)");
+  renderSaaS_MsSQLRow(category, sec.bodyContainer);
+  renderSaaS_EnovaRow(category, sec.bodyContainer);
+  renderSaaS_EnovaApiRow(category, sec.bodyContainer);
+  renderSaaS_TerminalRow(category, sec.bodyContainer);
+  renderSaaS_ExtraDataRow(category, sec.bodyContainer);
+  container.appendChild(sec.wrapper);
+}
+
+/****************************************************************************************************
+ * SaaS – Licencje Microsoft (SaaS)
+ ****************************************************************************************************/
+function renderSaaS_MsLicSection(category, container) {
+  console.log("→ renderSaaS_MsLicSection");
+  if (!category.msSplaServices) return;
+  const sec = createSection("Licencje Microsoft (SaaS)");
+  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
+  paramCol.innerHTML = `
+    <div class="inline-fields">
+      <label class="label-inline">Wybierz licencję:</label>
+      <select id="saasMsSelect" class="form-select" style="width:auto; min-width:150px;">
+        <option value="" disabled selected>-- wybierz --</option>
+      </select>
+      <label class="label-inline">Ilość:</label>
+      <input type="number" id="saasMsQty" value="1" min="1" style="width:60px;">
+    </div>
+  `;
+  priceCol.innerHTML = `<strong><span id="saasMsPrice">0.00</span> PLN</strong>`;
+  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddSaasMs">Dodaj do wyceny</button>`;
+  sec.bodyContainer.appendChild(row);
+  container.appendChild(sec.wrapper);
+  const saasMsSelect = paramCol.querySelector('#saasMsSelect');
+  const saasMsQty = paramCol.querySelector('#saasMsQty');
+  const saasMsPriceEl = priceCol.querySelector('#saasMsPrice');
+  const btnAddSaasMs = buttonCol.querySelector('#btnAddSaasMs');
+  category.msSplaServices.forEach(srv => {
+    const opt = document.createElement('option');
+    opt.value = srv.price;
+    opt.setAttribute('data-label', srv.label);
+    opt.textContent = `${srv.label} (${srv.price} PLN)`;
+    saasMsSelect.appendChild(opt);
+  });
+  function updateSaasMsPrice() {
+    if (!saasMsSelect.value) {
+      saasMsPriceEl.textContent = '0.00';
+      return;
+    }
+    const price = parseFloat(saasMsSelect.value) || 0;
+    const qty = parseInt(saasMsQty.value, 10) || 1;
+    saasMsPriceEl.textContent = (price * qty).toFixed(2);
+  }
+  saasMsSelect.addEventListener('change', updateSaasMsPrice);
+  saasMsQty.addEventListener('input', updateSaasMsPrice);
+  updateSaasMsPrice();
+  btnAddSaasMs.addEventListener('click', () => {
+    if (!saasMsSelect.value) {
+      alert("Wybierz licencję Microsoft (SaaS)!");
+      return;
+    }
+    const label = saasMsSelect.options[saasMsSelect.selectedIndex].getAttribute('data-label') || "";
+    const price = parseFloat(saasMsSelect.value) || 0;
+    const qty = parseInt(saasMsQty.value, 10) || 1;
+    const total = price * qty;
+    cart.push({ name: "Licencje Microsoft (SaaS)", details: `${label} x${qty}`, price: total });
+    renderCart();
+  });
+}
+
+/****************************************************************************************************
+ * Podfunkcja: MS SQL (SaaS)
+ ****************************************************************************************************/
+function renderSaaS_MsSQLRow(category, bodyContainer) {
+  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
+  paramCol.innerHTML = `
+    <div class="inline-fields">
+      <label class="label-inline">Baza danych Microsoft SQL:</label>
+      <select id="msSqlSelect" class="form-select" style="width:auto; min-width:150px;">
+        <option value="" disabled selected>-- wybierz --</option>
+      </select>
+    </div>
+    <div id="msSqlDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
+  `;
+  priceCol.innerHTML = `<strong><span id="msSqlPrice">0.00</span> PLN</strong>`;
+  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddMsSql">Dodaj do wyceny</button>`;
+  bodyContainer.appendChild(row);
+  const msSqlSelect = paramCol.querySelector('#msSqlSelect');
+  const msSqlDescEl = paramCol.querySelector('#msSqlDesc');
+  const msSqlPriceEl = priceCol.querySelector('#msSqlPrice');
+  const btnAddMsSql = buttonCol.querySelector('#btnAddMsSql');
+  const msSqlItem = category.services?.find(s => s.id === "saas_msSQL");
+  if (msSqlItem) {
+    const o = document.createElement('option');
+    o.value = msSqlItem.price;
+    o.setAttribute('data-label', msSqlItem.label);
+    o.setAttribute('data-desc', msSqlItem.desc || "");
+    o.textContent = `${msSqlItem.label} (${msSqlItem.price} PLN)`;
+    msSqlSelect.appendChild(o);
+  }
+  function updateMsSqlPrice() {
+    const val = parseFloat(msSqlSelect.value) || 0;
+    msSqlPriceEl.textContent = val.toFixed(2);
+  }
+  function updateMsSqlDesc() {
+    if (!msSqlSelect.value) {
+      msSqlDescEl.textContent = "";
+      return;
+    }
+    const sel = msSqlSelect.options[msSqlSelect.selectedIndex];
+    msSqlDescEl.textContent = sel.getAttribute('data-desc') || "";
+  }
+  msSqlSelect.addEventListener('change', () => {
+    updateMsSqlPrice();
+    updateMsSqlDesc();
+  });
+  updateMsSqlPrice();
+  updateMsSqlDesc();
+  btnAddMsSql.addEventListener('click', () => {
+    if (!msSqlSelect.value) {
+      alert("Wybierz Bazę SQL!");
+      return;
+    }
+    const sel = msSqlSelect.options[msSqlSelect.selectedIndex];
+    const label = sel.getAttribute('data-label') || "SQL DB";
+    const price = parseFloat(sel.value) || 0;
+    cart.push({ name: "SaaS - MS SQL", details: label, price: price });
+    renderCart();
+  });
+}
+
+/****************************************************************************************************
+ * Podfunkcja: Enova (SaaS)
+ ****************************************************************************************************/
+function renderSaaS_EnovaRow(category, bodyContainer) {
+  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
+  paramCol.innerHTML = `
+    <div class="inline-fields">
+      <label class="label-inline">Enova365Web:</label>
+      <select id="enovaSelect" class="form-select" style="width:auto; min-width:150px;">
+        <option value="" disabled selected>-- wybierz --</option>
+      </select>
+    </div>
+    <div id="enovaDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
+    <div class="inline-fields mt-2">
+      <label class="label-inline">Harmonogram zadań:</label>
+      <input type="checkbox" id="enovaHarm">
+    </div>
+  `;
+  priceCol.innerHTML = `<strong><span id="enovaPrice">0.00</span> PLN</strong>`;
+  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddEnova">Dodaj do wyceny</button>`;
+  bodyContainer.appendChild(row);
+  const enovaSelect = paramCol.querySelector('#enovaSelect');
+  const enovaDesc = paramCol.querySelector('#enovaDesc');
+  const enovaPrice = priceCol.querySelector('#enovaPrice');
+  const enovaHarm = paramCol.querySelector('#enovaHarm');
+  const btnAddEnova = buttonCol.querySelector('#btnAddEnova');
+  const enovaItem = category.services?.find(s => s.id === "saas_enova");
+  if (enovaItem) {
+    const o = document.createElement('option');
+    o.value = enovaItem.price;
+    o.setAttribute('data-label', enovaItem.label);
+    o.setAttribute('data-desc', enovaItem.desc || "");
+    o.textContent = `${enovaItem.label} (${enovaItem.price} PLN)`;
+    enovaSelect.appendChild(o);
+  }
+  function updateEnovaPrice() {
+    let total = parseFloat(enovaSelect.value) || 0;
+    if (enovaHarm.checked) {
+      total += (category.harmonogramCost || 10);
+    }
+    enovaPrice.textContent = total.toFixed(2);
+  }
+  function updateEnovaDesc() {
+    if (!enovaSelect.value) {
+      enovaDesc.textContent = "";
+      return;
+    }
+    const sel = enovaSelect.options[enovaSelect.selectedIndex];
+    enovaDesc.textContent = sel.getAttribute('data-desc') || "";
+  }
+  enovaSelect.addEventListener('change', () => {
+    updateEnovaPrice();
+    updateEnovaDesc();
+  });
+  enovaHarm.addEventListener('change', updateEnovaPrice);
+  updateEnovaPrice();
+  updateEnovaDesc();
+  btnAddEnova.addEventListener('click', () => {
+    if (!enovaSelect.value) {
+      alert("Wybierz Enova!");
+      return;
+    }
+    const sel = enovaSelect.options[enovaSelect.selectedIndex];
+    const label = sel.getAttribute('data-label') || "Enova365Web";
+    const basePrice = parseFloat(enovaSelect.value) || 0;
+    cart.push({ name: "SaaS - Enova365Web", details: label, price: basePrice });
+    if (enovaHarm.checked) {
+      const harmCost = category.harmonogramCost || 10;
+      cart.push({ name: "SaaS - Harmonogram zadań", details: "Dodatkowy moduł", price: harmCost });
+    }
+    renderCart();
+  });
+}
+
+/****************************************************************************************************
+ * Podfunkcja: Enova API (SaaS)
+ ****************************************************************************************************/
+function renderSaaS_EnovaApiRow(category, bodyContainer) {
+  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
+  paramCol.innerHTML = `
+    <div class="inline-fields">
+      <label class="label-inline">Enova365Web API:</label>
+      <select id="enovaApiSelect" class="form-select" style="width:auto; min-width:150px;">
+        <option value="" disabled selected>-- wybierz --</option>
+      </select>
+    </div>
+    <div id="enovaApiDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
+  `;
+  priceCol.innerHTML = `<strong><span id="enovaApiPrice">0.00</span> PLN</strong>`;
+  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddEnovaApi">Dodaj do wyceny</button>`;
+  bodyContainer.appendChild(row);
+  const enovaApiSelect = paramCol.querySelector('#enovaApiSelect');
+  const enovaApiDescEl = paramCol.querySelector('#enovaApiDesc');
+  const enovaApiPriceEl = priceCol.querySelector('#enovaApiPrice');
+  const btnAddEnovaApi = buttonCol.querySelector('#btnAddEnovaApi');
+  const enovaApiItem = category.services?.find(s => s.id === "saas_enovaApi");
+  if (enovaApiItem) {
+    const o = document.createElement('option');
+    o.value = enovaApiItem.price;
+    o.setAttribute('data-label', enovaApiItem.label);
+    o.setAttribute('data-desc', enovaApiItem.desc || "");
+    o.textContent = `${enovaApiItem.label} (${enovaApiItem.price} PLN)`;
+    enovaApiSelect.appendChild(o);
+  }
+  function updateEnovaApiPrice() {
+    const val = parseFloat(enovaApiSelect.value) || 0;
+    enovaApiPriceEl.textContent = val.toFixed(2);
+  }
+  function updateEnovaApiDesc() {
+    if (!enovaApiSelect.value) {
+      enovaApiDescEl.textContent = "";
+      return;
+    }
+    const sel = enovaApiSelect.options[enovaApiSelect.selectedIndex];
+    enovaApiDescEl.textContent = sel.getAttribute('data-desc') || "";
+  }
+  enovaApiSelect.addEventListener('change', () => {
+    updateEnovaApiPrice();
+    updateEnovaApiDesc();
+  });
+  updateEnovaApiPrice();
+  updateEnovaApiDesc();
+  btnAddEnovaApi.addEventListener('click', () => {
+    if (!enovaApiSelect.value) {
+      alert("Wybierz Enova365Web API!");
+      return;
+    }
+    const sel = enovaApiSelect.options[enovaApiSelect.selectedIndex];
+    const label = sel.getAttribute('data-label') || "EnovaAPI";
+    const price = parseFloat(sel.value) || 0;
+    cart.push({ name: "SaaS - EnovaAPI", details: label, price: price });
+    renderCart();
+  });
+}
+
+/****************************************************************************************************
+ * Podfunkcja: Terminal (SaaS)
+ ****************************************************************************************************/
+function renderSaaS_TerminalRow(category, bodyContainer) {
+  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
+  paramCol.innerHTML = `
+    <div class="inline-fields">
+      <label class="label-inline">Terminal w chmurze:</label>
+      <label class="label-inline">Użytkownicy:</label>
+      <input type="number" id="termUsers" value="0" min="0" style="width:60px;">
+    </div>
+    <div class="inline-fields mt-2">
+      <label class="label-inline">Zabezpieczenie terminala:</label>
+      <input type="checkbox" id="termSec">
+    </div>
+  `;
+  priceCol.innerHTML = `<strong><span id="termPrice">0.00</span> PLN</strong>`;
+  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddTerm">Dodaj do wyceny</button>`;
+  bodyContainer.appendChild(row);
+  const termUsers = paramCol.querySelector('#termUsers');
+  const termSec = paramCol.querySelector('#termSec');
+  const termPriceEl = priceCol.querySelector('#termPrice');
+  const btnAddTerm = buttonCol.querySelector('#btnAddTerm');
+  function updateTermPrice() {
+    let total = 0;
+    const users = parseInt(termUsers.value, 10) || 0;
+    if (users > 0) {
+      total += users * (category.terminalPricePerUser || 30);
+      if (termSec.checked) {
+        total += (category.terminalSecurityCost || 20);
+      }
+    }
+    termPriceEl.textContent = total.toFixed(2);
+  }
+  [termUsers, termSec].forEach(el => el.addEventListener('input', updateTermPrice));
+  updateTermPrice();
+  btnAddTerm.addEventListener('click', () => {
+    const users = parseInt(termUsers.value, 10) || 0;
+    if (users <= 0) {
+      alert("Podaj liczbę użytkowników > 0!");
+      return;
+    }
+    const base = users * (category.terminalPricePerUser || 30);
+    cart.push({ name: "SaaS - Terminal w chmurze", details: `Users=${users}`, price: base });
+    if (termSec.checked) {
+      const secCost = category.terminalSecurityCost || 20;
+      cart.push({ name: "SaaS - Zabezpieczenie terminala", details: "Dodatkowa ochrona", price: secCost });
+    } else {
+      alert("UWAGA: Terminal bez zabezpieczenia!");
+    }
+    renderCart();
+  });
+}
+
+/****************************************************************************************************
+ * Podfunkcja: Dodatkowe miejsce (SaaS)
+ ****************************************************************************************************/
+function renderSaaS_ExtraDataRow(category, bodyContainer) {
+  const { row, paramCol, priceCol, buttonCol } = createFlexRow();
+  paramCol.innerHTML = `
+    <div class="inline-fields">
+      <label class="label-inline">Dodatkowe miejsce na dane (GB):</label>
+      <input type="number" id="extraData" value="0" min="0" style="width:60px;">
+    </div>
+  `;
+  priceCol.innerHTML = `<strong><span id="extraPrice">0.00</span> PLN</strong>`;
+  buttonCol.innerHTML = `<button class="btn btn-primary" id="btnAddExtra">Dodaj do wyceny</button>`;
+  bodyContainer.appendChild(row);
+  const extraData = paramCol.querySelector('#extraData');
+  const extraPriceEl = priceCol.querySelector('#extraPrice');
+  const btnAddExtra = buttonCol.querySelector('#btnAddExtra');
+  function updateExtraPrice() {
+    const val = parseInt(extraData.value, 10) || 0;
+    const cost = val * (category.extraDataStoragePrice || 2);
+    extraPriceEl.textContent = cost.toFixed(2);
+  }
+  extraData.addEventListener('input', updateExtraPrice);
+  updateExtraPrice();
+  btnAddExtra.addEventListener('click', () => {
+    const val = parseInt(extraData.value, 10) || 0;
+    if (val <= 0) {
+      alert("Podaj ilość GB > 0!");
+      return;
+    }
+    const cost = val * (category.extraDataStoragePrice || 2);
+    cart.push({ name: "SaaS - Dodatkowe miejsce", details: `Ilość=${val}GB`, price: cost });
     renderCart();
   });
 }
