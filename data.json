@@ -11,6 +11,7 @@
       "backupPricePerGB": 0.1,
       "publicIPPrice": 10,
 
+
       "services": [
         { "label": "Windows Server Std (1 licencja)", "price": 20 },
         { "label": "Windows Server DC (1 licencja)",  "price": 50 },
@@ -56,10 +57,12 @@
         { "label": "MS SQL Standard",    "price": 70 }
       ],
 
+ 
       "msSplaServices": [
         { "label": "MS SQL Web Edition", "price": 25 },
         { "label": "MS SQL Standard",    "price": 70 }
       ],
+
 
       "drServices": [
         {
@@ -81,7 +84,6 @@
       "type": "saas",
       "harmonogramCost": 10,
       "terminalSecurityCost": 20,
-
 
       "services": [
         {
@@ -130,7 +132,6 @@
         }
       ],
 
-
       "msSplaServices": [
         { "label": "Office 365 Business", "price": 35 },
         { "label": "Office 365 E3",       "price": 70 }
@@ -140,6 +141,7 @@
       "name": "Acronis",
       "type": "acronis",
       "services": [
+
         {
           "id": "acronis_perGB_cloud",
           "label": "Kopie do chmury",
@@ -158,6 +160,8 @@
           "price": 0.15,
           "tip": "Archiwizacja danych Microsoft 365 – cena za GB."
         },
+
+
         {
           "id": "acronis_perWorkload_base",
           "label": "Workload Base",
@@ -176,6 +180,8 @@
           "price": 0.1,
           "tip": "Backup lokalny dla workload – cena za GB."
         },
+
+
         {
           "id": "acronis_M365_GSuite_kopia",
           "label": "Kopia Microsoft 365",
@@ -194,6 +200,8 @@
           "price": 4,
           "tip": "Backup Gmail, Dysk Google i innych usług G-Suite."
         },
+
+
         {
           "id": "acronis_security_antivirus",
           "label": "Antywirus",
@@ -206,6 +214,8 @@
           "price": 10,
           "tip": "Zaawansowany system EDR z wykorzystaniem AI."
         },
+
+
         {
           "id": "acronis_management_basic",
           "label": "Stacje robocze Basic",
@@ -229,7 +239,8 @@
     {
       "name": "Microsoft CSP",
       "type": "csp",
-      "services": [
+
+      "msCspServices": [
         {
           "id": "csp_m365_basic",
           "label": "M365 Business Basic",
@@ -253,7 +264,9 @@
     {
       "name": "Bezpieczeństwo",
       "type": "security",
-      "services": [
+
+
+      "securityWebApp": [
         {
           "id": "security_webapp_w1",
           "label": "Skanner W1",
@@ -265,7 +278,9 @@
           "label": "Skanner W2",
           "price": 100,
           "desc": "Zaawansowane skanowanie z raportami i rekomendacjami."
-        },
+        }
+      ],
+      "securityFW": [
         {
           "id": "security_fw_l1",
           "label": "Firewall L1",
@@ -277,14 +292,10 @@
           "label": "Firewall L2",
           "price": 80,
           "desc": "Zaawansowany firewall z IPS."
-        },
-        {
-          "id": "security_analysis",
-          "label": "Analiza zabezpieczeń",
-          "price": 0,
-          "desc": "Wprowadź dodatkowe dane w sekcji."
         }
       ],
+
+
       "analysis": {
         "centralLoggingTooltip": "Podaj liczbę licencji (min 1) jeśli chcesz centralne logowanie.",
         "memoryTooltip": "Jeśli logowanie > 0, pamięć >=5GB."
