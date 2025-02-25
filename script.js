@@ -163,17 +163,19 @@ function renderIaaS(category, container) {
       <span id="ramVal">${category.sliders[1].min}</span>
     </div>
     <div class="inline-fields">
-      <label>SSD (GB):</label>
+      <label>Powierzchnia dyskowa SSD (GB):</label>
       <input type="range" id="ssdSlider" min="${category.sliders[2].min}" max="${category.sliders[2].max}" step="${category.sliders[2].step}" value="${category.sliders[2].min}" style="width:100px;">
       <span id="ssdVal">${category.sliders[2].min}</span>
     </div>
     <div class="inline-fields">
       <label>Kopie zapasowe (GB):</label>
       <input type="number" id="backupGB" value="0" min="0" style="width:60px;">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
     <div class="inline-fields">
       <label>Dodatkowe publiczne IP (szt.):</label>
       <input type="number" id="publicIp" value="0" min="0" style="width:60px;">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="iaasPrice">0.00</span> PLN</strong>`;
@@ -308,16 +310,19 @@ function renderPaaSMachinesSection(category, container) {
     </div>
     <div id="paasSupportDesc" class="text-muted" style="font-size:0.85rem; margin-bottom:8px;"></div>
     <div class="inline-fields">
-      <label class="label-inline">Dysk SSD (GB):</label>
+      <label class="label-inline">Powierzchnia dyskowa SSD (GB):</label>
       <input type="number" id="paasSsd" value="0" min="0" style="width:60px;">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
     <div class="inline-fields">
       <label class="label-inline">Kopie zapasowe (GB):</label>
       <input type="number" id="paasBackup" value="0" min="0" style="width:60px;">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
     <div class="inline-fields">
       <label class="label-inline">Dodatkowe publiczne IP (szt.):</label>
       <input type="number" id="paasIp" value="0" min="0" style="width:60px;">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="paasPrice">0.00</span> PLN</strong>`;
@@ -419,12 +424,14 @@ function renderPaaSDisasterRecoverySection(category, container) {
   const ipObj = category.drServices.find(x => x.id === 'C-DR-IP');
   paramCol.innerHTML = `
     <div class="inline-fields">
-      <label class="label-inline">${storObj?.label || 'C-DR-STORAGE'} (GB):</label>
+      <label class="label-inline">${storObj?.label || 'Powierzchnia dyskowa'} (GB):</label>
       <input type="number" id="drStorage" value="0" min="0" style="width:60px;">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
     <div class="inline-fields">
-      <label class="label-inline">${ipObj?.label || 'C-DR-IP'} (szt.):</label>
+      <label class="label-inline">${ipObj?.label || 'Publiczne IP'} (szt.):</label>
       <input type="number" id="drIp" value="1" min="1" style="width:60px;">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="drPrice">0.00</span> PLN</strong>`;
@@ -1776,10 +1783,12 @@ function renderSaaS_TerminalRow(category, bodyContainer) {
       <label class="label-inline">Terminal w chmurze:</label>
       <label class="label-inline">Użytkownicy:</label>
       <input type="number" id="termUsers" value="0" min="0" style="width:60px;">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
     <div class="inline-fields mt-2">
       <label class="label-inline">Zabezpieczenie terminala:</label>
       <input type="checkbox" id="termSec">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="termPrice">0.00</span> PLN</strong>`;
@@ -1829,6 +1838,7 @@ function renderSaaS_ExtraDataRow(category, bodyContainer) {
     <div class="inline-fields">
       <label class="label-inline">Dodatkowe miejsce na dane (GB):</label>
       <input type="number" id="extraData" value="0" min="0" style="width:60px;">
+      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="extraPrice">0.00</span> PLN</strong>`;
