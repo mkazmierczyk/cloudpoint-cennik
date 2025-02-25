@@ -5,24 +5,20 @@
       "type": "iaas",
       "sliders": [
         { "id": "cpu", "label": "CPU (vCore)", "min": 1, "max": 64, "step": 1, "pricePerUnit": 5 },
-        { "id": "ram", "label": "RAM (GB)",   "min": 1, "max": 128, "step": 1, "pricePerUnit": 2 },
+        { "id": "ram", "label": "RAM (GB)", "min": 1, "max": 128, "step": 1, "pricePerUnit": 2 },
         { "id": "storage", "label": "SSD (GB)", "min": 10, "max": 1000, "step": 10, "pricePerUnit": 0.2 }
       ],
       "backupPricePerGB": 0.1,
       "publicIPPrice": 10,
-
-
       "services": [
         { "label": "Windows Server Std (1 licencja)", "price": 20 },
-        { "label": "Windows Server DC (1 licencja)",  "price": 50 },
-        { "label": "SQL Server Std (1 licencja)",     "price": 45 }
+        { "label": "Windows Server DC (1 licencja)", "price": 50 },
+        { "label": "SQL Server Std (1 licencja)", "price": 45 }
       ],
-
-
       "msSplaServices": [
         { "label": "Windows Server Std (1 licencja)", "price": 20 },
-        { "label": "Windows Server DC (1 licencja)",  "price": 50 },
-        { "label": "SQL Server Std (1 licencja)",     "price": 45 }
+        { "label": "Windows Server DC (1 licencja)", "price": 50 },
+        { "label": "SQL Server Std (1 licencja)", "price": 45 }
       ]
     },
     {
@@ -51,19 +47,14 @@
       "supportPlatinumDesc": "PLATINUM-AddON – priorytetowe wsparcie i dedykowany opiekun.",
       "backupPricePerGB": 0.3,
       "publicIPPrice": 15,
-
       "services": [
         { "label": "MS SQL Web Edition", "price": 25 },
-        { "label": "MS SQL Standard",    "price": 70 }
+        { "label": "MS SQL Standard", "price": 70 }
       ],
-
- 
       "msSplaServices": [
         { "label": "MS SQL Web Edition", "price": 25 },
-        { "label": "MS SQL Standard",    "price": 70 }
+        { "label": "MS SQL Standard", "price": 70 }
       ],
-
-
       "drServices": [
         {
           "id": "C-DR-STORAGE",
@@ -84,7 +75,6 @@
       "type": "saas",
       "harmonogramCost": 10,
       "terminalSecurityCost": 20,
-
       "services": [
         {
           "id": "saas_msSQL",
@@ -131,17 +121,15 @@
           "desc": "Cena za GB dodatkowego miejsca."
         }
       ],
-
       "msSplaServices": [
         { "label": "Office 365 Business", "price": 35 },
-        { "label": "Office 365 E3",       "price": 70 }
+        { "label": "Office 365 E3", "price": 70 }
       ]
     },
     {
       "name": "Acronis",
       "type": "acronis",
       "services": [
-
         {
           "id": "acronis_perGB_cloud",
           "label": "Kopie do chmury",
@@ -160,8 +148,6 @@
           "price": 0.15,
           "tip": "Archiwizacja danych Microsoft 365 – cena za GB."
         },
-
-
         {
           "id": "acronis_perWorkload_base",
           "label": "Workload Base",
@@ -180,8 +166,6 @@
           "price": 0.1,
           "tip": "Backup lokalny dla workload – cena za GB."
         },
-
-
         {
           "id": "acronis_M365_GSuite_kopia",
           "label": "Kopia Microsoft 365",
@@ -200,8 +184,6 @@
           "price": 4,
           "tip": "Backup Gmail, Dysk Google i innych usług G-Suite."
         },
-
-
         {
           "id": "acronis_security_antivirus",
           "label": "Antywirus",
@@ -214,8 +196,6 @@
           "price": 10,
           "tip": "Zaawansowany system EDR z wykorzystaniem AI."
         },
-
-
         {
           "id": "acronis_management_basic",
           "label": "Stacje robocze Basic",
@@ -239,7 +219,6 @@
     {
       "name": "Microsoft CSP",
       "type": "csp",
-
       "msCspServices": [
         {
           "id": "csp_m365_basic",
@@ -264,8 +243,6 @@
     {
       "name": "Bezpieczeństwo",
       "type": "security",
-
-
       "securityWebApp": [
         {
           "id": "security_webapp_w1",
@@ -294,8 +271,6 @@
           "desc": "Zaawansowany firewall z IPS."
         }
       ],
-
-
       "analysis": {
         "centralLoggingTooltip": "Podaj liczbę licencji (min 1) jeśli chcesz centralne logowanie.",
         "memoryTooltip": "Jeśli logowanie > 0, pamięć >=5GB."
