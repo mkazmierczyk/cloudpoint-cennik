@@ -1837,7 +1837,7 @@ function renderSaaS_ExtraDataRow(category, bodyContainer) {
     <div class="inline-fields">
       <label class="label-inline">Dodatkowe miejsce na dane (GB):</label>
       <input type="number" id="extraData" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
+
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="extraPrice">0.00</span> PLN</strong>`;
