@@ -1782,12 +1782,12 @@ function renderSaaS_TerminalRow(category, bodyContainer) {
       <label class="label-inline">Terminal w chmurze:</label>
       <label class="label-inline">Użytkownicy:</label>
       <input type="number" id="termUsers" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
+
     </div>
     <div class="inline-fields mt-2">
       <label class="label-inline">Zabezpieczenie terminala:</label>
       <input type="checkbox" id="termSec">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
+
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="termPrice">0.00</span> PLN</strong>`;
