@@ -170,12 +170,11 @@ function renderIaaS(category, container) {
     <div class="inline-fields">
       <label>Kopie zapasowe (GB):</label>
       <input type="number" id="backupGB" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
+
     </div>
     <div class="inline-fields">
       <label>Dodatkowe publiczne IP (szt.):</label>
       <input type="number" id="publicIp" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="iaasPrice">0.00</span> PLN</strong>`;
@@ -312,17 +311,17 @@ function renderPaaSMachinesSection(category, container) {
     <div class="inline-fields">
       <label class="label-inline">Powierzchnia dyskowa SSD (GB):</label>
       <input type="number" id="paasSsd" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
+
     </div>
     <div class="inline-fields">
       <label class="label-inline">Kopie zapasowe (GB):</label>
       <input type="number" id="paasBackup" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
+
     </div>
     <div class="inline-fields">
       <label class="label-inline">Dodatkowe publiczne IP (szt.):</label>
       <input type="number" id="paasIp" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
+
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="paasPrice">0.00</span> PLN</strong>`;
@@ -426,12 +425,12 @@ function renderPaaSDisasterRecoverySection(category, container) {
     <div class="inline-fields">
       <label class="label-inline">${storObj?.label || 'Powierzchnia dyskowa'} (GB):</label>
       <input type="number" id="drStorage" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
+
     </div>
     <div class="inline-fields">
       <label class="label-inline">${ipObj?.label || 'Publiczne IP'} (szt.):</label>
       <input type="number" id="drIp" value="1" min="1" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${opt.tip || ''}"></i>
+
     </div>
   `;
   priceCol.innerHTML = `<strong><span id="drPrice">0.00</span> PLN</strong>`;
