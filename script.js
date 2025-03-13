@@ -1307,6 +1307,7 @@ function renderAcronisPerGBSection(category, container) {
 }
 
 // Acronis 2: Kopie zapasowe (per Workload)
+// Acronis 2: Kopie zapasowe (per Workload)
 function renderAcronisPerWorkloadSection(category, container) {
   console.log("→ renderAcronisPerWorkloadSection");
   const baseOption = category.services.find(s => s.id === "acronis_perWorkload_base");
@@ -1318,10 +1319,11 @@ function renderAcronisPerWorkloadSection(category, container) {
     return;
   }
 
-  // Tworzymy sekcję i jej HTML
+  // Tworzymy sekcję
   const sec = createSection("Kopie zapasowe (per Workload)");
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
 
+  // Główny HTML – SELECT, inputy, plus <div> na opis base
   paramCol.innerHTML = `
     <div class="inline-fields">
       <label class="label-inline">Base:</label>
@@ -1335,12 +1337,14 @@ function renderAcronisPerWorkloadSection(category, container) {
          title="${baseOption.tip || ''}">
       </i>
     </div>
+    <!-- Tutaj opis -->
+    <div id="workload_base_desc" class="text-muted" style="font-size:0.85rem; margin-bottom:1rem;"></div>
 
     <div class="inline-fields">
       <label class="label-inline">Kopie do chmury:</label>
       <input type="number" id="workload_cloud" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" 
-         data-bs-toggle="tooltip" 
+      <i class="bi bi-info-circle text-muted"
+         data-bs-toggle="tooltip"
          title="${cloudOption ? cloudOption.tip : ''}">
       </i>
     </div>
@@ -1348,8 +1352,8 @@ function renderAcronisPerWorkloadSection(category, container) {
     <div class="inline-fields">
       <label class="label-inline">Kopie lokalne:</label>
       <input type="number" id="workload_local" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" 
-         data-bs-toggle="tooltip" 
+      <i class="bi bi-info-circle text-muted"
+         data-bs-toggle="tooltip"
          title="${localOption ? localOption.tip : ''}">
       </i>
     </div>
@@ -1358,30 +1362,31 @@ function renderAcronisPerWorkloadSection(category, container) {
   priceCol.innerHTML = `<strong><span id="workload_price">0.00</span> PLN</strong>`;
   buttonCol.innerHTML = `<button class="btn btn-primary" id="btn_workload">Dodaj do wyceny</button>`;
 
-  // Dołączamy do sekcji
+  // Dodajemy do sekcji
   sec.bodyContainer.appendChild(row);
   container.appendChild(sec.wrapper);
 
-  // Teraz pobieramy referencje do elementów
-  const baseSelect    = paramCol.querySelector('#workload_base_select');
-  const baseQtyInput  = paramCol.querySelector('#workload_base_qty');
-  const cloudInput    = paramCol.querySelector('#workload_cloud');
-  const localInput    = paramCol.querySelector('#workload_local');
-  const priceEl       = priceCol.querySelector('#workload_price');
-  const btnWorkload   = buttonCol.querySelector('#btn_workload');
+  // Wyszukujemy elementy
+  const baseSelect   = paramCol.querySelector('#workload_base_select');
+  const baseQtyInput = paramCol.querySelector('#workload_base_qty');
+  const cloudInput   = paramCol.querySelector('#workload_cloud');
+  const localInput   = paramCol.querySelector('#workload_local');
+  const priceEl      = priceCol.querySelector('#workload_price');
+  const btnWorkload  = buttonCol.querySelector('#btn_workload');
+  const baseDescEl   = paramCol.querySelector('#workload_base_desc');
 
-  // Uzupełniamy <select> danymi z baseItems:
+  // Uzupełniamy SELECT danymi z pliku data.json (tymi co zaczynają się na "acronis_perWorkload_base")
   const baseItems = category.services.filter(s => s.id && s.id.startsWith("acronis_perWorkload_base"));
   baseItems.forEach(item => {
     const opt = document.createElement('option');
-    opt.value = item.price;
+    opt.value = item.price;              // w value – cena
     opt.setAttribute('data-label', item.label);
     opt.setAttribute('data-desc', item.desc || "");
     opt.textContent = `${item.label} (${item.price} PLN)`;
     baseSelect.appendChild(opt);
   });
 
-  // Funkcja licząca łączny koszt
+  // Funkcja liczenia ceny
   function updateWorkloadPrice() {
     const basePrice = parseFloat(baseSelect.value) || 0;
     const baseQty   = parseInt(baseQtyInput.value, 10) || 0;
@@ -1389,23 +1394,39 @@ function renderAcronisPerWorkloadSection(category, container) {
     const localQty  = parseInt(localInput.value, 10)   || 0;
 
     let total = 0;
-    // liczymy cenę tylko jeśli baseQty>0 i (cloudQty>0 lub localQty>0)
     if (baseQty > 0 && (cloudQty > 0 || localQty > 0)) {
       total += basePrice * baseQty;
-      if (cloudQty > 0) total += cloudQty * cloudOption.price;
-      if (localQty > 0) total += localQty * localOption.price;
+      if (cloudQty > 0) total += cloudQty * (cloudOption.price);
+      if (localQty > 0) total += localQty * (localOption.price);
     }
-
     priceEl.textContent = total.toFixed(2);
   }
 
-  // Eventy na inputach i selectach
-  [baseSelect, baseQtyInput, cloudInput, localInput].forEach(el =>
-    el.addEventListener('input', updateWorkloadPrice)
-  );
-  updateWorkloadPrice();
+  // Funkcja aktualizacji opisu wybranej bazy
+  function updateBaseDesc() {
+    if (!baseSelect.value) {
+      baseDescEl.textContent = "";
+      return;
+    }
+    // pobieramy desc z <option data-desc="...">
+    const selOpt = baseSelect.options[baseSelect.selectedIndex];
+    baseDescEl.textContent = selOpt.getAttribute('data-desc') || "";
+  }
 
-  // Obsługa kliknięcia "Dodaj do wyceny"
+  // Eventy
+  [baseSelect, baseQtyInput, cloudInput, localInput].forEach(el => {
+    el.addEventListener('input', () => {
+      updateWorkloadPrice();
+      if (el === baseSelect) {
+        updateBaseDesc();
+      }
+    });
+  });
+  // na start
+  updateWorkloadPrice();
+  updateBaseDesc();
+
+  // Obsługa kliknięcia
   btnWorkload.addEventListener('click', () => {
     const basePrice = parseFloat(baseSelect.value) || 0;
     const baseQty   = parseInt(baseQtyInput.value, 10) || 0;
@@ -1413,18 +1434,16 @@ function renderAcronisPerWorkloadSection(category, container) {
     const localQty  = parseInt(localInput.value, 10)   || 0;
 
     if (basePrice <= 0 || baseQty <= 0 || (cloudQty <= 0 && localQty <= 0)) {
-      alert("Musisz wybrać bazę oraz co najmniej jedną opcję (Kopie do chmury lub Kopie lokalne).");
+      alert("Musisz wybrać bazę oraz co najmniej jedną opcję (chmura lub lokal).");
       return;
     }
 
-    // Budujemy opis
     let desc = `Base x${baseQty}`;
     if (cloudQty > 0) desc += `, Kopie do chmury x${cloudQty}`;
     if (localQty > 0) desc += `, Kopie lokalne x${localQty}`;
 
     const total = parseFloat(priceEl.textContent) || 0;
 
-    // Dodajemy do koszyka
     cart.push({
       name: sec.wrapper.querySelector('.section-title').textContent,
       details: desc,
@@ -1585,6 +1604,7 @@ function renderAcronisM365GSuiteSection(category, container) {
 }
 
 // Acronis 4: Mechanizmy zabezpieczeń (z opisem pod selectem)
+// Acronis 4: Mechanizmy zabezpieczeń (z opisem pod selectem)
 function renderAcronisSecuritySection(category, container) {
   console.log("→ renderAcronisSecuritySection");
   const securityOptions = category.services.filter(s => s.id && s.id.startsWith("acronis_security"));
@@ -1592,9 +1612,11 @@ function renderAcronisSecuritySection(category, container) {
     console.log("   Brak prefixu acronis_security → sekcja pusta");
     return;
   }
+
   const sec = createSection("Mechanizmy zabezpieczeń");
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
 
+  // Dodajemy <div id="acronisSecurityDesc" ...> aby wyświetlać opis
   paramCol.innerHTML = `
     <div class="inline-fields">
       <label class="label-inline">Wybierz rozwiązanie:</label>
@@ -1604,46 +1626,62 @@ function renderAcronisSecuritySection(category, container) {
       <label class="label-inline">Ilość:</label>
       <input type="number" id="acronisSecurityQty" value="0" min="0" style="width:60px;">
     </div>
+
+    <div id="acronisSecurityDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
   `;
+
   priceCol.innerHTML = `<strong><span id="acronisSecurityPrice">0.00</span> PLN</strong>`;
   buttonCol.innerHTML = `<button class="btn btn-primary" id="btn_acronisSecurity">Dodaj do wyceny</button>`;
+
   sec.bodyContainer.appendChild(row);
   container.appendChild(sec.wrapper);
 
+  // Wyszukujemy elementy
+  const acronisSecuritySelect = paramCol.querySelector('#acronisSecuritySelect');
+  const acronisSecurityQty    = paramCol.querySelector('#acronisSecurityQty');
+  const acronisSecurityDescEl = paramCol.querySelector('#acronisSecurityDesc');
+  const acronisSecurityPriceEl = priceCol.querySelector('#acronisSecurityPrice');
+  const btnAddAcronisSec      = buttonCol.querySelector('#btn_acronisSecurity');
+
+  // Uzupełniamy select
   securityOptions.forEach(opt => {
     const o = document.createElement('option');
     o.value = opt.price;
     o.setAttribute('data-label', opt.label);
     o.setAttribute('data-desc', opt.desc || "");
-    o.setAttribute('data-tip', opt.tip || "");
     o.textContent = `${opt.label} (${opt.price} PLN)`;
-    paramCol.querySelector('#acronisSecuritySelect').appendChild(o);
+    acronisSecuritySelect.appendChild(o);
   });
 
-  const acronisSecuritySelect = paramCol.querySelector('#acronisSecuritySelect');
-  const acronisSecurityQty = paramCol.querySelector('#acronisSecurityQty');
-  const acronisSecurityDesc = paramCol.querySelector('#acronisSecurityDesc');
-  const acronisSecurityPriceEl = priceCol.querySelector('#acronisSecurityPrice');
-  const btnAddAcronisSec = buttonCol.querySelector('#btn_acronisSecurity');
-
+  // Przelicz cenę
   function updateAcronisSecurityPrice() {
     const qty = parseInt(acronisSecurityQty.value, 10) || 0;
     const val = parseFloat(acronisSecuritySelect.value) || 0;
     acronisSecurityPriceEl.textContent = (val * qty).toFixed(2);
-
-    // Ustaw opis (desc) pod selectem
-    if (acronisSecuritySelect.selectedIndex > 0) {
-      const selOpt = acronisSecuritySelect.options[acronisSecuritySelect.selectedIndex];
-      acronisSecurityDesc.textContent = selOpt.getAttribute('data-desc') || "";
-    } else {
-      acronisSecurityDesc.textContent = "";
-    }
   }
 
-  acronisSecuritySelect.addEventListener('change', updateAcronisSecurityPrice);
-  acronisSecurityQty.addEventListener('input', updateAcronisSecurityPrice);
-  updateAcronisSecurityPrice();
+  // Aktualizacja opisu
+  function updateAcronisSecurityDesc() {
+    if (!acronisSecuritySelect.value) {
+      acronisSecurityDescEl.textContent = "";
+      return;
+    }
+    const selOpt = acronisSecuritySelect.options[acronisSecuritySelect.selectedIndex];
+    acronisSecurityDescEl.textContent = selOpt.getAttribute('data-desc') || "";
+  }
 
+  // Eventy
+  acronisSecuritySelect.addEventListener('change', () => {
+    updateAcronisSecurityPrice();
+    updateAcronisSecurityDesc();
+  });
+  acronisSecurityQty.addEventListener('input', updateAcronisSecurityPrice);
+
+  // Na start
+  updateAcronisSecurityPrice();
+  updateAcronisSecurityDesc();
+
+  // Obsługa kliknięcia
   btnAddAcronisSec.addEventListener('click', () => {
     const qty = parseInt(acronisSecurityQty.value, 10) || 0;
     if (qty <= 0) {
@@ -1655,7 +1693,11 @@ function renderAcronisSecuritySection(category, container) {
     const val = parseFloat(acronisSecuritySelect.value) || 0;
     const total = val * qty;
 
-    cart.push({ name: "Mechanizmy zabezpieczeń", details: `${label} x${qty}`, price: total });
+    cart.push({
+      name: "Mechanizmy zabezpieczeń",
+      details: `${label} x${qty}`,
+      price: total
+    });
     renderCart();
   });
 }
