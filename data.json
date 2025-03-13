@@ -5,20 +5,20 @@
       "type": "iaas",
       "sliders": [
         { "id": "cpu", "label": "CPU (vCore)", "min": 1, "max": 64, "step": 1, "pricePerUnit": 5 },
-        { "id": "ram", "label": "RAM (GB)", "min": 1, "max": 128, "step": 1, "pricePerUnit": 2 },
+        { "id": "ram", "label": "RAM (GB)",   "min": 1, "max": 128, "step": 1, "pricePerUnit": 2 },
         { "id": "storage", "label": "SSD (GB)", "min": 10, "max": 1000, "step": 10, "pricePerUnit": 0.2 }
       ],
+
       "backupPricePerGB": 0.1,
       "publicIPPrice": 10,
-      "services": [
-        { "label": "Windows Server Std (1 licencja)", "price": 20 },
-        { "label": "Windows Server DC (1 licencja)", "price": 50 },
-        { "label": "SQL Server Std (1 licencja)", "price": 45 }
-      ],
+
+      "backupTooltip": "Koszt za GB kopii zapasowej w IaaS.",
+      "publicIpTooltip": "Koszt za dodatkowy adres IP w IaaS.",
+
       "msSplaServices": [
         { "label": "Windows Server Std (1 licencja)", "price": 20 },
-        { "label": "Windows Server DC (1 licencja)", "price": 50 },
-        { "label": "SQL Server Std (1 licencja)", "price": 45 }
+        { "label": "Windows Server DC (1 licencja)",  "price": 50 },
+        { "label": "SQL Server Std (1 licencja)",     "price": 45 }
       ]
     },
     {
@@ -45,29 +45,31 @@
       "supportGoldDesc": "Wsparcie GOLD – SLA 24/7, czas reakcji do 2h.",
       "supportPlatinumAddOnPrice": 100,
       "supportPlatinumDesc": "PLATINUM-AddON – priorytetowe wsparcie i dedykowany opiekun.",
+
       "backupPricePerGB": 0.3,
       "publicIPPrice": 15,
-      "services": [
-        { "label": "MS SQL Web Edition", "price": 25 },
-        { "label": "MS SQL Standard", "price": 70 }
-      ],
-      "msSplaServices": [
-        { "label": "MS SQL Web Edition", "price": 25 },
-        { "label": "MS SQL Standard", "price": 70 }
-      ],
+
+      "paasBackupTooltip": "Kopia zapasowa w PaaS (cena za GB).",
+      "paasIpTooltip": "Adres IP w PaaS (koszt za szt.).",
+
       "drServices": [
         {
           "id": "C-DR-STORAGE",
-          "label": "C-DR-STORAGE",
+          "label": "Powierzchnia dyskowa",
           "price": 0.2,
           "tooltip": "Storage w GB (min 0)."
         },
         {
           "id": "C-DR-IP",
-          "label": "C-DR-IP",
+          "label": "Publiczne IP",
           "price": 10,
-          "tooltip": "Adresy IP (min 1)."
+          "tooltip": "Adres IP (min 1)."
         }
+      ],
+
+      "msSplaServices": [
+        { "label": "MS SQL Web Edition", "price": 25 },
+        { "label": "MS SQL Standard",    "price": 70 }
       ]
     },
     {
@@ -75,6 +77,7 @@
       "type": "saas",
       "harmonogramCost": 10,
       "terminalSecurityCost": 20,
+
       "services": [
         {
           "id": "saas_msSQL",
@@ -87,13 +90,6 @@
           "label": "Enova365Web",
           "price": 50,
           "desc": "Podstawowa licencja Enova365Web."
-        },
-        {
-          "id": "saas_enova_harmonogram",
-          "label": "Harmonogram zadań",
-          "price": 10,
-          "desc": "Dodatkowy moduł harmonogramu.",
-          "dependsOn": "saas_enova"
         },
         {
           "id": "saas_enovaApi",
@@ -112,18 +108,20 @@
           "label": "Zabezpieczenie terminala",
           "price": 20,
           "desc": "Dodatkowa ochrona terminala.",
-          "dependsOn": "saas_terminal"
+          "tip": "Zapewnia firewall i antywirus terminalowy."
         },
         {
           "id": "saas_extraData",
           "label": "Dodatkowe miejsce na dane",
           "price": 2,
-          "desc": "Cena za GB dodatkowego miejsca."
+          "desc": "Cena za GB dodatkowego miejsca.",
+          "tip": "Powiększona przestrzeń dyskowa w SaaS."
         }
       ],
+
       "msSplaServices": [
         { "label": "Office 365 Business", "price": 35 },
-        { "label": "Office 365 E3", "price": 70 }
+        { "label": "Office 365 E3",       "price": 70 }
       ]
     },
     {
@@ -134,85 +132,92 @@
           "id": "acronis_perGB_cloud",
           "label": "Kopie do chmury",
           "price": 0.1,
-          "tip": "Backup w chmurze Acronis – cena za GB."
+          "tip": "Backup w chmurze Acronis – cena za GB.",
+          "desc": "Przechowywanie danych w chmurze Acronis."
         },
         {
           "id": "acronis_perGB_local",
           "label": "Kopie lokalne",
           "price": 0.05,
-          "tip": "Backup do repozytorium lokalnego – cena za GB."
-        },
-        {
-          "id": "acronis_perGB_archM365",
-          "label": "Archiwizacja M365",
-          "price": 0.15,
-          "tip": "Archiwizacja danych Microsoft 365 – cena za GB."
+          "tip": "Backup do repozytorium lokalnego – cena za GB.",
+          "desc": "Lokalne kopie zapasowe w wybranym repozytorium."
         },
         {
           "id": "acronis_perWorkload_base",
           "label": "Workload Base",
           "price": 50,
-          "tip": "Cena bazowa dla zabezpieczanego środowiska."
+          "tip": "Cena bazowa dla zabezpieczanego środowiska.",
+          "desc": "Podstawa licencji Acronis per Workload."
         },
         {
           "id": "acronis_perWorkload_cloud",
           "label": "Workload Kopie do chmury",
           "price": 0.2,
-          "tip": "Backup do chmury dla workload – cena za GB."
+          "tip": "Backup do chmury dla workload – cena za GB.",
+          "desc": "Chmurowe kopie zapasowe Workload."
         },
         {
           "id": "acronis_perWorkload_local",
           "label": "Workload Kopie lokalne",
           "price": 0.1,
-          "tip": "Backup lokalny dla workload – cena za GB."
+          "tip": "Backup lokalny dla workload – cena za GB.",
+          "desc": "Lokalne kopie zapasowe Workload."
         },
         {
           "id": "acronis_M365_GSuite_kopia",
           "label": "Kopia Microsoft 365",
           "price": 5,
-          "tip": "Backup skrzynek pocztowych i OneDrive w M365."
+          "tip": "Backup skrzynek pocztowych i OneDrive w M365.",
+          "desc": "Kopia danych z Microsoft 365."
         },
         {
           "id": "acronis_M365_GSuite_archiwizacja",
           "label": "Archiwizacja Microsoft 365",
           "price": 3,
-          "tip": "Archiwizacja poczty i dokumentów M365."
+          "tip": "Archiwizacja poczty i dokumentów M365.",
+          "desc": "Długoterminowa archiwizacja M365."
         },
         {
           "id": "acronis_M365_GSuite_gsuite",
           "label": "Kopie G-Suite",
           "price": 4,
-          "tip": "Backup Gmail, Dysk Google i innych usług G-Suite."
+          "tip": "Backup Gmail, Dysk Google i innych usług G-Suite.",
+          "desc": "Kopie zapasowe środowiska G-Suite."
         },
         {
           "id": "acronis_security_antivirus",
           "label": "Antywirus",
           "price": 5,
-          "tip": "Podstawowy antywirus Acronis."
+          "tip": "Podstawowy antywirus Acronis.",
+          "desc": "Ochrona antywirusowa w czasie rzeczywistym."
         },
         {
           "id": "acronis_security_edr",
           "label": "EDR (AI)",
           "price": 10,
-          "tip": "Zaawansowany system EDR z wykorzystaniem AI."
+          "tip": "Zaawansowany system EDR z wykorzystaniem AI.",
+          "desc": "Wykrywanie zagrożeń w czasie rzeczywistym."
         },
         {
           "id": "acronis_management_basic",
           "label": "Stacje robocze Basic",
           "price": 8,
-          "tip": "Podstawowe zarządzanie stacjami roboczymi."
+          "tip": "Podstawowe zarządzanie stacjami roboczymi.",
+          "desc": "Monitoring i zarządzanie stacjami w wersji Basic."
         },
         {
           "id": "acronis_management_full",
           "label": "Stacje robocze Full",
           "price": 12,
-          "tip": "Pełne zarządzanie stacjami z automatycznym patchowaniem."
+          "tip": "Pełne zarządzanie stacjami z automatycznym patchowaniem.",
+          "desc": "Zaawansowane zarządzanie stacjami."
         },
         {
           "id": "acronis_management_servers",
           "label": "Serwery",
           "price": 20,
-          "tip": "Zarządzanie serwerami fizycznymi i wirtualnymi."
+          "tip": "Zarządzanie serwerami fizycznymi i wirtualnymi.",
+          "desc": "Pełne wsparcie i monitoring serwerów."
         }
       ]
     },
