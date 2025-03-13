@@ -1273,7 +1273,6 @@ function renderAcronisPerGBSection(category, container) {
            data-bs-toggle="tooltip"
            title="${opt.tip || ''}"></i>
       </div>
-      <div class="text-muted" style="font-size:0.85rem;" id="desc_${opt.id}">${opt.desc || ''}</div>
     `;
     priceCol.innerHTML = `<strong><span id="${opt.id}_price">0.00</span> PLN</strong>`;
     buttonCol.innerHTML = `<button class="btn btn-primary" id="btn_${opt.id}">Dodaj do wyceny</button>`;
@@ -1320,79 +1319,132 @@ function renderAcronisPerWorkloadSection(category, container) {
   }
   const sec = createSection("Kopie zapasowe (per Workload)");
   const { row, paramCol, priceCol, buttonCol } = createFlexRow();
+  // Szukamy wszystkich pozycji w "services" o id zaczynającym się od "acronis_perWorkload_base"
+  const baseItems = category.services.filter(s => s.id && s.id.startsWith("acronis_perWorkload_base"));
+
+  
+  baseItems.forEach(item => {
+    const opt = document.createElement('option');
+    opt.value = item.price; // w value zapiszemy cenę
+    opt.setAttribute('data-label', item.label);
+    opt.setAttribute('data-desc', item.desc || "");
+    opt.textContent = `${item.label} (${item.price} PLN)`;
+    baseSelect.appendChild(opt);
+  })};
 
   paramCol.innerHTML = `
     <div class="inline-fields">
       <label class="label-inline">Base:</label>
-      <input type="number" id="workload_base" value="0" min="0" style="width:60px;">
-      <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${baseOption.tip || ''}"></i>
+
+      <!-- SELECT z cenami baseOption -->
+      <select id="workload_base_select" class="form-select" style="width:auto; min-width:150px;">
+        <option value="" disabled selected>-- wybierz --</option>
+       
+        <!-- Tu można dać więcej <option> jeśli masz w data.json kilka pozycji do wyboru -->
+      </select>
+
+      <!-- INPUT z ilością -->
+      <label class="label-inline">Ilość:</label>
+      <input type="number" id="workload_base_qty" value="0" min="0" style="width:60px;">
+
+      <i class="bi bi-info-circle text-muted"
+        data-bs-toggle="tooltip"
+        title="${baseOption.tip || ''}">
+      </i>
     </div>
-    <div class="text-muted" style="font-size:0.85rem;">${baseOption.desc || ''}</div>
+
 
     <div class="inline-fields">
       <label class="label-inline">Kopie do chmury:</label>
       <input type="number" id="workload_cloud" value="0" min="0" style="width:60px;">
       <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${cloudOption ? cloudOption.tip : ''}"></i>
     </div>
-    <div class="text-muted" style="font-size:0.85rem;">${cloudOption?.desc || ''}</div>
+
 
     <div class="inline-fields">
       <label class="label-inline">Kopie lokalne:</label>
       <input type="number" id="workload_local" value="0" min="0" style="width:60px;">
       <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${localOption ? localOption.tip : ''}"></i>
     </div>
-    <div class="text-muted" style="font-size:0.85rem;">${localOption?.desc || ''}</div>
+
   `;
   priceCol.innerHTML = `<strong><span id="workload_price">0.00</span> PLN</strong>`;
   buttonCol.innerHTML = `<button class="btn btn-primary" id="btn_workload">Dodaj do wyceny</button>`;
   sec.bodyContainer.appendChild(row);
   container.appendChild(sec.wrapper);
 
-  const baseInput = paramCol.querySelector('#workload_base');
+  const baseSelect = paramCol.querySelector('#workload_base_select');
+  const baseQtyInput = paramCol.querySelector('#workload_base_qty');
   const cloudInput = paramCol.querySelector('#workload_cloud');
   const localInput = paramCol.querySelector('#workload_local');
   const priceEl = priceCol.querySelector('#workload_price');
   const btnWorkload = buttonCol.querySelector('#btn_workload');
 
   function updateWorkloadPrice() {
-    const baseQty = parseInt(baseInput.value, 10) || 0;
+    // Pobieramy wybraną cenę z SELECT-a (lub 0 jeśli nic nie wybrano)
+    const basePrice = parseFloat(baseSelect.value) || 0;
+  
+    // Ilości z inputów
+    const baseQty = parseInt(baseQtyInput.value, 10) || 0;
     const cloudQty = parseInt(cloudInput.value, 10) || 0;
     const localQty = parseInt(localInput.value, 10) || 0;
+  
     let total = 0;
-
+  
+    // Logika: musi być baseQty>0 i (cloudQty>0 lub localQty>0), żeby liczyć cenę
     if (baseQty > 0 && (cloudQty > 0 || localQty > 0)) {
-      total = baseQty * (baseOption.price);
+      // cena base
+      total += basePrice * baseQty;
+  
+      // dopłaty do chmury
       if (cloudQty > 0) {
         total += cloudQty * (cloudOption.price);
-      } else if (localQty > 0) {
+      }
+      // dopłaty lokalne
+      if (localQty > 0) {
         total += localQty * (localOption.price);
       }
     }
+  
+    // Wyświetlamy wynik w polu priceEl
     priceEl.textContent = total.toFixed(2);
   }
-  [baseInput, cloudInput, localInput].forEach(el => el.addEventListener('input', updateWorkloadPrice));
-  updateWorkloadPrice();
+  
+  // Nasłuchujemy zmian w SELECT i inputach:
+  [baseSelect, baseQtyInput, cloudInput, localInput].forEach(el =>
+    el.addEventListener('input', updateWorkloadPrice)
+  );
+  updateWorkloadPrice(); // na start
 
   btnWorkload.addEventListener('click', () => {
-    const baseQty = parseInt(baseInput.value, 10) || 0;
+    // Pobierz wartości ponownie
+    const basePrice = parseFloat(baseSelect.value) || 0;
+    const baseQty = parseInt(baseQtyInput.value, 10) || 0;
     const cloudQty = parseInt(cloudInput.value, 10) || 0;
     const localQty = parseInt(localInput.value, 10) || 0;
-
-    if (baseQty <= 0 || (cloudQty <= 0 && localQty <= 0)) {
-      alert("Musisz ustawić wartość base oraz co najmniej jedną z opcji: Kopie do chmury lub Kopie lokalne.");
+  
+    // Jeśli nic nie wybrano lub ilości są 0, wyrzucamy alert
+    if (basePrice <= 0 || baseQty <= 0 || (cloudQty <= 0 && localQty <= 0)) {
+      alert("Musisz wybrać bazę oraz co najmniej jedną opcję: Kopie do chmury lub Kopie lokalne.");
       return;
     }
-
+  
+    // Zbieramy opis (np. Base=... x2, Kopie do chmury x5, Kopie lokalne x0 itd.)
+    // Można też pobrać label z <option data-label="...">
     let desc = `Base x${baseQty}`;
     if (cloudQty > 0) desc += `, Kopie do chmury x${cloudQty}`;
-    else if (localQty > 0) desc += `, Kopie lokalne x${localQty}`;
-
+    if (localQty > 0) desc += `, Kopie lokalne x${localQty}`;
+  
     const total = parseFloat(priceEl.textContent) || 0;
-
-    cart.push({ name: sec.wrapper.querySelector('.section-title').textContent, details: desc, price: total });
+  
+    // Dodajemy do koszyka
+    cart.push({
+      name: sec.wrapper.querySelector('.section-title').textContent,
+      details: desc,
+      price: total
+    });
     renderCart();
   });
-}
 
 // Acronis 3: Kopie zapasowe M365 i G-Suite
 function renderAcronisM365GSuiteSection(category, container) {
@@ -1419,7 +1471,7 @@ function renderAcronisM365GSuiteSection(category, container) {
         <label class="label-inline">Zaawansowany:</label>
         <input type="checkbox" id="m365KopiaAdvanced">
       </div>
-      <div class="text-muted" style="font-size:0.85rem;">${kopiaM365.desc || ''}</div>
+
     `;
     priceCol.innerHTML = `<strong><span id="m365KopiaPrice">0.00</span> PLN</strong>`;
     buttonCol.innerHTML = `<button class="btn btn-primary" id="btn_m365Kopia">Dodaj do wyceny</button>`;
@@ -1468,7 +1520,7 @@ function renderAcronisM365GSuiteSection(category, container) {
         <input type="number" id="archiwizacjaQty" value="0" min="0" style="width:60px;">
         <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${archiwizacjaM365.tip || ''}"></i>
       </div>
-      <div class="text-muted" style="font-size:0.85rem;">${archiwizacjaM365.desc || ''}</div>
+
     `;
     priceCol.innerHTML = `<strong><span id="archiwizacjaPrice">0.00</span> PLN</strong>`;
     buttonCol.innerHTML = `<button class="btn btn-primary" id="btn_archiwizacja">Dodaj do wyceny</button>`;
@@ -1509,7 +1561,7 @@ function renderAcronisM365GSuiteSection(category, container) {
         <input type="number" id="gsuiteQty" value="0" min="0" style="width:60px;">
         <i class="bi bi-info-circle text-muted" data-bs-toggle="tooltip" title="${kopiaGSuite.tip || ''}"></i>
       </div>
-      <div class="text-muted" style="font-size:0.85rem;">${kopiaGSuite.desc || ''}</div>
+
     `;
     priceCol.innerHTML = `<strong><span id="gsuitePrice">0.00</span> PLN</strong>`;
     buttonCol.innerHTML = `<button class="btn btn-primary" id="btn_gsuite">Dodaj do wyceny</button>`;
@@ -1563,7 +1615,6 @@ function renderAcronisSecuritySection(category, container) {
       <label class="label-inline">Ilość:</label>
       <input type="number" id="acronisSecurityQty" value="0" min="0" style="width:60px;">
     </div>
-    <div id="acronisSecurityDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
   `;
   priceCol.innerHTML = `<strong><span id="acronisSecurityPrice">0.00</span> PLN</strong>`;
   buttonCol.innerHTML = `<button class="btn btn-primary" id="btn_acronisSecurity">Dodaj do wyceny</button>`;
@@ -1640,7 +1691,6 @@ function renderAcronisManagementSection(category, container) {
       <label class="label-inline">Ilość:</label>
       <input type="number" id="acronisManagementQty" value="0" min="0" style="width:60px;">
     </div>
-    <div id="acronisManagementDesc" class="text-muted" style="font-size:0.85rem; margin-top:4px;"></div>
   `;
   priceCol.innerHTML = `<strong><span id="acronisManagementPrice">0.00</span> PLN</strong>`;
   buttonCol.innerHTML = `<button class="btn btn-primary" id="btn_acronisManagement">Dodaj do wyceny</button>`;
