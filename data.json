@@ -1,4 +1,9 @@
 {
+  "allowedEmails": [
+    "jan@firma.pl",
+    "test@domena.com"
+  ],
+  
   "categories": [
     {
       "name": "IaaS",
