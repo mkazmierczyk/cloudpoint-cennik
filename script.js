@@ -42,6 +42,10 @@ document.addEventListener('DOMContentLoaded', () => {
       renderCategoriesMenu(categoriesData);
     })
     .catch(err => console.error("Błąd wczytywania data.json:", err));
+    const btnExportXls = document.getElementById('btnExportXls');
+    if (btnExportXls) {
+      btnExportXls.addEventListener('click', exportCartToXLS);
+    }
 });
 
 /****************************************************************************************************
@@ -1960,4 +1964,65 @@ function renderSecurityAnalysisSection(category, container) {
     renderCart();
   });
 }
+/**
+ * exportCartToXLS – generuje plik .xls (HTML) z zawartością koszyka
+ * i wywołuje pobranie (download) przez przeglądarkę
+ */
+function exportCartToXLS() {
+  if (!cart.length) {
+    alert("Koszyk jest pusty, brak danych do eksportu!");
+    return;
+  }
+
+  // Tworzymy prosty HTML w postaci tabeli – Excel potrafi to otworzyć:
+  let html = `
+    <table border="1">
+      <thead>
+        <tr>
+          <th>Kategoria</th>
+          <th>Szczegóły</th>
+          <th>Cena (PLN)</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
+
+  cart.forEach(item => {
+    html += `
+      <tr>
+        <td>${item.name}</td>
+        <td>${item.details}</td>
+        <td>${item.price.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+
+  // Policzmy sumę:
+  const sum = cart.reduce((acc, item) => acc + item.price, 0).toFixed(2);
+
+  html += `
+      <tr>
+        <td colspan="2"><strong>Razem</strong></td>
+        <td><strong>${sum}</strong></td>
+      </tr>
+    </tbody>
+    </table>
+  `;
+
+  // Stworzymy data URI z typem: vnd.ms-excel
+  const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+  const url = URL.createObjectURL(blob);
+
+  // Tworzymy tymczasowy link <a>, symulujemy kliknięcie -> ściąga plik
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `wycena_${new Date().toISOString().slice(0,10)}.xls`; // nazwa pliku
+  document.body.appendChild(a);
+  a.click();
+
+  // Usuwamy link i zwalniamy URL
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
 
