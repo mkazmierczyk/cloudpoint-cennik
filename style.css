@@ -1,167 +1,156 @@
-/* Zmienne kolorów */
-:root {
-  --primary-color: #007bff;
-  --accent-color:  #00aaff;
-  --primary-hover: #0056b3;
-  --accent-hover:  #0088cc;
-}
 
-/* Reset i font */
-body {
-  margin: 0;
-  padding: 0;
-  font-family: "Montserrat", sans-serif;
-  background-color: #f8f9fa;
-}
+    :root {
+      --primary-color: #007bff;
+      --accent-color: #00aaff;
+      --primary-hover: #0056b3;
+      --accent-hover: #0088cc;
+    }
 
-/* Navbar */
-.navbar {
-  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: "Montserrat", sans-serif;
+      background-color: #f8f9fa;
+    }
 
-/* LEWE MENU */
-#leftMenu {
-  border-right: 1px solid #dee2e6;
-}
-#leftMenu h6 {
-  margin-top: 1rem;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-}
-#categoriesMenu {
-  margin-top: 1rem;
-}
-#categoriesMenu li {
-  border-bottom: 1px solid #f1f1f1;
-}
-#categoriesMenu li a {
-  display: block;
-  padding: 0.5rem 0;
-  color: #343a40;
-  text-decoration: none;
-  font-size: 0.95rem;
-}
-#categoriesMenu li a:hover {
-  background-color: #e9ecef;
-}
-#categoriesMenu li a.active {
-  color: #0d6efd;
-  font-weight: 600;
-  background-color: #edf5ff;
-}
+    .navbar {
+      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+    }
 
-/* Sekcje (boxy) */
-.section-wrapper {
-  margin-bottom: 1rem;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-.section-title {
-  background-image: linear-gradient(135deg, var(--primary-hover), var(--accent-color));
-  color: #fff;
-  padding: 0.75rem 1rem;
-}
-.section-body {
-  background-color: #ffffff;
-  padding: 1rem;
-}
+    #leftMenu {
+      border-right: 1px solid #dee2e6;
+    }
+    #leftMenu h6 {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+    #categoriesMenu {
+      margin-top: 1rem;
+    }
+    #categoriesMenu li {
+      border-bottom: 1px solid #f1f1f1;
+    }
+    #categoriesMenu li a {
+      display: block;
+      padding: 0.5rem 0;
+      color: #343a40;
+      text-decoration: none;
+      font-size: 0.95rem;
+    }
+    #categoriesMenu li a:hover {
+      background-color: #e9ecef;
+    }
+    #categoriesMenu li a.active {
+      color: #0d6efd;
+      font-weight: 600;
+      background-color: #edf5ff;
+    }
 
-/* Układ wiersza – 3 kolumny */
-.row-desktop {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-.col-params {
-  flex: 1;
-}
-.col-price {
-  width: 150px;
-  text-align: center;
-}
-.col-button {
-  width: 160px;
-  text-align: right;
-}
+    .section-wrapper {
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .section-title {
+      background-image: linear-gradient(135deg, var(--primary-hover), var(--accent-color));
+      color: #fff;
+      padding: 0.75rem 1rem;
+    }
+    .section-body {
+      background-color: #ffffff;
+      padding: 1rem;
+    }
 
-/* Responsywność – na wąskich ekranach układ pionowy */
-@media (max-width: 576px) {
-  .row-desktop {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .col-price, .col-button {
-    margin-top: 1rem;
-    width: 100% !important;
-    text-align: left;
-  }
-}
+    .row-desktop {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .col-params {
+      flex: 1;
+    }
+    .col-price {
+      width: 150px;
+      text-align: center;
+    }
+    .col-button {
+      width: 160px;
+      text-align: right;
+    }
 
-/* Inline fields – etykiety, inputy, selecty w jednym wierszu */
-.inline-fields {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.label-inline {
-  margin-bottom: 0;
-}
+    @media (max-width: 576px) {
+      .row-desktop {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .col-price, .col-button {
+        margin-top: 1rem;
+        width: 100% !important;
+        text-align: left;
+      }
+    }
 
-/* Przyciski – gradient i mniejszy rozmiar */
-.btn-primary {
-  font-size: 0.85rem;
-  padding: 0.4rem 0.75rem;
-  border: none;
-  color: #fff;
-  background-image: linear-gradient(90deg, var(--primary-color), var(--accent-color));
-  transition: background 0.3s ease;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-}
-.btn-primary:hover {
-  background-image: linear-gradient(90deg, var(--primary-hover), var(--accent-hover));
-}
+    .inline-fields {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .label-inline {
+      margin-bottom: 0;
+    }
 
-/* Separator między wierszami usług w jednej sekcji */
-.section-body .row-desktop:not(:first-child) {
-  margin-top: 1rem;
-  border-top: 1px solid #ddd;
-  padding-top: 1rem;
-}
+    .btn-primary {
+      font-size: 0.85rem;
+      padding: 0.4rem 0.75rem;
+      border: none;
+      color: #fff;
+      background-image: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+      transition: background 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .btn-primary:hover {
+      background-image: linear-gradient(90deg, var(--primary-hover), var(--accent-hover));
+    }
 
-/* Koszyk */
-#cartSection h4 {
-  margin-bottom: 1rem;
-}
-#cartTable thead tr {
-  background-color: #f0f0f0;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  color: #666;
-}
-#cartTable td, #cartTable th {
-  padding: 0.5rem;
-  border-top: none;
-}
+    .section-body .row-desktop:not(:first-child) {
+      margin-top: 1rem;
+      border-top: 1px solid #ddd;
+      padding-top: 1rem;
+    }
 
-/* Footer – przykładowy czarny footer */
-.footer-kontakt {
-  background-color: #000;
-  color: #fff;
-  padding: 2rem 0;
-}
-.footer-kontakt h1 {
-  font-weight: 700;
-  letter-spacing: -1px;
-}
-.footer-kontakt p {
-  margin-bottom: 0.5rem;
-  line-height: 1.5;
-}
-.footer-kontakt strong {
-  font-weight: 600;
-}
+    #cartSection h4 {
+      margin-bottom: 1rem;
+    }
+    #cartTable thead tr {
+      background-color: #f0f0f0;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      color: #666;
+    }
+    #cartTable td, #cartTable th {
+      padding: 0.5rem;
+      border-top: none;
+    }
+
+    .footer-kontakt {
+      background-color: #000;
+      color: #fff;
+      padding: 2rem 0;
+    }
+    .footer-kontakt h1 {
+      font-weight: 700;
+      letter-spacing: -1px;
+    }
+    .footer-kontakt p {
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+    }
+    .footer-kontakt strong {
+      font-weight: 600;
+    }

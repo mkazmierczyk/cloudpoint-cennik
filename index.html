@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CloudPoint - Cennik</title>
+
   <!-- Bootstrap 5 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
   <!-- Bootstrap Icons -->
@@ -11,30 +12,46 @@
   <!-- Google Fonts - Montserrat -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-  <!-- Własny CSS -->
-  <link rel="stylesheet" href="style.css" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap"
+    rel="stylesheet">
+  
+
 </head>
 <body class="d-flex flex-column min-vh-100">
+
   <!-- NAVBAR -->
   <nav class="navbar navbar-expand-lg navbar-light border-bottom">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">
-        <img src="https://enteo.pl/wp-content/uploads/2023/11/Warstwa_1-5.svg" alt="CloudPoint Logo" style="height:40px;">
+        <!-- Logo -->
+        <img src="https://enteo.pl/wp-content/uploads/2023/11/Warstwa_1-5.svg"
+             alt="CloudPoint Logo"
+             style="height:40px;">
       </a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topNavbar" aria-controls="topNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+              data-bs-target="#topNavbar" aria-controls="topNavbar"
+              aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="topNavbar">
         <div class="ms-auto d-flex gap-3">
-          <a href="https://enteo.pl/skontaktuj-sie-z-nami/" target="_blank" class="btn btn-outline-primary">Skontaktuj się z nami</a>
-          <a href="https://enteo.pl/wp-content/uploads/2025/02/Cloudpoint_opis_uslug.pdf" target="_blank" class="btn btn-outline-primary">Przeczytaj opis usług</a>
+          <a href="https://enteo.pl/skontaktuj-sie-z-nami/"
+             target="_blank"
+             class="btn btn-outline-primary">
+             Skontaktuj się z nami
+          </a>
+          <a href="https://enteo.pl/wp-content/uploads/2025/02/Cloudpoint_opis_uslug.pdf"
+             target="_blank"
+             class="btn btn-outline-primary">
+             Przeczytaj opis usług
+          </a>
         </div>
       </div>
     </div>
   </nav>
 
-  <!-- GŁÓWNA ZAWARTOŚĆ / WARSTWA NA KONTENT -->
+  <!-- GŁÓWNA ZAWARTOŚĆ -->
   <div class="container-fluid flex-fill mt-4">
     <div class="row">
       <!-- LEWE MENU -->
@@ -44,13 +61,17 @@
           <!-- Menu generowane dynamicznie (script.js) -->
         </ul>
       </div>
+
       <!-- PRAWA KOLUMNA -->
       <div class="col-12 col-md-9 col-lg-10 px-4">
         <h2 class="mt-3" id="categoryTitle">Wybierz kategorię...</h2>
-        <p class="text-muted" id="categoryDesc">Proszę wybrać kategorię po lewej, aby zobaczyć dostępne usługi.</p>
+        <p class="text-muted" id="categoryDesc">
+          Proszę wybrać kategorię po lewej, aby zobaczyć dostępne usługi.
+        </p>
         <div id="plansContainer">
           <!-- Sekcje generowane dynamicznie (script.js) -->
         </div>
+
         <!-- KOSZYK -->
         <div id="cartSection" class="bg-light p-3 rounded mt-4" style="display:none;">
           <h4>Koszyk</h4>
@@ -60,7 +81,7 @@
                 <tr>
                   <th>Kategoria</th>
                   <th>Szczegóły</th>
-                  <th>Cena (PLN)</th>
+                  <th>Cena (w PLN)</th>
                   <th>Usuń</th>
                 </tr>
               </thead>
@@ -73,11 +94,12 @@
             <strong>Razem: <span id="cartTotal">0.00</span> PLN</strong>
           </div>
         </div>
+
       </div>
     </div>
   </div>
 
-  <!-- FOOTER PRZYKLEJONY DO DOŁU -->
+  <!-- STOPKA -->
   <footer class="footer-kontakt mt-auto">
     <div class="container py-4">
       <h1 class="display-4 mb-4">Kontakt</h1>
@@ -109,7 +131,9 @@
 
   <!-- Bootstrap 5 JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Skrypt aplikacji -->
+
+  <!-- Główny skrypt aplikacji (podzielony poniżej) -->
   <script src="script.js"></script>
+
 </body>
 </html>

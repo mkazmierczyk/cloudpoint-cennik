@@ -1,117 +1,229 @@
 {
-  "allowedEmails": [
-    "jan@firma.pl",
-    "test@domena.com"
-  ],
-  
+  "exchangeRates": {
+    "PLN": 1,
+    "EUR": 4.70,
+    "USD": 4.20
+  },
+  "baseCurrency": "PLN",
+
   "categories": [
     {
       "name": "IaaS",
       "type": "iaas",
+
+      "labels": {
+        "sectionTitle": "Maszyny wirtualne (IaaS)",
+        "sectionDescription": "Konfiguracja w chmurze z CPU, RAM i dyskiem SSD.",
+        "cpuLabel": "CPU (vCore):",
+        "ramLabel": "RAM (GB):",
+        "ssdLabel": "Powierzchnia dyskowa SSD (GB):",
+        "backupLabel": "Kopie zapasowe (GB):",
+        "publicIpLabel": "Dodatkowe publiczne IP (szt.):",
+        "backupTooltip": "Koszt za GB kopii zapasowej w IaaS.",
+        "publicIpTooltip": "Koszt za dodatkowy adres IP w IaaS.",
+        "addToCartBtn": "Dodaj do wyceny",
+        "msLicSectionTitle": "Licencje Microsoft"
+      },
+
       "sliders": [
-        { "id": "cpu", "label": "CPU (vCore)", "min": 1, "max": 64, "step": 1, "pricePerUnit": 5 },
-        { "id": "ram", "label": "RAM (GB)",   "min": 1, "max": 128, "step": 1, "pricePerUnit": 2 },
-        { "id": "storage", "label": "SSD (GB)", "min": 10, "max": 1000, "step": 10, "pricePerUnit": 0.2 }
+        {
+          "id": "cpu",
+          "label": "CPU (vCore)",
+          "min": 1,
+          "max": 64,
+          "step": 1,
+          "pricePerUnit": 5,
+          "currency": "PLN"
+        },
+        {
+          "id": "ram",
+          "label": "RAM (GB)",
+          "min": 1,
+          "max": 128,
+          "step": 1,
+          "pricePerUnit": 2,
+          "currency": "PLN"
+        },
+        {
+          "id": "storage",
+          "label": "SSD (GB)",
+          "min": 10,
+          "max": 1000,
+          "step": 10,
+          "pricePerUnit": 0.2,
+          "currency": "PLN"
+        }
       ],
-
+      
       "backupPricePerGB": 0.1,
+      "backupCurrency": "PLN",
       "publicIPPrice": 10,
-
-      "backupTooltip": "Koszt za GB kopii zapasowej w IaaS.",
-      "publicIpTooltip": "Koszt za dodatkowy adres IP w IaaS.",
+      "publicIPCurrency": "PLN",
 
       "msSplaServices": [
-        { "label": "Windows Server Std (1 licencja)", "price": 20 },
-        { "label": "Windows Server DC (1 licencja)",  "price": 50 },
-        { "label": "SQL Server Std (1 licencja)",     "price": 45 }
+        {
+          "label": "Windows Server Std (1 licencja)",
+          "price": 20,
+          "currency": "PLN"
+        },
+        {
+          "label": "Windows Server DC (1 licencja)",
+          "price": 50,
+          "currency": "PLN"
+        },
+        {
+          "label": "SQL Server Std (1 licencja)",
+          "price": 45,
+          "currency": "PLN"
+        }
       ]
     },
+
     {
       "name": "PaaS",
       "type": "paas",
+
+      "labels": {
+        "sectionTitle": "Maszyny wirtualne (PaaS)",
+        "sectionDescription": "Instancje z obsługą PaaS, wsparciem i DR",
+        "backupLabel": "Kopie zapasowe (GB):",
+        "publicIpLabel": "Dodatkowe publiczne IP (szt.):",
+        "backupTooltip": "Kopia zapasowa w PaaS (cena za GB).",
+        "publicIpTooltip": "Adres IP w PaaS (koszt za szt.).",
+        "selectInstLabel": "Wybierz instancję:",
+        "supportLabel": "Wsparcie techniczne:",
+        "ssdLabel": "Powierzchnia dyskowa SSD (GB):",
+        "addToCartBtn": "Dodaj do wyceny",
+        "msLicSectionTitle": "Licencje Microsoft (PaaS)",
+        "drSectionTitle": "Disaster Recovery (PaaS)",
+        "drStorageLabel": "Powierzchnia dyskowa (GB):",
+        "drIpLabel": "Publiczne IP (szt.):",
+        "drIpAlert": "C-DR-IP musi być >=1!"
+      },
+
       "paasInstances": [
         {
           "label": "PaaS Basic VM",
           "price": 40,
+          "currency": "EUR",
           "desc": "Podstawowa instancja PaaS z ograniczonymi zasobami."
         },
         {
           "label": "PaaS Standard VM",
           "price": 80,
+          "currency": "EUR",
           "desc": "Instancja PaaS o zbalansowanych zasobach."
         },
         {
           "label": "PaaS Premium VM",
           "price": 160,
+          "currency": "EUR",
           "desc": "Najwyższa wydajność PaaS."
         }
       ],
       "supportGoldPrice": 50,
-      "supportGoldDesc": "Wsparcie GOLD – SLA 24/7, czas reakcji do 2h.",
+      "supportGoldCurrency": "PLN",
       "supportPlatinumAddOnPrice": 100,
+      "supportPlatinumAddOnCurrency": "PLN",
+      "supportGoldDesc": "Wsparcie GOLD – SLA 24/7, czas reakcji do 2h.",
       "supportPlatinumDesc": "PLATINUM-AddON – priorytetowe wsparcie i dedykowany opiekun.",
 
       "backupPricePerGB": 0.3,
+      "backupCurrency": "PLN",
       "publicIPPrice": 15,
-
-      "paasBackupTooltip": "Kopia zapasowa w PaaS (cena za GB).",
-      "paasIpTooltip": "Adres IP w PaaS (koszt za szt.).",
+      "publicIPCurrency": "PLN",
 
       "drServices": [
         {
           "id": "C-DR-STORAGE",
           "label": "Powierzchnia dyskowa",
           "price": 0.2,
+          "currency": "PLN",
           "tooltip": "Storage w GB (min 0)."
         },
         {
           "id": "C-DR-IP",
           "label": "Publiczne IP",
           "price": 10,
+          "currency": "PLN",
           "tooltip": "Adres IP (min 1)."
         }
       ],
 
       "msSplaServices": [
-        { "label": "MS SQL Web Edition", "price": 25 },
-        { "label": "MS SQL Standard",    "price": 70 }
+        {
+          "label": "MS SQL Web Edition",
+          "price": 25,
+          "currency": "USD"
+        },
+        {
+          "label": "MS SQL Standard",
+          "price": 70,
+          "currency": "USD"
+        }
       ]
     },
+
     {
       "name": "SaaS",
       "type": "saas",
+
+      "labels": {
+        "sectionTitle": "Aplikacje (SaaS)",
+        "sectionDescription": "Aplikacje w modelu SaaS: MS SQL, Enova, Terminal...",
+        "harmonogramLabel": "Harmonogram zadań:",
+        "addToCartBtn": "Dodaj do wyceny",
+        "msLicSectionTitle": "Licencje Microsoft (SaaS)",
+        "terminalLabel": "Terminal w chmurze:",
+        "terminalUsersLabel": "Użytkownicy:",
+        "terminalSecurityLabel": "Zabezpieczenie terminala:",
+        "terminalSecurityAlert": "UWAGA: Terminal bez zabezpieczenia!",
+        "extraDataLabel": "Dodatkowe miejsce na dane (GB):"
+      },
+
       "harmonogramCost": 10,
+      "harmonogramCurrency": "PLN",
+      "terminalPricePerUser": 30,
+      "terminalPricePerUserCurrency": "PLN",
       "terminalSecurityCost": 20,
+      "terminalSecurityCurrency": "PLN",
+      "extraDataStoragePrice": 2,
+      "extraDataStorageCurrency": "PLN",
 
       "services": [
         {
           "id": "saas_msSQL",
           "label": "Baza danych Microsoft SQL",
           "price": 30,
+          "currency": "PLN",
           "desc": "Podstawowa baza MS SQL."
         },
         {
           "id": "saas_enova",
           "label": "Enova365Web",
           "price": 50,
+          "currency": "PLN",
           "desc": "Podstawowa licencja Enova365Web."
         },
         {
           "id": "saas_enovaApi",
           "label": "Enova365Web API",
           "price": 20,
+          "currency": "PLN",
           "desc": "Podstawowa komunikacja API."
         },
         {
           "id": "saas_terminal",
           "label": "Terminal w chmurze",
-          "pricePerUser": 30,
-          "desc": "Terminal dostępowy w chmurze."
+          "price": 9999,
+          "currency": "USD",
+          "desc": "Nieużywane - jedynie do przykładu."
         },
         {
           "id": "saas_terminal_security",
           "label": "Zabezpieczenie terminala",
           "price": 20,
+          "currency": "PLN",
           "desc": "Dodatkowa ochrona terminala.",
           "tip": "Zapewnia firewall i antywirus terminalowy."
         },
@@ -119,24 +231,50 @@
           "id": "saas_extraData",
           "label": "Dodatkowe miejsce na dane",
           "price": 2,
+          "currency": "PLN",
           "desc": "Cena za GB dodatkowego miejsca.",
           "tip": "Powiększona przestrzeń dyskowa w SaaS."
         }
       ],
 
       "msSplaServices": [
-        { "label": "Office 365 Business", "price": 35 },
-        { "label": "Office 365 E3",       "price": 70 }
+        {
+          "label": "Office 365 Business",
+          "price": 35,
+          "currency": "PLN"
+        },
+        {
+          "label": "Office 365 E3",
+          "price": 70,
+          "currency": "PLN"
+        }
       ]
     },
+
     {
       "name": "Acronis",
       "type": "acronis",
+
+      "labels": {
+        "sectionTitle": "Acronis - Usługi kopii zapasowych i zabezpieczeń",
+        "addToCartBtn": "Dodaj do wyceny",
+        "perGbSectionTitle": "Kopie zapasowe (per GB)",
+        "perWorkloadSectionTitle": "Kopie zapasowe (per Workload)",
+        "m365SectionTitle": "Kopie zapasowe M365 i G-Suite",
+        "securitySectionTitle": "Mechanizmy zabezpieczeń",
+        "managementSectionTitle": "Zarządzanie stacjami i serwerami",
+        "workloadBaseLabel": "Base:",
+        "workloadCloudLabel": "Kopie do chmury:",
+        "workloadLocalLabel": "Kopie lokalne:",
+        "workloadAlert": "Musisz wybrać bazę oraz co najmniej jedną opcję (chmura lub lokal)."
+      },
+
       "services": [
         {
           "id": "acronis_perGB_cloud",
           "label": "Kopie do chmury",
           "price": 0.1,
+          "currency": "PLN",
           "tip": "Backup w chmurze Acronis – cena za GB.",
           "desc": "Przechowywanie danych w chmurze Acronis."
         },
@@ -144,6 +282,7 @@
           "id": "acronis_perGB_local",
           "label": "Kopie lokalne",
           "price": 0.05,
+          "currency": "PLN",
           "tip": "Backup do repozytorium lokalnego – cena za GB.",
           "desc": "Lokalne kopie zapasowe w wybranym repozytorium."
         },
@@ -151,6 +290,7 @@
           "id": "acronis_perWorkload_base",
           "label": "Workload Base",
           "price": 50,
+          "currency": "PLN",
           "tip": "Cena bazowa dla zabezpieczanego środowiska.",
           "desc": "Podstawa licencji Acronis per Workload."
         },
@@ -158,6 +298,7 @@
           "id": "acronis_perWorkload_cloud",
           "label": "Workload Kopie do chmury",
           "price": 0.2,
+          "currency": "PLN",
           "tip": "Backup do chmury dla workload – cena za GB.",
           "desc": "Chmurowe kopie zapasowe Workload."
         },
@@ -165,6 +306,7 @@
           "id": "acronis_perWorkload_local",
           "label": "Workload Kopie lokalne",
           "price": 0.1,
+          "currency": "PLN",
           "tip": "Backup lokalny dla workload – cena za GB.",
           "desc": "Lokalne kopie zapasowe Workload."
         },
@@ -172,6 +314,7 @@
           "id": "acronis_M365_GSuite_kopia",
           "label": "Kopia Microsoft 365",
           "price": 5,
+          "currency": "PLN",
           "tip": "Backup skrzynek pocztowych i OneDrive w M365.",
           "desc": "Kopia danych z Microsoft 365."
         },
@@ -179,6 +322,7 @@
           "id": "acronis_M365_GSuite_archiwizacja",
           "label": "Archiwizacja Microsoft 365",
           "price": 3,
+          "currency": "PLN",
           "tip": "Archiwizacja poczty i dokumentów M365.",
           "desc": "Długoterminowa archiwizacja M365."
         },
@@ -186,6 +330,7 @@
           "id": "acronis_M365_GSuite_gsuite",
           "label": "Kopie G-Suite",
           "price": 4,
+          "currency": "PLN",
           "tip": "Backup Gmail, Dysk Google i innych usług G-Suite.",
           "desc": "Kopie zapasowe środowiska G-Suite."
         },
@@ -193,6 +338,7 @@
           "id": "acronis_security_antivirus",
           "label": "Antywirus",
           "price": 5,
+          "currency": "PLN",
           "tip": "Podstawowy antywirus Acronis.",
           "desc": "Ochrona antywirusowa w czasie rzeczywistym."
         },
@@ -200,6 +346,7 @@
           "id": "acronis_security_edr",
           "label": "EDR (AI)",
           "price": 10,
+          "currency": "PLN",
           "tip": "Zaawansowany system EDR z wykorzystaniem AI.",
           "desc": "Wykrywanie zagrożeń w czasie rzeczywistym."
         },
@@ -207,6 +354,7 @@
           "id": "acronis_management_basic",
           "label": "Stacje robocze Basic",
           "price": 8,
+          "currency": "PLN",
           "tip": "Podstawowe zarządzanie stacjami roboczymi.",
           "desc": "Monitoring i zarządzanie stacjami w wersji Basic."
         },
@@ -214,6 +362,7 @@
           "id": "acronis_management_full",
           "label": "Stacje robocze Full",
           "price": 12,
+          "currency": "PLN",
           "tip": "Pełne zarządzanie stacjami z automatycznym patchowaniem.",
           "desc": "Zaawansowane zarządzanie stacjami."
         },
@@ -221,49 +370,78 @@
           "id": "acronis_management_servers",
           "label": "Serwery",
           "price": 20,
+          "currency": "PLN",
           "tip": "Zarządzanie serwerami fizycznymi i wirtualnymi.",
           "desc": "Pełne wsparcie i monitoring serwerów."
         }
       ]
     },
+
     {
       "name": "Microsoft CSP",
       "type": "csp",
+
+      "labels": {
+        "sectionTitle": "Microsoft 365",
+        "sectionDescription": "Subskrypcje Microsoft 365 w modelu CSP",
+        "selectLabel": "Wybierz subskrypcję:",
+        "qtyLabel": "Ilość:",
+        "addToCartBtn": "Dodaj do wyceny"
+      },
+
       "msCspServices": [
         {
           "id": "csp_m365_basic",
           "label": "M365 Business Basic",
           "price": 5,
+          "currency": "PLN",
           "desc": "Podstawowe narzędzia online."
         },
         {
           "id": "csp_m365_standard",
           "label": "M365 Business Standard",
           "price": 10,
+          "currency": "PLN",
           "desc": "Pełny Office, Poczta, OneDrive."
         },
         {
           "id": "csp_m365_premium",
           "label": "M365 Business Premium",
           "price": 15,
+          "currency": "PLN",
           "desc": "Więcej zabezpieczeń, Intune."
         }
       ]
     },
+
     {
       "name": "Bezpieczeństwo",
       "type": "security",
+
+      "labels": {
+        "sectionTitle": "Bezpieczeństwo",
+        "sectionDescription": "Aplikacje webowe, Firewall i Analiza zabezpieczeń",
+        "webAppsTitle": "Aplikacje webowe",
+        "firewallTitle": "Firewall w chmurze",
+        "analysisTitle": "Analiza zabezpieczeń",
+        "centralLoggingTooltip": "Podaj liczbę licencji (min 1) jeśli chcesz centralne logowanie.",
+        "memoryTooltip": "Jeśli logowanie > 0, pamięć >=5GB.",
+        "addToCartBtn": "Dodaj do wyceny"
+      },
+
       "securityWebApp": [
         {
           "id": "security_webapp_w1",
           "label": "Skanner W1",
           "price": 50,
+          "currency": "PLN",
           "desc": "Automatyczne skanowanie aplikacji webowej."
         },
         {
           "id": "security_webapp_w2",
           "label": "Skanner W2",
           "price": 100,
+          "currency": "PLN",
           "desc": "Zaawansowane skanowanie z raportami i rekomendacjami."
         }
       ],
@@ -272,12 +450,14 @@
           "id": "security_fw_l1",
           "label": "Firewall L1",
           "price": 40,
+          "currency": "PLN",
           "desc": "Podstawowy firewall w chmurze."
         },
         {
           "id": "security_fw_l2",
           "label": "Firewall L2",
           "price": 80,
+          "currency": "PLN",
           "desc": "Zaawansowany firewall z IPS."
         }
       ],
